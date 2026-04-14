@@ -1,0 +1,131 @@
+<?php
+
+namespace App\Filament\Resources\Employees\Schemas;
+
+use App\Models\City;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+
+// AJUSTE AQUI: No Filament 5, componentes de Layout usam o namespace Schema
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Section;
+
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+
+class EmployeeForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Tabs::make('Employee Management')
+                    ->tabs([
+                        // --- TAB 1: IDENTIFICAÇÃO BÁSICA ---
+                        Tabs\Tab::make('Dados Pessoais')
+                            ->icon('heroicon-m-user')
+                            ->schema([
+                                Section::make()
+                                    ->schema([
+                                        TextInput::make('first_name')
+                                            ->label('Nome')
+                                            ->required()
+                                            ->maxLength(100),
+                                        TextInput::make('last_name')
+                                            ->label('Apelido')
+                                            ->required()
+                                            ->maxLength(100),
+                                        TextInput::make('email')
+                                            ->label('Email Profissional')
+                                            ->email()
+                                            ->required()
+                                            ->unique(ignoreRecord: true),
+                                        DatePicker::make('date_of_birth')
+                                            ->label('Data de Nascimento')
+                                            ->required()
+                                            ->native(false),
+                                    ])->columns(2),
+                            ]),
+
+                        // --- TAB 2: DOCUMENTOS E MORADA ---
+                        Tabs\Tab::make('Documentação e Morada')
+                            ->icon('heroicon-m-identification')
+                            ->schema([
+                                Section::make('Numero de Telemóvel')
+                                    ->schema([
+                                        TextInput::make('phone_number')
+                                            ->label('Telemóvel')
+                                            ->tel()
+                                            ->prefix(fn(Get $get) => '+' . (City::find($get('city_id'))?->state?->country?->phonecode ?? ''))
+                                            ->required(),
+                                    ]),
+
+                                Section::make('Identificação Legal')
+                                    ->schema([
+                                        TextInput::make('nif')
+                                            ->label('NIF')
+                                            ->required()
+                                            ->numeric()
+                                            ->length(9),
+                                        TextInput::make('nss')
+                                            ->label('Nº Seg. Social')
+                                            ->required(),
+                                    ])->columns(2),
+
+                                Section::make('Endereço')
+                                    ->schema([
+                                        TextInput::make('address')
+                                            ->label('Morada Completa')
+                                            ->required()
+                                            ->columnSpanFull(),
+                                        TextInput::make('zip_code')
+                                            ->label('Código Postal')
+                                            ->required()
+                                            ->placeholder('0000-000'),
+                                        Select::make('city_id')
+                                            ->label('Cidade')
+                                            ->relationship('city', 'name')
+                                            ->searchable()
+                                            ->native(false)
+                                            ->preload()
+                                            ->live()
+                                            ->required(),
+                                    ])->columns(2),
+                            ]),
+
+                        // --- TAB 3: VÍNCULO EMPREGATÍCIO ---
+                        Tabs\Tab::make('Contrato e Empresa')
+                            ->icon('heroicon-m-briefcase')
+                            ->schema([
+                                Section::make()
+                                    ->schema([
+                                        Select::make('unit_id')
+                                            ->label('Unidade/Departamento')
+                                            ->relationship('unit', 'name')
+                                            ->required()
+                                            ->searchable(),
+                                        Select::make('designation_id')
+                                            ->label('Cargo/Designação')
+                                            ->relationship('designation', 'name')
+                                            ->searchable(),
+                                        DatePicker::make('date_hired')
+                                            ->label('Data de Admissão')
+                                            ->required(),
+                                        DateTimePicker::make('date_dismissed')
+                                            ->label('Data de Demissão')
+                                            ->helperText('Deixe vazio se estiver ativo'),
+                                        TextInput::make('vacation_balance')
+                                            ->label('Saldo de Férias')
+                                            ->numeric()
+                                            ->default(22)
+                                            ->required(),
+                                    ])->columns(2),
+                            ]),
+                    ])->columnSpanFull(),
+            ]);
+    }
+}
