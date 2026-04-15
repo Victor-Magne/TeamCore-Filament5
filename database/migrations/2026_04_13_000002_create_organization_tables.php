@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         // 1. Unidades (Direções, Departamentos, Secções)
@@ -40,6 +41,7 @@ return new class extends Migration {
             $table->enum('level', ['junior', 'pleno', 'senior', 'specialist', 'lead']);
             $table->decimal('base_salary', 12, 2)->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

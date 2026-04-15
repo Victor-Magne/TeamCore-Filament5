@@ -4,9 +4,10 @@ namespace App\Filament\Resources\Vacations\Schemas;
 
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class VacationForm
 {
@@ -67,6 +68,11 @@ class VacationForm
                         ->searchable()
                         ->preload()
                         ->nullable(),
+
+                    Textarea::make('rejection_reason')
+                        ->label('Razão da Rejeição')
+                        ->visible(fn (?string $state) => $state === 'rejected')
+                        ->columnSpanFull(),
                 ])->columns(2),
         ]);
     }

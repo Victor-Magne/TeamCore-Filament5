@@ -16,8 +16,8 @@ class EmployeeStatsWidget extends StatsOverviewWidget
 
     protected int|string|array $columnSpan = [
         'default' => 'full',
-        'md' => 2,
-        'xl' => 2,
+        'md' => 1,
+        'xl' => 1,
     ];
 
     public static function canView(): bool

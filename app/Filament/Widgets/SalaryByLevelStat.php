@@ -57,15 +57,15 @@ class SalaryByLevelStat extends StatsOverviewWidget
 
         return [
             Stat::make('Salarial Superior', '€ '.number_format($seniorLevel, 2, ',', '.'))
-                ->description('Nível C/Direção')
+                ->description('Direção')
                 ->descriptionIcon('heroicon-m-star')
                 ->color('success'),
             Stat::make('Salarial Médio', '€ '.number_format($midLevel, 2, ',', '.'))
-                ->description('Nível B/Intermédio')
+                ->description('Intermédio')
                 ->descriptionIcon('heroicon-m-user-circle')
                 ->color('info'),
             Stat::make('Salarial Base', '€ '.number_format($juniorLevel, 2, ',', '.'))
-                ->description('Nível A/Operacional')
+                ->description('Operacional')
                 ->descriptionIcon('heroicon-m-user')
                 ->color('warning'),
         ];

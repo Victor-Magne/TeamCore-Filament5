@@ -20,7 +20,29 @@ class DesignationFactory extends Factory
         return [
             'name' => $this->faker->jobTitle(),
             'level' => $this->faker->numberBetween(1, 5),
-            'base_salary' => $this->faker->numberBetween(1000, 10000),
+            'base_salary' => $this->faker->numberBetween(100000, 500000) / 100,
         ];
+    }
+
+    /**
+     * Designação de nível gerencial
+     */
+    public function manager(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'level' => $this->faker->numberBetween(4, 5),
+            'base_salary' => $this->faker->numberBetween(300000, 600000) / 100,
+        ]);
+    }
+
+    /**
+     * Designação de nível operacional
+     */
+    public function operational(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'level' => $this->faker->numberBetween(1, 2),
+            'base_salary' => $this->faker->numberBetween(100000, 200000) / 100,
+        ]);
     }
 }

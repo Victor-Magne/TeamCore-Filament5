@@ -38,6 +38,7 @@ return new class extends Migration
             $table->text('reason')->nullable();
 
             $table->timestamps();
+            $table->softDeletes();
 
             // Índices para queries rápidas
             $table->index(['employee_id', 'absence_date']);

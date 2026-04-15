@@ -3,12 +3,12 @@
 namespace App\Filament\Resources\LeavesAndAbsences\Schemas;
 
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\FileUpload;
-use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class LeaveAndAbsenceForm
 {
@@ -27,10 +27,12 @@ class LeaveAndAbsenceForm
                     Select::make('type')
                         ->label('Tipo de Ausência')
                         ->options([
-                            'sick_leave' => 'Licença de Doença',
-                            'vacation' => 'Férias',
-                            'unpaid' => 'Ausência Não Remunerada',
-                            'other' => 'Outro',
+                            'sick_leave' => 'Baixa Médica (SNS)',
+                            'parental' => 'Licença Parental',
+                            'marriage' => 'Licença de Casamento',
+                            'bereavement' => 'Nojo (Falecimento)',
+                            'justified_absence' => 'Falta Justificada',
+                            'unjustified' => 'Falta Injustificada',
                         ])
                         ->required()
                         ->native(false),
@@ -62,6 +64,31 @@ class LeaveAndAbsenceForm
                     FileUpload::make('justification_doc')
                         ->label('Documento de Justificação')
                         ->directory('leaves')
+                        ->columnSpanFull(),
+                ]),
+
+            Section::make('Aprovação')
+                ->schema([
+                    Select::make('status')
+                        ->label('Estado')
+                        ->options([
+                            'pending' => 'Pendente',
+                            'approved' => 'Aprovado',
+                            'rejected' => 'Rejeitado',
+                        ])
+                        ->required()
+                        ->native(false),
+
+                    Select::make('approved_by')
+                        ->label('Aprovado Por')
+                        ->relationship('approver', 'name')
+                        ->searchable()
+                        ->preload()
+                        ->nullable(),
+
+                    Textarea::make('rejection_reason')
+                        ->label('Razão da Rejeição')
+                        ->visible(fn (?string $state) => $state === 'rejected')
                         ->columnSpanFull(),
                 ]),
         ]);

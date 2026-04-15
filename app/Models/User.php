@@ -6,28 +6,28 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Spatie\Permission\Traits\HasRoles;
+use Jeffgreco13\FilamentBreezy\Traits\TwoFactorAuthenticatable;
 // Importa o trait do Breezy para Two Factor
-use Jeffgreco13\FilamentBreezy\Traits\TwoFactorAuthenticatable; 
+use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable([
     'name',
     'email',
     'password',
     'employee_id',
-    'must_change_password'
+    'must_change_password',
 ])]
 #[Hidden([
     'password',
-    'remember_token'
+    'remember_token',
 ])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasRoles, TwoFactorAuthenticatable; // <-- ADICIONA AQUI
+    use HasFactory, HasRoles, Notifiable, TwoFactorAuthenticatable; // <-- ADICIONA AQUI
 
     /**
      * Define as tipagens (casts) dos atributos.

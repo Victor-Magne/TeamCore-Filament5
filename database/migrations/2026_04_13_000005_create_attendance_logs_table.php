@@ -30,6 +30,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
 
             $table->timestamps();
+            $table->softDeletes();
 
             // Índices para acelerar relatórios
             $table->index(['employee_id', 'time_in']);

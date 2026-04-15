@@ -34,6 +34,7 @@ return new class extends Migration
             $table->integer('previous_balance')->default(0);
 
             $table->timestamps();
+            $table->softDeletes();
 
             // Índices para queries rápidas
             $table->unique(['employee_id', 'month_year']);

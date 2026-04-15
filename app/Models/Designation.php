@@ -12,6 +12,7 @@ class Designation extends Model
     protected $fillable = ['name', 'level', 'base_salary'];
 
     use HasFactory;
+    use SoftDeletes;
 
     protected $casts = [
         'base_salary' => 'decimal:2',
