@@ -18,7 +18,6 @@ use Jeffgreco13\FilamentBreezy\Traits\TwoFactorAuthenticatable;
     'email',
     'password',
     'employee_id',
-    'role',
     'must_change_password'
 ])]
 #[Hidden([

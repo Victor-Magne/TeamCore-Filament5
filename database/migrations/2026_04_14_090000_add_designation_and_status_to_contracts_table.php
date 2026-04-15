@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::table('contracts', function (Blueprint $table) {
@@ -23,7 +24,10 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('contracts', function (Blueprint $table) {
-            $table->dropForeignKeyIfExists('contracts_designation_id_foreign');
+            // 1. Remova primeiro a chave estrangeira (use o array com o nome da coluna)
+            $table->dropForeign(['designation_id']);
+
+            // 2. Depois remova a coluna (e outras colunas que adicionou)
             $table->dropColumn(['designation_id', 'status']);
         });
     }

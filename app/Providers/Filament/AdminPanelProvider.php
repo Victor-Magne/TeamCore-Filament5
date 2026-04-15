@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -9,7 +10,6 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -17,10 +17,9 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
-use Illuminate\View\Middleware\ShareErrorsFromSession;
 // Plugins
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
-use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -32,8 +31,22 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin') // URL base: localhost:8000/admin
             ->login()       // Ativa o formulário de login padrão
             ->colors([
-                'primary' => Color::Sky, // Mudando para Sky (mais profissional para RH)
+                // Primary/Brand colors: warm earth tones (WCAG AA compliant on light backgrounds)
+                'primary' => '#582f0e',      // Rich brown - main CTA, active states
+                'secondary' => '#7f4f24',    // Golden brown - secondary CTAs, accents
+
+                // Semantic colors: optimized for accessibility
+                'success' => '#2d5016',      // Deep green - improved contrast
+                'warning' => '#b45309',      // Amber/orange - pending states, important alerts
+                'danger' => '#7f1d1d',       // Deep red - errors, rejections
+                'info' => '#936639',         // Warm tan - informational content
+
+                // Neutral grayscale: improved contrast and visual hierarchy
+                'gray' => '#4b5563',         // Neutral dark gray
+                'muted' => '#6b7280',        // Medium gray - distinct from gray
+                'accent' => '#414833',       // Very dark olive - dark accents
             ])
+            ->brandLogo(asset('images/Teamcorelogo.svg')) // Logo personalizada
             // Registo de Plugins
             ->plugins([
                 BreezyCore::make()

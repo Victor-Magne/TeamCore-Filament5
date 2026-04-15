@@ -5,8 +5,9 @@ namespace App\Filament\Resources\AttendanceLogs\Schemas;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class AttendanceLogForm
 {
@@ -24,23 +25,45 @@ class AttendanceLogForm
                         ->columnSpanFull(),
                 ]),
 
-            Section::make('Registo')
-                ->description('Defina o tipo e hora do registo.')
+            Section::make('Horários do Ponto')
+                ->description('Registar os 4 momentos do dia: entrada, saída para almoço, volta do almoço e fim do expediente.')
                 ->schema([
-                    Select::make('type')
-                        ->label('Tipo')
-                        ->options([
-                            'check_in' => 'Entrada',
-                            'check_out' => 'Saída',
-                        ])
+                    DateTimePicker::make('time_in')
+                        ->label('Entrada')
                         ->required()
                         ->native(false),
 
-                    DateTimePicker::make('recorded_at')
-                        ->label('Data e Hora')
-                        ->required()
+                    DateTimePicker::make('lunch_break_start')
+                        ->label('Saída para Almoço')
+                        ->native(false),
+
+                    DateTimePicker::make('lunch_break_end')
+                        ->label('Volta do Almoço')
+                        ->native(false),
+
+                    DateTimePicker::make('time_out')
+                        ->label('Fim do Expediente')
                         ->native(false),
                 ])->columns(2),
+
+            Section::make('Tempo Total')
+                ->schema([
+                    TextInput::make('total_minutes')
+                        ->label('Tempo Total (minutos)')
+                        ->disabled()
+                        ->dehydrated(false)
+                        ->formatStateUsing(function ($record) {
+                            if (! $record?->total_minutes) {
+                                return 'Será calculado automaticamente';
+                            }
+
+                            $hours = intdiv($record->total_minutes, 60);
+                            $minutes = $record->total_minutes % 60;
+
+                            return "{$hours}h {$minutes}m";
+                        })
+                        ->columnSpanFull(),
+                ]),
 
             Section::make('Observações')
                 ->schema([

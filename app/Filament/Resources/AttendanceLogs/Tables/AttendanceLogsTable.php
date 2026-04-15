@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\AttendanceLogs\Tables;
 
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
 
 class AttendanceLogsTable
 {
@@ -17,18 +17,39 @@ class AttendanceLogsTable
                     ->label('Funcionário')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('recorded_at')
-                    ->label('Data/Hora')
-                    ->dateTime()
+
+                TextColumn::make('time_in')
+                    ->label('Entrada')
+                    ->dateTime('H:i')
                     ->sortable(),
-                TextColumn::make('type')
-                    ->label('Tipo')
-                    ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'check_in' => 'success',
-                        'check_out' => 'danger',
-                        default => 'gray',
-                    }),
+
+                TextColumn::make('lunch_break_start')
+                    ->label('Saída Almoço')
+                    ->dateTime('H:i')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('lunch_break_end')
+                    ->label('Volta Almoço')
+                    ->dateTime('H:i')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('time_out')
+                    ->label('Fim Expediente')
+                    ->dateTime('H:i'),
+
+                TextColumn::make('total_minutes')
+                    ->label('Total')
+                    ->formatStateUsing(function (?int $state) {
+                        if ($state === null) {
+                            return '-';
+                        }
+                        $hours = intdiv($state, 60);
+                        $minutes = $state % 60;
+
+                        return "{$hours}h {$minutes}m";
+                    })
+                    ->sortable(),
+
                 TextColumn::make('notes')
                     ->label('Notas')
                     ->searchable()

@@ -20,7 +20,6 @@ return new class extends Migration {
             $table->rememberToken();
 
             $table->boolean('must_change_password')->default(true);
-            $table->enum('role', ['admin', 'hr', 'employee'])->default('employee');
 
             $table->timestamps();
         });

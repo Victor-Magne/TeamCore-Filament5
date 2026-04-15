@@ -4,9 +4,10 @@ namespace App\Filament\Widgets;
 
 use App\Models\LeaveAndAbsence;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
-class AttendanceOverviewChart extends ChartWidget
+class AbsenceReasonChart extends ChartWidget
 {
     protected static ?int $sort = 32;
 
@@ -20,22 +21,26 @@ class AttendanceOverviewChart extends ChartWidget
 
     public static function canView(): bool
     {
-        return Auth::user()?->can('View:AttendanceOverviewChart') ?? false;
+        return Auth::user()?->can('View:AbsenceReasonChart') ?? false;
     }
 
     public function getHeading(): ?string
     {
-        return 'Tipologia de Ausências';
+        return 'Motivos de Ausência';
     }
 
     public function getDescription(): ?string
     {
-        return 'Distribuição de tipos de falta registados';
+        return 'Últimos 30 dias - Distribuição por motivo';
     }
 
     protected function getData(): array
     {
-        $absencesByType = LeaveAndAbsence::selectRaw('type, COUNT(*) as count')
+        $thirtyDaysAgo = Carbon::today()->subDays(30);
+
+        // Agrupa faltas por tipo otimizado
+        $absencesByType = LeaveAndAbsence::where('start_date', '>=', $thirtyDaysAgo)
+            ->selectRaw('type, COUNT(*) as count')
             ->groupBy('type')
             ->pluck('count', 'type');
 
@@ -92,7 +97,7 @@ class AttendanceOverviewChart extends ChartWidget
 
     protected function getType(): string
     {
-        return 'doughnut';
+        return 'pie';
     }
 
     protected ?string $maxHeight = '300px';

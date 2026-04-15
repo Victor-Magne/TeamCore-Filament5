@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Employee extends Model
 {
-    use SoftDeletes, HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'city_id',
@@ -28,7 +28,7 @@ class Employee extends Model
         'zip_code',
         'date_hired',
         'date_dismissed',
-        'vacation_balance'
+        'vacation_balance',
     ];
 
     protected $casts = [
@@ -85,5 +85,33 @@ class Employee extends Model
     public function attendanceLogs(): HasMany
     {
         return $this->hasMany(AttendanceLog::class);
+    }
+
+    public function hourBanks(): HasMany
+    {
+        return $this->hasMany(HourBank::class);
+    }
+
+    public function absences(): HasMany
+    {
+        return $this->hasMany(Absence::class);
+    }
+
+    /**
+     * Obtém o saldo atual do banco de horas (mês atual)
+     */
+    public function getCurrentHourBankBalance(): ?HourBank
+    {
+        $monthYear = now()->format('Y-m');
+
+        return $this->hourBanks()->where('month_year', $monthYear)->first();
+    }
+
+    /**
+     * Obtém o saldo total do banco de horas (acumulado de todos os meses)
+     */
+    public function getTotalHourBankBalance(): int
+    {
+        return $this->hourBanks()->sum('balance');
     }
 }

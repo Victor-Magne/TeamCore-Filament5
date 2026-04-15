@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('attendance_logs', function (Blueprint $table) {
@@ -13,22 +14,26 @@ return new class extends Migration {
             // Relacionamento com o funcionário
             $table->foreignId('employee_id')->constrained()->cascadeOnDelete();
 
-            // O momento exato do registo
-            $table->dateTime('recorded_at');
+            // Os 4 momentos do dia: entrada, saída para almoço, volta do almoço, fim do expediente
+            $table->dateTime('time_in');
+            $table->dateTime('lunch_break_start')->nullable();
+            $table->dateTime('lunch_break_end')->nullable();
+            $table->dateTime('time_out')->nullable();
 
-            // Tipo de registo: Entrada ou Saída
-            $table->enum('type', ['in', 'out']);
+            // Tempo total em minutos (entrada - fim do expediente, excluindo almoço)
+            $table->integer('total_minutes')->nullable();
 
-            // Metadata: Para segurança e auditoria (RH adora isto)
-            $table->json('metadata')->nullable(); // Guarda: IP, Geolocalização, User Agent
+            // Metadata: Para segurança e auditoria
+            $table->json('metadata')->nullable();
 
-            // Notas opcionais do funcionário (ex: "esqueci-me de bater ponto às 09h")
+            // Notas opcionais do funcionário
             $table->text('notes')->nullable();
 
             $table->timestamps();
 
-            // Índice para acelerar relatórios por data
-            $table->index(['employee_id', 'recorded_at']);
+            // Índices para acelerar relatórios
+            $table->index(['employee_id', 'time_in']);
+            $table->index(['employee_id', 'created_at']);
         });
     }
 
