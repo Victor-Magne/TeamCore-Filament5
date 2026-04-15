@@ -30,4 +30,13 @@ class LeaveAndAbsence extends Model
     {
         return $this->belongsTo(User::class, 'approved_by');
     }
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $model) {
+            if ($model->isDirty('status') && in_array($model->status, ['approved', 'rejected'])) {
+                $model->approved_by = auth()->id();
+            }
+        });
+    }
 }

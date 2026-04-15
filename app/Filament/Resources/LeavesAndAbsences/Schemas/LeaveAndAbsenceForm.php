@@ -79,16 +79,9 @@ class LeaveAndAbsenceForm
                         ->required()
                         ->native(false),
 
-                    Select::make('approved_by')
-                        ->label('Aprovado Por')
-                        ->relationship('approver', 'name')
-                        ->searchable()
-                        ->preload()
-                        ->nullable(),
-
                     Textarea::make('rejection_reason')
                         ->label('Razão da Rejeição')
-                        ->visible(fn (?string $state) => $state === 'rejected')
+                        ->visible(fn (callable $get) => $get('status') === 'rejected')
                         ->columnSpanFull(),
                 ]),
         ]);

@@ -4,7 +4,9 @@ namespace App\Filament\Resources\Vacations\Tables;
 
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class VacationsTable
@@ -32,15 +34,29 @@ class VacationsTable
                 TextColumn::make('days_taken')
                     ->label('Dias Gozados')
                     ->numeric(),
-                TextColumn::make('status')
+                SelectColumn::make('status')
                     ->label('Estado')
-                    ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'pending' => 'warning',
-                        'approved' => 'success',
-                        'rejected' => 'danger',
-                        default => 'gray',
-                    }),
+                    ->options([
+                        'pending' => 'Pendente',
+                        'approved' => 'Aprovado',
+                        'rejected' => 'Rejeitado',
+                    ])
+                    ->native(false),
+                TextColumn::make('approver.name')
+                    ->label('Aprovado Por')
+                    ->toggleable(isToggledHiddenByDefault: false),
+                TextColumn::make('rejection_reason')
+                    ->label('Razão da Rejeição')
+                    ->limit(30)
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                SelectFilter::make('status')
+                    ->options([
+                        'pending' => 'Pendente',
+                        'approved' => 'Aprovado',
+                        'rejected' => 'Rejeitado',
+                    ]),
             ])
             ->recordActions([
                 EditAction::make(),

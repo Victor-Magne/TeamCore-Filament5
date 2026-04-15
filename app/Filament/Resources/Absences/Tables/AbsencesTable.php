@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Absences\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -26,8 +25,9 @@ class AbsencesTable
                     ->searchable()
                     ->sortable(),
 
-                BadgeColumn::make('deduction_type')
+                TextColumn::make('deduction_type')
                     ->label('Tipo de Dedução')
+                    ->badge()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'unjustified_absence' => 'Falta Injustificada',
                         'partial_absence' => 'Falta Parcial',
