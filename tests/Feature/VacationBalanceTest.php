@@ -8,8 +8,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 test('vacation balance is decremented when vacation is approved', function () {
+    // Disable observer to avoid duplicate user creation for this test
+    Employee::unsetEventDispatcher();
     $employee = Employee::factory()->create(['vacation_balance' => 22]);
-    $admin = User::factory()->create();
+    $admin = User::factory()->create(['employee_id' => null]);
     $this->actingAs($admin);
 
     $vacation = Vacation::factory()->create([
@@ -18,15 +20,17 @@ test('vacation balance is decremented when vacation is approved', function () {
         'status' => 'pending',
     ]);
 
-    $vacation->update(['status' => 'approved']);
+    $vacation->status = 'approved';
+    $vacation->save();
 
     $employee->refresh();
     expect($employee->vacation_balance)->toBe(17);
 });
 
 test('vacation balance is NOT decremented when vacation is rejected', function () {
+    Employee::unsetEventDispatcher();
     $employee = Employee::factory()->create(['vacation_balance' => 22]);
-    $admin = User::factory()->create();
+    $admin = User::factory()->create(['employee_id' => null]);
     $this->actingAs($admin);
 
     $vacation = Vacation::factory()->create([

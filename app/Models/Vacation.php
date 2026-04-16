@@ -67,12 +67,46 @@ class Vacation extends Model
             }
         });
 
-        // Deduzir do saldo de férias ao aprovar
-        static::saved(function (self $model) {
-            if ($model->wasChanged('status') && $model->status === 'approved') {
+        static::created(function (self $model) {
+            if ($model->status === 'approved') {
                 $employee = $model->employee;
                 if ($employee && $model->days_taken > 0) {
                     $employee->decrement('vacation_balance', $model->days_taken);
+                }
+            }
+        });
+
+        // Deduzir do saldo de férias ao aprovar ou restaurar se desaprovado
+        static::updated(function (self $model) {
+            if ($model->wasChanged('status')) {
+                $employee = $model->employee;
+                if (! $employee) {
+                    return;
+                }
+
+                if ($model->status === 'approved') {
+                    $employee->decrement('vacation_balance', $model->days_taken);
+                } elseif ($model->getOriginal('status') === 'approved') {
+                    $employee->increment('vacation_balance', $model->getOriginal('days_taken'));
+                }
+            } elseif ($model->wasChanged('days_taken') && $model->status === 'approved') {
+                $employee = $model->employee;
+                if ($employee) {
+                    $diff = $model->days_taken - $model->getOriginal('days_taken');
+                    if ($diff > 0) {
+                        $employee->decrement('vacation_balance', $diff);
+                    } elseif ($diff < 0) {
+                        $employee->increment('vacation_balance', abs($diff));
+                    }
+                }
+            }
+        });
+
+        static::deleted(function (self $model) {
+            if ($model->status === 'approved') {
+                $employee = $model->employee;
+                if ($employee) {
+                    $employee->increment('vacation_balance', $model->days_taken);
                 }
             }
         });
