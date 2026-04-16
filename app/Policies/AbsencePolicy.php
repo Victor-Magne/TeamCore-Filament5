@@ -7,12 +7,10 @@ namespace App\Policies;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Absence;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use App\Traits\HasHierarchicalPolicy;
 
 class AbsencePolicy
 {
     use HandlesAuthorization;
-    use HasHierarchicalPolicy;
     
     public function viewAny(AuthUser $authUser): bool
     {
