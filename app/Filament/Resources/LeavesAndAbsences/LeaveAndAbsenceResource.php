@@ -21,7 +21,7 @@ class LeaveAndAbsenceResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendar;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Gestão de Pessoal';
+    protected static string|UnitEnum|null $navigationGroup = 'Gestão de Tempo e Frequência';
 
     protected static ?string $recordTitleAttribute = 'id';
 

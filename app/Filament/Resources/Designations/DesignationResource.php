@@ -10,10 +10,10 @@ use App\Filament\Resources\Designations\Tables\DesignationsTable;
 use App\Models\Designation;
 use BackedEnum;
 use Filament\Resources\Resource;
-use UnitEnum;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class DesignationResource extends Resource
 {
@@ -21,7 +21,7 @@ class DesignationResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Dados Organisacionais';
+    protected static string|UnitEnum|null $navigationGroup = 'Recursos Humanos';
 
     protected static ?string $recordTitleAttribute = 'name';
 

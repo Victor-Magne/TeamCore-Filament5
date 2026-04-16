@@ -14,12 +14,15 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class HourBankResource extends Resource
 {
     protected static ?string $model = HourBank::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Clock;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Gestão de Tempo e Frequência';
 
     protected static ?string $navigationLabel = 'Banco de Horas';
 

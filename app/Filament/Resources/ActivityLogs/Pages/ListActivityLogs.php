@@ -11,8 +11,6 @@ class ListActivityLogs extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        return [
-            // Activity logs are read-only, manual creation is not allowed
-        ];
+        return [];
     }
 }

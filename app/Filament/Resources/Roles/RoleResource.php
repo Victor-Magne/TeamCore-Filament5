@@ -29,6 +29,7 @@ use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Unique;
 use Override;
+use UnitEnum;
 
 class RoleResource extends Resource
 {
@@ -40,6 +41,8 @@ class RoleResource extends Resource
     use HasShieldFormComponents;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Administração';
 
     #[Override]
     public static function form(Schema $schema): Schema

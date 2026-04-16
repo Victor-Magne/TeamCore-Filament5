@@ -12,13 +12,12 @@ use App\Filament\Resources\Units\Tables\UnitsTable;
 use App\Models\Unit;
 use BackedEnum;
 use Filament\Resources\Resource;
-use UnitEnum;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-
+use UnitEnum;
 
 class UnitResource extends Resource
 {
@@ -26,7 +25,7 @@ class UnitResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Dados Organisacionais';
+    protected static string|UnitEnum|null $navigationGroup = 'Recursos Humanos';
 
     protected static ?string $recordTitleAttribute = 'name';
 
