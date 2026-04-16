@@ -145,12 +145,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/bezhanSalleh/filament-shield.git",
-                "reference": "96af979d8fdfc66c2a55d23b5b209971963932b7"
+                "reference": "eccd10f9a3185a6cdfee79ab6a5b73b4ac04f93d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bezhanSalleh/filament-shield/zipball/96af979d8fdfc66c2a55d23b5b209971963932b7",
-                "reference": "96af979d8fdfc66c2a55d23b5b209971963932b7",
+                "url": "https://api.github.com/repos/bezhanSalleh/filament-shield/zipball/eccd10f9a3185a6cdfee79ab6a5b73b4ac04f93d",
+                "reference": "eccd10f9a3185a6cdfee79ab6a5b73b4ac04f93d",
                 "shasum": ""
             },
             "require": {
@@ -233,7 +233,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-04-01T10:20:20+00:00"
+            "time": "2026-03-22T08:35:45+00:00"
         },
         {
             "name": "blade-ui-kit/blade-heroicons",
