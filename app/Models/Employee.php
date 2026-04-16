@@ -8,12 +8,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Activitylog\Models\Concerns\LogsActivity;
-use Spatie\Activitylog\Support\LogOptions;
 
 class Employee extends Model
 {
-    use HasFactory, LogsActivity, SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'city_id',
@@ -31,6 +29,7 @@ class Employee extends Model
         'date_hired',
         'date_dismissed',
         'vacation_balance',
+        'reports_to_id',
     ];
 
     protected $casts = [
@@ -100,6 +99,22 @@ class Employee extends Model
     }
 
     /**
+     * Relacionamento: Supervisor direto
+     */
+    public function supervisor(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'reports_to_id');
+    }
+
+    /**
+     * Relacionamento: Subordinados diretos
+     */
+    public function directReports(): HasMany
+    {
+        return $this->hasMany(Employee::class, 'reports_to_id');
+    }
+
+    /**
      * Obtém o saldo atual do banco de horas (mês atual)
      */
     public function getCurrentHourBankBalance(): ?HourBank
@@ -115,13 +130,5 @@ class Employee extends Model
     public function getTotalHourBankBalance(): int
     {
         return $this->hourBanks()->sum('balance');
-    }
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logAll()
-            ->logOnlyDirty()
-            ->useLogName(class_basename($this));
     }
 }

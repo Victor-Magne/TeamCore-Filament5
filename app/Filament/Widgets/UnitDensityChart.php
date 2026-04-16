@@ -4,7 +4,6 @@ namespace App\Filament\Widgets;
 
 use App\Models\Unit;
 use Filament\Widgets\ChartWidget;
-
 use Illuminate\Support\Facades\Auth;
 
 class UnitDensityChart extends ChartWidget

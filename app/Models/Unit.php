@@ -5,15 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Activitylog\Models\Concerns\LogsActivity;
-use Spatie\Activitylog\Support\LogOptions;
 
 class Unit extends Model
 {
-    use HasFactory, LogsActivity, SoftDeletes;
+    use SoftDeletes, HasFactory;
 
     protected $table = 'organizational_units';
 
@@ -23,7 +21,7 @@ class Unit extends Model
         'description',
         'parent_id',
         'manager_id',
-        'is_main_direction',
+        'is_main_direction'
     ];
 
     public function parent(): BelongsTo
@@ -49,13 +47,5 @@ class Unit extends Model
     public function managers(): BelongsToMany
     {
         return $this->belongsToMany(Employee::class, 'unit_manager', 'unit_id', 'employee_id');
-    }
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logAll()
-            ->logOnlyDirty()
-            ->useLogName(class_basename($this));
     }
 }

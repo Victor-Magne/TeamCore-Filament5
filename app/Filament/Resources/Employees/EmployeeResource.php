@@ -10,12 +10,12 @@ use App\Filament\Resources\Employees\Tables\EmployeesTable;
 use App\Models\Employee;
 use BackedEnum;
 use Filament\Resources\Resource;
+use UnitEnum;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class EmployeeResource extends Resource
 {
@@ -23,7 +23,7 @@ class EmployeeResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Recursos Humanos';
+    protected static string|UnitEnum|null $navigationGroup = 'Gestão de Pessoal';
 
     protected static ?string $recordTitleAttribute = 'first_name';
 

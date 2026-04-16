@@ -21,7 +21,7 @@ class ContractResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Recursos Humanos';
+    protected static string|UnitEnum|null $navigationGroup = 'Gestão de Pessoal';
 
     protected static ?string $recordTitleAttribute = 'id';
 

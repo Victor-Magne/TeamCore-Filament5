@@ -14,15 +14,12 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class AbsenceResource extends Resource
 {
     protected static ?string $model = Absence::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::XMark;
-
-    protected static string|UnitEnum|null $navigationGroup = 'Gestão de Tempo e Frequência';
 
     protected static ?string $navigationLabel = 'Ausências/Faltas';
 

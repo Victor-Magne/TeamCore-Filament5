@@ -5,9 +5,9 @@ namespace App\Filament\Resources\Contracts\Schemas;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 
 class ContractForm
 {
@@ -69,13 +69,13 @@ class ContractForm
                         ->label('Data de Início')
                         ->required()
                         ->native(false)
-                        ->columnSpanFull(fn(Get $get) => $get('type') === 'permanent'),
+                        ->columnSpanFull(fn (Get $get) => $get('type') === 'permanent'),
 
                     DatePicker::make('end_date')
                         ->label('Data de Fim')
                         ->helperText('Deixe vazio se o contrato for efetivo.')
                         ->native(false)
-                        ->hidden(fn(Get $get) => $get('type') === 'permanent'),
+                        ->hidden(fn (Get $get) => $get('type') === 'permanent'),
                 ])->columns(2),
 
             Section::make('Remuneração e Jornada')

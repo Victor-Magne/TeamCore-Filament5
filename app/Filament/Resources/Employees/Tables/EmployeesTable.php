@@ -40,6 +40,11 @@ class EmployeesTable
                     ->label('Cargo')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('supervisor.first_name')
+                    ->label('Supervisor')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('date_hired')
                     ->label('Data Admissão')
                     ->date()

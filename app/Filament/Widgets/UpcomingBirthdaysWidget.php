@@ -17,12 +17,14 @@ class UpcomingBirthdaysWidget extends StatsOverviewWidget
         $thirtyDaysFromNow = $today->copy()->addDays(30);
 
         $birthdayCount = Employee::all()->filter(function ($employee) use ($today, $thirtyDaysFromNow) {
-            if (!$employee->date_of_birth) return false;
+            if (! $employee->date_of_birth) {
+                return false;
+            }
 
             $birthdayThisYear = $employee->date_of_birth->copy()->year($today->year);
             $birthdayNextYear = $employee->date_of_birth->copy()->year($today->year + 1);
 
-            return ($birthdayThisYear->between($today, $thirtyDaysFromNow)) ||
+            return $birthdayThisYear->between($today, $thirtyDaysFromNow) ||
                    ($birthdayNextYear->between($today, $thirtyDaysFromNow));
         })->count();
 

@@ -7,12 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Activitylog\Models\Concerns\LogsActivity;
-use Spatie\Activitylog\Support\LogOptions;
 
 class City extends Model
 {
-    use HasFactory, LogsActivity, SoftDeletes;
+    use SoftDeletes, HasFactory;
 
     protected $fillable = ['name', 'state_id'];
 
@@ -24,13 +22,5 @@ class City extends Model
     public function employees(): HasMany
     {
         return $this->hasMany(Employee::class);
-    }
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logAll()
-            ->logOnlyDirty()
-            ->useLogName(class_basename($this));
     }
 }

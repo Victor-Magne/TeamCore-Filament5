@@ -12,8 +12,7 @@
         "jeffgreco13/filament-breezy": "^3.2",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
-        "predis/predis": "^3.4",
-        "spatie/laravel-activitylog": "^5.0"
+        "predis/predis": "^3.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

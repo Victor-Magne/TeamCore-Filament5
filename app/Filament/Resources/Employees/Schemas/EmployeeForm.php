@@ -7,15 +7,12 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-
 // AJUSTE AQUI: No Filament 5, componentes de Layout usam o namespace Schema
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Components\Section;
-
-use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
 
 class EmployeeForm
 {
@@ -26,7 +23,7 @@ class EmployeeForm
                 Tabs::make('Employee Management')
                     ->tabs([
                         // --- TAB 1: IDENTIFICAÇÃO BÁSICA ---
-                        Tabs\Tab::make('Dados Pessoais')
+                        Tab::make('Dados Pessoais')
                             ->icon('heroicon-m-user')
                             ->schema([
                                 Section::make()
@@ -52,7 +49,7 @@ class EmployeeForm
                             ]),
 
                         // --- TAB 2: DOCUMENTOS E MORADA ---
-                        Tabs\Tab::make('Documentação e Morada')
+                        Tab::make('Documentação e Morada')
                             ->icon('heroicon-m-identification')
                             ->schema([
                                 Section::make('Numero de Telemóvel')
@@ -60,7 +57,7 @@ class EmployeeForm
                                         TextInput::make('phone_number')
                                             ->label('Telemóvel')
                                             ->tel()
-                                            ->prefix(fn(Get $get) => '+' . (City::find($get('city_id'))?->state?->country?->phonecode ?? ''))
+                                            ->prefix(fn (Get $get) => '+'.(City::find($get('city_id'))?->state?->country?->phonecode ?? ''))
                                             ->required(),
                                     ]),
 
@@ -98,7 +95,7 @@ class EmployeeForm
                             ]),
 
                         // --- TAB 3: VÍNCULO EMPREGATÍCIO ---
-                        Tabs\Tab::make('Contrato e Empresa')
+                        Tab::make('Contrato e Empresa')
                             ->icon('heroicon-m-briefcase')
                             ->schema([
                                 Section::make()
@@ -112,6 +109,11 @@ class EmployeeForm
                                             ->label('Cargo/Designação')
                                             ->relationship('designation', 'name')
                                             ->searchable(),
+                                        Select::make('reports_to_id')
+                                            ->label('Supervisor Direto')
+                                            ->relationship('supervisor', 'first_name')
+                                            ->searchable()
+                                            ->preload(),
                                         DatePicker::make('date_hired')
                                             ->label('Data de Admissão')
                                             ->required(),
