@@ -9,13 +9,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Contract extends Model
 {
-    use SoftDeletes, HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'employee_id',
         'designation_id',
         'type',
         'salary',
+        'daily_work_minutes',
         'status',
         'start_date',
         'end_date',

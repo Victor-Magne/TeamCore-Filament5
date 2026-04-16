@@ -78,16 +78,22 @@ class ContractForm
                         ->hidden(fn(Get $get) => $get('type') === 'permanent'),
                 ])->columns(2),
 
-            Section::make('Remuneração')
-                ->description('Defina o salário bruto.')
+            Section::make('Remuneração e Jornada')
+                ->description('Defina o salário bruto e a jornada diária.')
                 ->schema([
                     TextInput::make('salary')
                         ->label('Salário Bruto')
                         ->numeric()
                         ->prefix('€')
+                        ->required(),
+
+                    TextInput::make('daily_work_minutes')
+                        ->label('Jornada Diária (minutos)')
+                        ->numeric()
+                        ->default(480)
                         ->required()
-                        ->columnSpanFull(),
-                ]),
+                        ->helperText('Padrao: 480 minutos (8 horas)'),
+                ])->columns(2),
         ]);
     }
 }
