@@ -37,6 +37,13 @@ class Vacation extends Model
                 $model->approved_by = auth()->id();
             }
         });
+
+        static::updated(function (self $model) {
+            if ($model->wasChanged('status') && $model->status === 'approved') {
+                $employee = $model->employee;
+                $employee->decrement('vacation_balance', $model->days_taken);
+            }
+        });
     }
 
     public function getActivitylogOptions(): LogOptions

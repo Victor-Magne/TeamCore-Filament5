@@ -19,7 +19,7 @@ class DesignationFactory extends Factory
     {
         return [
             'name' => $this->faker->jobTitle(),
-            'level' => $this->faker->numberBetween(1, 5),
+            'level' => $this->faker->randomElement(['junior', 'pleno', 'senior', 'specialist', 'lead']),
             'base_salary' => $this->faker->numberBetween(100000, 500000) / 100,
         ];
     }

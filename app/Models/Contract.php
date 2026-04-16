@@ -11,13 +11,14 @@ use Spatie\Activitylog\Support\LogOptions;
 
 class Contract extends Model
 {
-    use HasFactory, LogsActivity, SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'employee_id',
         'designation_id',
         'type',
         'salary',
+        'daily_work_minutes',
         'status',
         'start_date',
         'end_date',

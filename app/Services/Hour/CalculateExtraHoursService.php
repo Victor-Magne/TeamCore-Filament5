@@ -9,11 +9,6 @@ use Illuminate\Support\Carbon;
 class CalculateExtraHoursService
 {
     /**
-     * Jornada diária padrão em minutos (8 horas)
-     */
-    private const DAILY_WORK_HOURS = 480; // 8 * 60
-
-    /**
      * Calcula e registra horas extras de um AttendanceLog
      *
      * @param  AttendanceLog  $attendanceLog  O registo de ponto
@@ -21,13 +16,18 @@ class CalculateExtraHoursService
      */
     public function handle(AttendanceLog $attendanceLog): int
     {
+        // Obtém a jornada diária do contrato ativo do funcionário
+        $dailyWorkMinutes = $attendanceLog->employee->contracts()
+            ->where('status', 'active')
+            ->first()?->daily_work_minutes ?? 480;
+
         // Se ao menos um dos tempos está vazio, não há hora extra para calcular
-        if (! $attendanceLog->total_minutes || $attendanceLog->total_minutes <= self::DAILY_WORK_HOURS) {
+        if (! $attendanceLog->total_minutes || $attendanceLog->total_minutes <= $dailyWorkMinutes) {
             return 0;
         }
 
-        // Calcular horas extras (tudo acima de 8 horas)
-        $extraMinutes = $attendanceLog->total_minutes - self::DAILY_WORK_HOURS;
+        // Calcular horas extras
+        $extraMinutes = $attendanceLog->total_minutes - $dailyWorkMinutes;
 
         // Obter o mês/ano do dia trabalhado
         $monthYear = $attendanceLog->time_in->format('Y-m');
