@@ -7,6 +7,7 @@ use App\Filament\Resources\Absences\Pages\ListAbsences;
 use App\Filament\Resources\Absences\Schemas\AbsenceForm;
 use App\Filament\Resources\Absences\Tables\AbsencesTable;
 use App\Models\Absence;
+use App\Traits\HasHierarchicalQuery;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -18,6 +19,8 @@ use UnitEnum;
 
 class AbsenceResource extends Resource
 {
+    use HasHierarchicalQuery;
+
     protected static ?string $model = Absence::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::XMark;

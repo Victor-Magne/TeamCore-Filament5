@@ -25,6 +25,11 @@ class DesignationResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Cargos');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return DesignationForm::configure($schema);

@@ -24,6 +24,11 @@ class ActivityLogResource extends Resource
 
     protected static bool $shouldRegisterNavigation = true;
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Logs de Atividade');
+    }
+
     public static function infolist(Schema $schema): Schema
     {
         return ActivityLogInfolist::configure($schema);

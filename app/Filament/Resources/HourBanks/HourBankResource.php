@@ -7,6 +7,7 @@ use App\Filament\Resources\HourBanks\Pages\ListHourBanks;
 use App\Filament\Resources\HourBanks\Schemas\HourBankForm;
 use App\Filament\Resources\HourBanks\Tables\HourBanksTable;
 use App\Models\HourBank;
+use App\Traits\HasHierarchicalQuery;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -18,6 +19,8 @@ use UnitEnum;
 
 class HourBankResource extends Resource
 {
+    use HasHierarchicalQuery;
+
     protected static ?string $model = HourBank::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Clock;

@@ -8,6 +8,7 @@ use App\Filament\Resources\Vacations\Pages\ListVacations;
 use App\Filament\Resources\Vacations\Schemas\VacationForm;
 use App\Filament\Resources\Vacations\Tables\VacationsTable;
 use App\Models\Vacation;
+use App\Traits\HasHierarchicalQuery;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -17,6 +18,8 @@ use UnitEnum;
 
 class VacationResource extends Resource
 {
+    use HasHierarchicalQuery;
+
     protected static ?string $model = Vacation::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSun;
@@ -24,6 +27,11 @@ class VacationResource extends Resource
     protected static string|UnitEnum|null $navigationGroup = 'Gestão de Tempo e Frequência';
 
     protected static ?string $recordTitleAttribute = 'id';
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Férias');
+    }
 
     public static function form(Schema $schema): Schema
     {

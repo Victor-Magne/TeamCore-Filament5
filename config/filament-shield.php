@@ -29,7 +29,7 @@ return [
             'pages' => true,
             'widgets' => true,
             'resources' => true,
-            'custom_permissions' => false,
+            'custom_permissions' => true,
         ],
     ],
 
@@ -244,7 +244,11 @@ return [
     |
     */
 
-    'custom_permissions' => [],
+    'custom_permissions' => [
+        'scope_view_dept_heads',       // Atribuir ao Diretor Geral
+        'scope_view_section_chiefs',   // Atribuir ao Chefe de Departamento
+        'scope_view_base_employees',   // Atribuir ao Chefe de Secção
+    ],
 
     /*
     |--------------------------------------------------------------------------

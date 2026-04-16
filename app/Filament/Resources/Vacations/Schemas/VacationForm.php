@@ -3,11 +3,13 @@
 namespace App\Filament\Resources\Vacations\Schemas;
 
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Carbon;
 
 class VacationForm
 {
@@ -26,27 +28,33 @@ class VacationForm
                 ]),
 
             Section::make('Período de Férias')
-                ->description('Defina as datas e dias gozados.')
+                ->description('Defina as datas. O ano e dias gozados serão preenchidos automaticamente.')
                 ->schema([
-                    TextInput::make('year_reference')
-                        ->label('Ano de Referência')
-                        ->numeric()
-                        ->required(),
+                    Hidden::make('year_reference')
+                        ->default(Carbon::now()->year),
 
                     DatePicker::make('start_date')
                         ->label('Data de Início')
                         ->required()
-                        ->native(false),
+                        ->native(false)
+                        ->live(),
 
                     DatePicker::make('end_date')
                         ->label('Data de Fim')
                         ->required()
-                        ->native(false),
+                        ->native(false)
+                        ->live(),
 
                     TextInput::make('days_taken')
                         ->label('Dias Gozados')
                         ->numeric()
-                        ->required(),
+                        ->readonly()
+                        ->afterStateHydrated(function (TextInput $component, ?string $state): void {
+                            $state ??= '0';
+                            $component->state($state);
+                        })
+                        ->live(debounce: 500)
+                        ->dehydrated(),
                 ])->columns(2),
 
             Section::make('Aprovação')

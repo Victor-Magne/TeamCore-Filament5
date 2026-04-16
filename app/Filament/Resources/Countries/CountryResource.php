@@ -10,10 +10,10 @@ use App\Filament\Resources\Countries\Tables\CountriesTable;
 use App\Models\Country;
 use BackedEnum;
 use Filament\Resources\Resource;
-use UnitEnum;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class CountryResource extends Resource
 {
@@ -24,6 +24,11 @@ class CountryResource extends Resource
     protected static string|UnitEnum|null $navigationGroup = 'Dados Geográficos';
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Países');
+    }
 
     public static function form(Schema $schema): Schema
     {

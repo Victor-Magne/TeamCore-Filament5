@@ -8,6 +8,7 @@ use App\Filament\Resources\LeavesAndAbsences\Pages\ListLeavesAndAbsences;
 use App\Filament\Resources\LeavesAndAbsences\Schemas\LeaveAndAbsenceForm;
 use App\Filament\Resources\LeavesAndAbsences\Tables\LeavesAndAbsencesTable;
 use App\Models\LeaveAndAbsence;
+use App\Traits\HasHierarchicalQuery;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -17,6 +18,8 @@ use UnitEnum;
 
 class LeaveAndAbsenceResource extends Resource
 {
+    use HasHierarchicalQuery;
+
     protected static ?string $model = LeaveAndAbsence::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendar;
@@ -24,6 +27,21 @@ class LeaveAndAbsenceResource extends Resource
     protected static string|UnitEnum|null $navigationGroup = 'Gestão de Tempo e Frequência';
 
     protected static ?string $recordTitleAttribute = 'id';
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Licenças e Ausências');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Licença/Ausência');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Licenças e Ausências');
+    }
 
     public static function form(Schema $schema): Schema
     {

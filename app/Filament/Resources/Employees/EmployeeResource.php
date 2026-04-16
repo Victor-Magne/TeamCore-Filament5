@@ -27,6 +27,11 @@ class EmployeeResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'first_name';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Funcionários');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return EmployeeForm::configure($schema);

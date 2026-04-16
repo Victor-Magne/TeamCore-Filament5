@@ -8,6 +8,7 @@ use App\Filament\Resources\AttendanceLogs\Pages\ListAttendanceLogs;
 use App\Filament\Resources\AttendanceLogs\Schemas\AttendanceLogForm;
 use App\Filament\Resources\AttendanceLogs\Tables\AttendanceLogsTable;
 use App\Models\AttendanceLog;
+use App\Traits\HasHierarchicalQuery;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -17,6 +18,8 @@ use UnitEnum;
 
 class AttendanceLogResource extends Resource
 {
+    use HasHierarchicalQuery;
+
     protected static ?string $model = AttendanceLog::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
@@ -24,6 +27,11 @@ class AttendanceLogResource extends Resource
     protected static string|UnitEnum|null $navigationGroup = 'Gestão de Tempo e Frequência';
 
     protected static ?string $recordTitleAttribute = 'id';
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Registros de Presença');
+    }
 
     public static function form(Schema $schema): Schema
     {

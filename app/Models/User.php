@@ -47,11 +47,6 @@ class User extends Authenticatable
         return $this->belongsTo(Employee::class);
     }
 
-    public function isAdmin(): bool
-    {
-        return $this->role === 'admin';
-    }
-
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()

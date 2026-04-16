@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Traits\HasHierarchicalPolicy;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Spatie\Activitylog\Models\Activity;
@@ -11,6 +12,7 @@ use Spatie\Activitylog\Models\Activity;
 class ActivityPolicy
 {
     use HandlesAuthorization;
+    use HasHierarchicalPolicy;
 
     public function viewAny(AuthUser $authUser): bool
     {

@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\AttendanceLog;
+use App\Traits\HasHierarchicalPolicy;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class AttendanceLogPolicy
 {
     use HandlesAuthorization;
+    use HasHierarchicalPolicy;
     
     public function viewAny(AuthUser $authUser): bool
     {
@@ -19,7 +21,7 @@ class AttendanceLogPolicy
 
     public function view(AuthUser $authUser, AttendanceLog $attendanceLog): bool
     {
-        return $authUser->can('View:AttendanceLog');
+        return $authUser->can('View:AttendanceLog') && $this->canAccessModel($authUser, $attendanceLog);
     }
 
     public function create(AuthUser $authUser): bool
@@ -29,12 +31,12 @@ class AttendanceLogPolicy
 
     public function update(AuthUser $authUser, AttendanceLog $attendanceLog): bool
     {
-        return $authUser->can('Update:AttendanceLog');
+        return $authUser->can('Update:AttendanceLog') && $this->canAccessModel($authUser, $attendanceLog);
     }
 
     public function delete(AuthUser $authUser, AttendanceLog $attendanceLog): bool
     {
-        return $authUser->can('Delete:AttendanceLog');
+        return $authUser->can('Delete:AttendanceLog') && $this->canAccessModel($authUser, $attendanceLog);
     }
 
     public function deleteAny(AuthUser $authUser): bool
@@ -44,12 +46,12 @@ class AttendanceLogPolicy
 
     public function restore(AuthUser $authUser, AttendanceLog $attendanceLog): bool
     {
-        return $authUser->can('Restore:AttendanceLog');
+        return $authUser->can('Restore:AttendanceLog') && $this->canAccessModel($authUser, $attendanceLog);
     }
 
     public function forceDelete(AuthUser $authUser, AttendanceLog $attendanceLog): bool
     {
-        return $authUser->can('ForceDelete:AttendanceLog');
+        return $authUser->can('ForceDelete:AttendanceLog') && $this->canAccessModel($authUser, $attendanceLog);
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
@@ -64,7 +66,7 @@ class AttendanceLogPolicy
 
     public function replicate(AuthUser $authUser, AttendanceLog $attendanceLog): bool
     {
-        return $authUser->can('Replicate:AttendanceLog');
+        return $authUser->can('Replicate:AttendanceLog') && $this->canAccessModel($authUser, $attendanceLog);
     }
 
     public function reorder(AuthUser $authUser): bool
