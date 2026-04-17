@@ -10,6 +10,12 @@ trait HasHierarchicalQuery
     {
         $query = parent::getEloquentQuery();
         $user = auth()->user();
+
+        // 0. REGRA SUPER ADMIN: Super admin vê todos os registos
+        if ($user->hasRole('super_admin')) {
+            return $query;
+        }
+
         $meuEmployee = $user->employee;
 
         if (! $meuEmployee) {

@@ -19,7 +19,7 @@ class DesignationResource extends Resource
 {
     protected static ?string $model = Designation::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::Briefcase;
 
     protected static string|UnitEnum|null $navigationGroup = 'Recursos Humanos';
 

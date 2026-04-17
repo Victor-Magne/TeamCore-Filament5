@@ -10,11 +10,11 @@ use App\Filament\Resources\Payrolls\Tables\PayrollsTable;
 use App\Models\Employee;
 use App\Models\Payroll;
 use App\Services\Payroll\GeneratePayrollService;
+use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput as FormTextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 
 class PayrollResource extends Resource
@@ -30,6 +30,7 @@ class PayrollResource extends Resource
         return __('Processamento Salarial');
     }
 
+    /** @noinspection PhpIncompatibleReturnTypeInspection */
     public static function form(Schema $schema): Schema
     {
         return PayrollForm::configure($schema);
