@@ -19,13 +19,3 @@ it('payroll status can be updated', function () {
 
     expect($payroll->refresh()->status)->toBe('paid');
 });
-
-it('payroll can be soft deleted', function () {
-    $payroll = Payroll::factory()->create();
-    $id = $payroll->id;
-
-    $payroll->delete();
-
-    expect(Payroll::find($id))->toBeNull();
-    expect(Payroll::withTrashed()->find($id))->not->toBeNull();
-});

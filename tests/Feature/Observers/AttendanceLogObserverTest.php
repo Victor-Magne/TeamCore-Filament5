@@ -254,4 +254,81 @@ describe('AttendanceLogObserver - Update Scenarios', function () {
         $absence = Absence::where('employee_id', $employee->id)->first();
         expect($absence)->not->toBeNull();
     });
+
+    it('recalculates hour bank when attendance log is corrected', function () {
+        $employee = Employee::factory()->create();
+        $date = Carbon::create(2026, 4, 17);
+
+        // 1. Registar entrada SEM saída (falta)
+        $attendanceLog = AttendanceLog::create([
+            'employee_id' => $employee->id,
+            'time_in' => $date->setHour(9, 0),
+            'time_out' => null,
+            'total_minutes' => null,
+        ]);
+
+        // Verificar que foi deducido
+        $hourBank = HourBank::where('employee_id', $employee->id)
+            ->where('month_year', '2026-04')
+            ->first();
+
+        expect($hourBank->balance)->toBe(-480); // -8 horas
+        expect($hourBank->extra_hours_used)->toBe(480);
+
+        $absence = Absence::where('employee_id', $employee->id)->first();
+        expect($absence)->not->toBeNull();
+
+        // 2. CORRIGIR: Registar saída normal (8 horas trabalhadas)
+        $attendanceLog->update([
+            'time_out' => $date->setHour(17, 30), // Saída às 17:30
+            'total_minutes' => 480, // 8 horas
+        ]);
+
+        // Recarregar
+        $attendanceLog->refresh();
+        $hourBank->refresh();
+
+        // Verificar que:
+        // - A Absence foi removida
+        // - O HourBank foi restaurado e recalculado
+        $absence = Absence::where('employee_id', $employee->id)->first();
+        expect($absence)->toBeNull(); // ← Absence foi deletada
+
+        // O saldo deve ser 0 (removeu a deduação)
+        expect($hourBank->balance)->toBe(0);
+        expect($hourBank->extra_hours_used)->toBe(0);
+    });
+
+    it('recalculates extra hours when attendance log total_minutes increases', function () {
+        $employee = Employee::factory()->create();
+        $date = Carbon::create(2026, 4, 17);
+
+        // 1. Registar com 8 horas (sem extras)
+        $attendanceLog = AttendanceLog::create([
+            'employee_id' => $employee->id,
+            'time_in' => $date->setHour(9, 0),
+            'time_out' => $date->setHour(17, 0),
+            'total_minutes' => 480, // 8 horas exatas
+        ]);
+
+        $hourBank = HourBank::where('employee_id', $employee->id)
+            ->where('month_year', '2026-04')
+            ->first();
+
+        expect($hourBank->balance)->toBe(0); // Sem extras
+        expect($hourBank->extra_hours_added)->toBe(0);
+
+        // 2. CORRIGIR: Aumentar para 10 horas (2 horas extras)
+        $attendanceLog->update([
+            'time_out' => $date->setHour(19, 0), // 19:00 em vez de 17:00
+            'total_minutes' => 600, // 10 horas
+        ]);
+
+        $hourBank->refresh();
+
+        // Verificar que foi adicionado 2 horas (120 minutos) de extras
+        expect($hourBank->balance)->toBe(120);
+        expect($hourBank->extra_hours_added)->toBe(120);
+    });
 });
+

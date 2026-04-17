@@ -4,8 +4,10 @@ namespace App\Observers;
 
 use App\Models\Absence;
 use App\Models\AttendanceLog;
+use App\Models\HourBank;
 use App\Models\LeaveAndAbsence;
 use App\Models\Vacation;
+use App\Services\Hour\CalculateExtraHoursService;
 use App\Services\Hour\DeductHourBankService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -18,17 +20,27 @@ class AttendanceLogObserver
      */
     public function created(AttendanceLog $attendanceLog): void
     {
+        // Primeiro, processa ausências (falta completa)
         $this->processAbsence($attendanceLog);
+        
+        // Depois, calcula e registra horas extras se aplicável
+        $this->recalculateExtraHours($attendanceLog);
     }
 
     /**
      * Também processa se o AttendanceLog é atualizado para marcar uma falta
+     * OU se foi corrigido (recalcula horas extras)
      */
     public function updated(AttendanceLog $attendanceLog): void
     {
-        // Apenas processar se passou de "com horas" para "sem horas" (falta)
+        // Se os tempos foram alterados, precisa recalcular TUDO
         if ($attendanceLog->isDirty(['time_in', 'time_out'])) {
+            // 1. Limpar o saldo anterior deste dia (restaurar)
+            $this->cleanupPreviousCalculations($attendanceLog->getOriginal());
+            
+            // 2. Processar nova situação
             $this->processAbsence($attendanceLog);
+            $this->recalculateExtraHours($attendanceLog);
         }
     }
 
@@ -155,6 +167,109 @@ class AttendanceLogObserver
                 'employee_id' => $attendanceLog->employee_id,
                 'attendance_log_id' => $attendanceLog->id,
                 'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Recalcula horas extras para um AttendanceLog
+     * 
+     * Quando um ponto é registado com horas acima da jornada diária,
+     * adiciona ao banco de horas as horas extras ganhas
+     */
+    private function recalculateExtraHours(AttendanceLog $attendanceLog): void
+    {
+        try {
+            // Ignorar se não tem horas registadas
+            if (! $attendanceLog->total_minutes || $attendanceLog->total_minutes <= 0) {
+                return;
+            }
+
+            $service = new CalculateExtraHoursService;
+            $extraMinutes = $service->handle($attendanceLog);
+
+            if ($extraMinutes > 0) {
+                Log::info('Horas extras calculadas', [
+                    'employee_id' => $attendanceLog->employee_id,
+                    'attendance_log_id' => $attendanceLog->id,
+                    'extra_minutes' => $extraMinutes,
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Erro ao calcular horas extras', [
+                'employee_id' => $attendanceLog->employee_id,
+                'attendance_log_id' => $attendanceLog->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Limpa/restaura cálculos anteriores quando um AttendanceLog é corrigido
+     * 
+     * Remove as horas extras que foram adicionadas e as deduções que foram aplicadas
+     * para recalcular com os novos valores
+     */
+    private function cleanupPreviousCalculations(array $originalAttributes): void
+    {
+        // Se o tempo_in original é nulo, não há cálculos anteriores para limpar
+        if (! isset($originalAttributes['time_in']) || ! $originalAttributes['time_in']) {
+            return;
+        }
+
+        $employeeId = $originalAttributes['employee_id'];
+        $monthYear = Carbon::parse($originalAttributes['time_in'])->format('Y-m');
+
+        // Se tinha horas extras registadas, remover
+        $originalMinutes = $originalAttributes['total_minutes'] ?? 0;
+        if ($originalMinutes > 0) {
+            $dailyWorkMinutes = 480; // Padrão 8h
+            if ($originalMinutes > $dailyWorkMinutes) {
+                $extraMinutes = $originalMinutes - $dailyWorkMinutes;
+                
+                $hourBank = HourBank::where('employee_id', $employeeId)
+                    ->where('month_year', $monthYear)
+                    ->first();
+
+                if ($hourBank) {
+                    $hourBank->extra_hours_added -= $extraMinutes;
+                    $hourBank->balance -= $extraMinutes;
+                    $hourBank->save();
+
+                    Log::info('Horas extras removidas (limpeza)', [
+                        'employee_id' => $employeeId,
+                        'month_year' => $monthYear,
+                        'removed_minutes' => $extraMinutes,
+                    ]);
+                }
+            }
+        }
+
+        // Se tinha uma deduação registada, remover a Absence
+        $absenceDate = Carbon::parse($originalAttributes['time_in'])->toDateString();
+        $absence = Absence::where('employee_id', $employeeId)
+            ->where('absence_date', $absenceDate)
+            ->first();
+
+        if ($absence) {
+            // Restaurar horas ao banco (inverter a deduação)
+            $hourBank = HourBank::where('employee_id', $employeeId)
+                ->where('month_year', $monthYear)
+                ->first();
+
+            if ($hourBank) {
+                $hourBank->extra_hours_used -= $absence->hours_deducted;
+                $hourBank->balance += $absence->hours_deducted;
+                $hourBank->save();
+            }
+
+            // Deletar o registo de absence
+            $absence->delete();
+
+            Log::info('Deduação de falta removida (limpeza)', [
+                'employee_id' => $employeeId,
+                'absence_date' => $absenceDate,
+                'hours_restored' => $absence->hours_deducted,
             ]);
         }
     }

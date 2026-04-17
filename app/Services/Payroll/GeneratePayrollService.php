@@ -68,6 +68,8 @@ class GeneratePayrollService
             ],
             [
                 'base_salary' => $baseSalary,
+                'hourly_rate' => $hourlyRate,
+                'extra_hours' => (int) $extraHoursMinutes,
                 'extra_hours_amount' => $extraHoursAmount,
                 'deductions' => $deductions,
                 'total_net' => max(0, $totalNet), // Não permite salário negativo

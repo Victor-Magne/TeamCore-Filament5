@@ -18,15 +18,21 @@ class PayrollFactory extends Factory
      */
     public function definition(): array
     {
+        $baseSalary = $this->faker->numberBetween(1000, 5000);
+        $hourlyRate = $baseSalary / (8 * 22);
+        $extraHours = $this->faker->numberBetween(0, 480);
+        $extraHoursAmount = ($hourlyRate * 1.5) * ($extraHours / 60);
+        
         return [
             'employee_id' => Employee::factory(),
             'month_year' => $this->faker->monthName(true, false).'-'.date('Y'),
-            'base_salary' => $this->faker->numberBetween(1000, 5000),
-            'extra_hours_amount' => $this->faker->numberBetween(0, 200),
+            'base_salary' => $baseSalary,
+            'hourly_rate' => round($hourlyRate, 2),
+            'extra_hours' => $extraHours,
+            'extra_hours_amount' => round($extraHoursAmount, 2),
             'deductions' => $this->faker->numberBetween(0, 300),
-            'total_net' => $this->faker->numberBetween(1000, 5000),
+            'total_net' => round($baseSalary + $extraHoursAmount - $this->faker->numberBetween(0, 300), 2),
             'status' => $this->faker->randomElement(['pending', 'paid', 'cancelled']),
-            'paid_at' => $this->faker->optional()->dateTime(),
         ];
     }
 }
