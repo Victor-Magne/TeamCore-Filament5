@@ -8,6 +8,7 @@ use App\Models\LeaveAndAbsence;
 use App\Models\Vacation;
 use App\Services\Hour\DeductHourBankService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class AttendanceLogObserver
 {
@@ -150,7 +151,7 @@ class AttendanceLogObserver
             }
         } catch (\Exception $e) {
             // Log the error but don't fail the AttendanceLog creation
-            \Log::error('Erro ao descontar horas de falta', [
+            Log::error('Erro ao descontar horas de falta', [
                 'employee_id' => $attendanceLog->employee_id,
                 'attendance_log_id' => $attendanceLog->id,
                 'error' => $e->getMessage(),
