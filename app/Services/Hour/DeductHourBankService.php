@@ -106,12 +106,12 @@ class DeductHourBankService
             if ($leaveCheck['has_leave']) {
                 // Verificar se é falta injustificada ou licença justificada
                 if ($leaveCheck['type'] === 'leave' && $this->isJustifiedLeave($leaveCheck['leave_type'])) {
-                    // Não descontar - é uma licença justificada
+                    // Não descontar - é uma licença justificada (retorna antes de descontar)
                     return null;
                 }
 
                 if ($leaveCheck['type'] === 'vacation') {
-                    // Não descontar - é férias aprovadas
+                    // Não descontar - é férias aprovadas (retorna antes de descontar)
                     return null;
                 }
             }
