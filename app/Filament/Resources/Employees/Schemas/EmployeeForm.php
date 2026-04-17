@@ -68,7 +68,7 @@ class EmployeeForm
                                         TextInput::make('nif')
                                             ->label('NIF')
                                             ->required()
-                                            ->numeric()
+                                            // ->numeric()
                                             ->length(9),
                                         TextInput::make('nss')
                                             ->label('Nº Seg. Social')

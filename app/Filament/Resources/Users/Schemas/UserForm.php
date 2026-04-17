@@ -2,11 +2,12 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\Models\Employee;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class UserForm
 {
@@ -37,15 +38,15 @@ class UserForm
                         ->password()
                         ->confirmed()
                         ->maxLength(255)
-                        ->required(fn(string $operation) => $operation === 'create')
-                        ->dehydrateStateUsing(fn($state) => $state ? bcrypt($state) : null)
-                        ->dehydrated(fn($state) => filled($state)),
+                        ->required(fn (string $operation) => $operation === 'create')
+                        ->dehydrateStateUsing(fn ($state) => $state ? bcrypt($state) : null)
+                        ->dehydrated(fn ($state) => filled($state)),
 
                     TextInput::make('password_confirmation')
                         ->label('Confirmar Password')
                         ->password()
                         ->maxLength(255)
-                        ->required(fn(string $operation) => $operation === 'create')
+                        ->required(fn (string $operation) => $operation === 'create')
                         ->dehydrated(false),
 
                     Toggle::make('must_change_password')
@@ -57,17 +58,30 @@ class UserForm
                 ->schema([
                     Select::make('employee_id')
                         ->label('Funcionário Associado')
-                        ->relationship('employee', 'first_name')
+                        ->relationship(
+                            'employee',
+                            'first_name',
+                            fn ($query) => $query->select(['id', 'first_name', 'last_name', 'email'])
+                        )
                         ->searchable()
-                        ->preload()
                         ->nullable()
+                        ->afterStateUpdated(function ($set, $state) {
+                            if ($state) {
+                                $employee = Employee::query()
+                                    ->select(['id', 'first_name', 'last_name', 'email'])
+                                    ->find($state);
+                                if ($employee) {
+                                    $set('name', $employee->first_name.' '.$employee->last_name);
+                                    $set('email', $employee->email);
+                                }
+                            }
+                        })
                         ->columnSpanFull(),
 
                     Select::make('roles')
                         ->label('Roles')
                         ->relationship('roles', 'name')
                         ->multiple()
-                        ->preload()
                         ->columnSpanFull(),
                 ]),
         ]);

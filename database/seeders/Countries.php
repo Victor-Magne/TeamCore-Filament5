@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB; // <-- Add this line
 
-class countries extends Seeder
+class Countries extends Seeder
 {
     /**
      * Run the database seeds.

@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB; // <-- Correct spelling here
 
-class states extends Seeder
+class States extends Seeder
 {
     /**
      * Run the database seeds.
