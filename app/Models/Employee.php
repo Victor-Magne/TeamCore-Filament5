@@ -115,11 +115,13 @@ class Employee extends Model
     }
 
     /**
-     * Obtém o saldo total do banco de horas (acumulado de todos os meses)
+     * Obtém o saldo total do banco de horas (saldo do mês mais recente)
      */
     public function getTotalHourBankBalance(): int
     {
-        return $this->hourBanks()->sum('balance');
+        return $this->hourBanks()
+            ->orderByDesc('month_year')
+            ->first()?->balance ?? 0;
     }
 
     public function getActivitylogOptions(): LogOptions
