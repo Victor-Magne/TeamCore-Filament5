@@ -51,18 +51,12 @@ class AttendanceLog extends Model
     }
 
     /**
-     * Hook automático: calcula total_minutes antes de guardar e horas extras após guardar
+     * Hook automático: calcula total_minutes antes de guardar
      */
     protected static function booted(): void
     {
         static::saving(function (self $model) {
             $model->total_minutes = $model->calculateTotalMinutes();
-        });
-
-        static::saved(function (self $model) {
-            // Calcular e registar horas extras no banco de horas
-            $service = new CalculateExtraHoursService;
-            $service->handle($model);
         });
     }
 
