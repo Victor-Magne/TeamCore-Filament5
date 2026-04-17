@@ -99,6 +99,11 @@ class Employee extends Model
         return $this->hasMany(Absence::class);
     }
 
+    public function payrolls(): HasMany
+    {
+        return $this->hasMany(Payroll::class);
+    }
+
     /**
      * Obtém o saldo atual do banco de horas (mês atual)
      */

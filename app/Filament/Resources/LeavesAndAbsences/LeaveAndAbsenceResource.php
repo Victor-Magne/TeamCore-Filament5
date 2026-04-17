@@ -30,17 +30,17 @@ class LeaveAndAbsenceResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('Licenças e Ausências');
+        return __('Licenças e Justificativas');
     }
 
     public static function getModelLabel(): string
     {
-        return __('Licença/Ausência');
+        return __('Licença/ Justificativa');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Licenças e Ausências');
+        return __('Licenças e Justificativas');
     }
 
     public static function form(Schema $schema): Schema

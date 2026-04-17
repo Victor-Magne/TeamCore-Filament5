@@ -18,7 +18,7 @@ return new class extends Migration
                 'marriage',         // Licença de Casamento (15 dias seguidos)
                 'bereavement',      // Falecimento de familiar (Nojo)
                 'justified_absence', // Falta Justificada (ex: ida a tribunal)
-                'unjustified',      // Falta Injustificada
+                // 'unjustified',      // Falta Injustificada
             ]);
 
             $table->date('start_date');

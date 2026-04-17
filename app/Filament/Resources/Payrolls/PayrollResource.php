@@ -48,6 +48,7 @@ class PayrollResource extends Resource
                             ->label('Mês de Referência')
                             ->placeholder('YYYY-MM')
                             ->regex('/^\d{4}-(0[1-9]|1[0-2])$/')
+                            ->default(now()->format('Y-m'))
                             ->required(),
                     ])
                     ->action(function (array $data) {
@@ -61,6 +62,7 @@ class PayrollResource extends Resource
 
                         Notification::make()
                             ->title('Processamento concluído')
+                            ->body("Salários processados para {$monthYear}")
                             ->success()
                             ->send();
                     }),
