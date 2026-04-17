@@ -22,13 +22,11 @@ class HourBankForm
                         ->searchable()
                         ->preload()
                         ->required()
-                        ->disabled()
                         ->columnSpanFull(),
 
                     TextInput::make('month_year')
                         ->label('Mês/Ano (YYYY-MM)')
                         ->required()
-                        ->disabled()
                         ->columnSpanFull(),
                 ])->columns(2),
 
@@ -37,24 +35,28 @@ class HourBankForm
                     TextInput::make('balance')
                         ->label('Saldo Total (minutos)')
                         ->numeric()
+                        ->default(0)
                         ->disabled()
                         ->helperText('Positivo = crédito | Negativo = débito'),
 
                     TextInput::make('extra_hours_added')
                         ->label('Horas Extras Adicionadas (min)')
                         ->numeric()
-                        ->disabled(),
+                        ->default(0)
+                        ->required(),
 
                     TextInput::make('extra_hours_used')
                         ->label('Horas Descontadas (min)')
                         ->numeric()
-                        ->disabled(),
+                        ->default(0)
+                        ->required(),
 
                     TextInput::make('previous_balance')
                         ->label('Saldo Anterior (min)')
                         ->numeric()
-                        ->disabled(),
-                ])->columns(2),
+                        ->default(0)
+                        ->required(),
+        ])->columns(2),
         ]);
     }
 }
