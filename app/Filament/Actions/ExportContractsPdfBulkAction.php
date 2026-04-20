@@ -2,6 +2,7 @@
 
 namespace App\Filament\Actions;
 
+use App\Services\ContractPdfService;
 use Filament\Actions\BulkAction;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -19,8 +20,7 @@ class ExportContractsPdfBulkAction extends BulkAction
         $this->label('Exportar PDF')
             ->icon('heroicon-o-arrow-down-tray')
             ->tooltip('Exportar contratos selecionados em PDF')
-            ->url(fn (Collection $records) => route('contracts.pdf.bulk', ['ids' => $records->pluck('id')->implode(',')]))
-            ->openUrlInNewTab()
+            ->action(fn (Collection $records) => (new ContractPdfService)->downloadMultipleContractsPdf($records))
             ->deselectRecordsAfterCompletion();
     }
 }
