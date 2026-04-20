@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Contracts\Tables;
 
+use App\Filament\Actions\ExportContractsPdfBulkAction;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -35,7 +37,7 @@ class ContractsTable
                 TextColumn::make('status')
                     ->label('Estado')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'active' => 'success',
                         'terminated' => 'danger',
                         'on_hold' => 'warning',
@@ -72,9 +74,17 @@ class ContractsTable
                 EditAction::make(),
                 DeleteAction::make(),
             ])
+            ->headerActions([
+                Action::make('export_pdf')
+                    ->label('Exportar Relatório PDF')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->url(route('contracts.pdf.all'))
+                    ->openUrlInNewTab(),
+            ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    ExportContractsPdfBulkAction::make(),
                 ]),
             ]);
     }

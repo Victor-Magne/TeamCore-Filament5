@@ -8,6 +8,8 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class PayrollsTable
 {
@@ -41,6 +43,17 @@ class PayrollsTable
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
+            ])
+            ->headerActions([
+                ExportAction::make()
+                    ->exports([
+                        ExcelExport::make('table')
+                            ->fromTable()
+                            ->except([
+                                'created_at',
+                                'updated_at',
+                            ]),
+                    ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

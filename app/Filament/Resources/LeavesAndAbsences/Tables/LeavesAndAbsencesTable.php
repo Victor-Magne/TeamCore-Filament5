@@ -9,6 +9,8 @@ use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class LeavesAndAbsencesTable
 {
@@ -70,6 +72,17 @@ class LeavesAndAbsencesTable
                         'pending' => 'Pendente',
                         'approved' => 'Aprovado',
                         'rejected' => 'Rejeitado',
+                    ]),
+            ])
+            ->headerActions([
+                ExportAction::make()
+                    ->exports([
+                        ExcelExport::make('table')
+                            ->fromTable()
+                            ->except([
+                                'created_at',
+                                'updated_at',
+                            ]),
                     ]),
             ])
             ->recordActions([
