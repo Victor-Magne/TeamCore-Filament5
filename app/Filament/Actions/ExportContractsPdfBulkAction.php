@@ -20,6 +20,7 @@ class ExportContractsPdfBulkAction extends BulkAction
             ->icon('heroicon-o-arrow-down-tray')
             ->tooltip('Exportar contratos selecionados em PDF')
             ->url(fn (Collection $records) => route('contracts.pdf.bulk', ['ids' => $records->pluck('id')->implode(',')]))
+            ->openUrlInNewTab()
             ->deselectRecordsAfterCompletion();
     }
 }
