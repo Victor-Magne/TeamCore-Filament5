@@ -8,11 +8,13 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Carbon\Carbon;
 // AJUSTE AQUI: No Filament 5, componentes de Layout usam o namespace Schema
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 
 class EmployeeForm
@@ -45,8 +47,17 @@ class EmployeeForm
                                             ->rule(new ValidEmailDomain),
                                         DatePicker::make('date_of_birth')
                                             ->label('Data de Nascimento')
+                                            ->maxDate(now()->subYears(18))
                                             ->required()
                                             ->native(false),
+                                        Select::make('gender')
+                                            ->label('Género')
+                                            ->options([
+                                                'male' => 'Masculino',
+                                                'female' => 'Feminino',
+                                                'other' => 'Outro',
+                                            ])
+                                            ->required(),
                                     ])->columns(2),
                             ]),
 
@@ -59,7 +70,7 @@ class EmployeeForm
                                         TextInput::make('phone_number')
                                             ->label('Telemóvel')
                                             ->tel()
-                                            ->prefix(fn (Get $get) => '+'.(City::find($get('city_id'))?->state?->country?->phonecode ?? ''))
+                                            ->prefix(fn(Get $get) => '+' . (City::find($get('city_id'))?->state?->country?->phonecode ?? ''))
                                             ->required(),
                                     ]),
 

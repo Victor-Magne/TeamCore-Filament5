@@ -24,6 +24,7 @@ class Employee extends Model
         'email',
         'phone_number',
         'date_of_birth',
+        'gender',
         'nif',
         'nss',
         'address',
