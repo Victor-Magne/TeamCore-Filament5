@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use AzGasim\FilamentUnsavedChangesModal\FilamentUnsavedChangesModalPlugin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -17,6 +18,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+
 // Plugins
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
@@ -30,7 +32,9 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin') // URL base: localhost:8000/admin
             ->login()       // Ativa o formulário de login padrão
+            ->databaseNotifications() // Ativa notificações persistentes no banco de dados
             ->unsavedChangesAlerts() // Alertas de mudanças não salvas
+            ->spa() // Ativa o modo SPA para navegação sem recarregamento
             ->colors([
                 // Primary/Brand colors: warm earth tones (WCAG AA compliant on light backgrounds)
                 'primary' => '#582f0e',      // Rich brown - main CTA, active states
@@ -59,7 +63,9 @@ class AdminPanelProvider extends PanelProvider
                     )
                     ->enableTwoFactorAuthentication(),
                 FilamentShieldPlugin::make(),
+                FilamentUnsavedChangesModalPlugin::make(),
             ])
+            
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([

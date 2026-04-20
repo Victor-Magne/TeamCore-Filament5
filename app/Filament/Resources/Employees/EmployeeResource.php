@@ -21,7 +21,7 @@ class EmployeeResource extends Resource
 {
     protected static ?string $model = Employee::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::Identification;
 
     protected static string|UnitEnum|null $navigationGroup = 'Recursos Humanos';
 

@@ -10,6 +10,8 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class EmployeesTable
 {
@@ -90,6 +92,18 @@ class EmployeesTable
             ])
             ->filters([
                 TrashedFilter::make(),
+            ])
+            ->headerActions([
+                ExportAction::make()
+                    ->exports([
+                        ExcelExport::make('table')
+                            ->fromTable()
+                            ->except([
+                                'created_at',
+                                'updated_at',
+                                'deleted_at',
+                            ]),
+                    ]),
             ])
             ->recordActions([
                 EditAction::make(),

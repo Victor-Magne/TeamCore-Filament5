@@ -10,11 +10,11 @@ use App\Filament\Resources\Payrolls\Tables\PayrollsTable;
 use App\Models\Employee;
 use App\Models\Payroll;
 use App\Services\Payroll\GeneratePayrollService;
+use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput as FormTextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 
 class PayrollResource extends Resource
@@ -30,6 +30,7 @@ class PayrollResource extends Resource
         return __('Processamento Salarial');
     }
 
+    /** @noinspection PhpIncompatibleReturnTypeInspection */
     public static function form(Schema $schema): Schema
     {
         return PayrollForm::configure($schema);
@@ -47,6 +48,7 @@ class PayrollResource extends Resource
                             ->label('Mês de Referência')
                             ->placeholder('YYYY-MM')
                             ->regex('/^\d{4}-(0[1-9]|1[0-2])$/')
+                            ->default(now()->format('Y-m'))
                             ->required(),
                     ])
                     ->action(function (array $data) {
@@ -60,8 +62,10 @@ class PayrollResource extends Resource
 
                         Notification::make()
                             ->title('Processamento concluído')
+                            ->body("Salários processados para {$monthYear}")
                             ->success()
-                            ->send();
+                            ->send()
+                            ->sendToDatabase(auth()->user());
                     }),
             ]);
     }

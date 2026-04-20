@@ -24,6 +24,7 @@ class Employee extends Model
         'email',
         'phone_number',
         'date_of_birth',
+        'gender',
         'nif',
         'nss',
         'address',
@@ -99,6 +100,11 @@ class Employee extends Model
         return $this->hasMany(Absence::class);
     }
 
+    public function payrolls(): HasMany
+    {
+        return $this->hasMany(Payroll::class);
+    }
+
     /**
      * Obtém o saldo atual do banco de horas (mês atual)
      */
@@ -110,11 +116,13 @@ class Employee extends Model
     }
 
     /**
-     * Obtém o saldo total do banco de horas (acumulado de todos os meses)
+     * Obtém o saldo total do banco de horas (saldo do mês mais recente)
      */
     public function getTotalHourBankBalance(): int
     {
-        return $this->hourBanks()->sum('balance');
+        return $this->hourBanks()
+            ->orderByDesc('month_year')
+            ->first()?->balance ?? 0;
     }
 
     public function getActivitylogOptions(): LogOptions

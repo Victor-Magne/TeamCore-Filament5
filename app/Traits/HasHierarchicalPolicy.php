@@ -8,6 +8,11 @@ trait HasHierarchicalPolicy
 {
     protected function canAccessModel(User $user, $model): bool
     {
+        // 0. REGRA SUPER ADMIN: Super admin vê tudo
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
         $meuEmployee = $user->employee;
         $donoDoModel = $model->employee ?? null;
 

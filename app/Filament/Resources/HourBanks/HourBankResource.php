@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\HourBanks;
 
+use App\Filament\Resources\HourBanks\Pages\CreateHourBank;
 use App\Filament\Resources\HourBanks\Pages\EditHourBank;
 use App\Filament\Resources\HourBanks\Pages\ListHourBanks;
 use App\Filament\Resources\HourBanks\Schemas\HourBankForm;
@@ -54,6 +55,7 @@ class HourBankResource extends Resource
     {
         return [
             'index' => ListHourBanks::route('/'),
+            'create' => CreateHourBank::route('/create'),
             'edit' => EditHourBank::route('/{record}/edit'),
         ];
     }

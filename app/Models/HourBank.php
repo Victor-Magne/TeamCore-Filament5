@@ -71,17 +71,6 @@ class HourBank extends Model
         return "{$hours}h {$minutes}m";
     }
 
-    /**
-     * Formata horas extras usadas em horas e minutos
-     */
-    public function getFormattedExtraHoursUsedAttribute(): string
-    {
-        $hours = intdiv($this->extra_hours_used, 60);
-        $minutes = $this->extra_hours_used % 60;
-
-        return "{$hours}h {$minutes}m";
-    }
-
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()

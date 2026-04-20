@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Contracts\Pages;
 
+use App\Filament\Actions\DownloadContractPdfAction;
 use App\Filament\Resources\Contracts\ContractResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
@@ -17,6 +18,7 @@ class EditContract extends EditRecord
     {
         return [
             ViewAction::make(),
+            DownloadContractPdfAction::make(),
             DeleteAction::make(),
             ForceDeleteAction::make(),
             RestoreAction::make(),
