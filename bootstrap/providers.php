@@ -8,4 +8,5 @@ return [
     AppServiceProvider::class,
     EventServiceProvider::class,
     AdminPanelProvider::class,
+    \App\Providers\Filament\AppPanelProvider::class,
 ];
