@@ -4,8 +4,84 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ac362625ff56de2c8c26990ff015231b",
+    "content-hash": "33c384341d17ca83ab8baf4aff3633e4",
     "packages": [
+        {
+            "name": "azgasim/filament-unsaved-changes-modal",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/AzGasim/filament-unsaved-changes-modal.git",
+                "reference": "1df30efe2f964e0a11f35306e24fdb27e8feba47"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/AzGasim/filament-unsaved-changes-modal/zipball/1df30efe2f964e0a11f35306e24fdb27e8feba47",
+                "reference": "1df30efe2f964e0a11f35306e24fdb27e8feba47",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^5.3.5",
+                "php": "^8.2",
+                "spatie/laravel-package-tools": "^1.15.0"
+            },
+            "require-dev": {
+                "larastan/larastan": "^3.0",
+                "laravel/pint": "^1.0",
+                "orchestra/testbench": "^9.0|^10.0",
+                "pestphp/pest": "^3.7|^4.0",
+                "pestphp/pest-plugin-laravel": "^3.0|^4.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AzGasim\\FilamentUnsavedChangesModal\\FilamentUnsavedChangesModalServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AzGasim\\FilamentUnsavedChangesModal\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Aziz Gasim",
+                    "email": "104441723+AzGasim@users.noreply.github.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Filament plugin: unsaved-changes prompts as Filament modals instead of browser confirm dialogs.",
+            "homepage": "https://github.com/AzGasim/filament-unsaved-changes-modal",
+            "keywords": [
+                "AzGasim",
+                "filament",
+                "filament-plugin",
+                "filament-unsaved-changes-modal",
+                "filamentphp",
+                "laravel",
+                "livewire",
+                "modal",
+                "unsaved-changes",
+                "unsaved-changes-alert"
+            ],
+            "support": {
+                "issues": "https://github.com/AzGasim/filament-unsaved-changes-modal/issues",
+                "source": "https://github.com/AzGasim/filament-unsaved-changes-modal"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/AzGasim",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-04-14T21:01:12+00:00"
+        },
         {
             "name": "bacon/bacon-qr-code",
             "version": "v3.1.1",
