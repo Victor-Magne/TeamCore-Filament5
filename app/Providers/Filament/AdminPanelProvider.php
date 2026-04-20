@@ -30,6 +30,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin') // URL base: localhost:8000/admin
             ->login()       // Ativa o formulário de login padrão
+            ->databaseNotifications() // Ativa notificações persistentes no banco de dados
             ->unsavedChangesAlerts() // Alertas de mudanças não salvas
             ->colors([
                 // Primary/Brand colors: warm earth tones (WCAG AA compliant on light backgrounds)

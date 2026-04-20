@@ -6,6 +6,8 @@ use App\Models\Contract;
 use App\Models\Employee;
 use App\Models\HourBank;
 use App\Models\User;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 
@@ -16,6 +18,8 @@ class EmployeeObserver
      */
     public function created(Employee $employee): void
     {
+        $creator = Auth::user();
+
         // 1. Criar Utilizador
         $user = User::create([
             'employee_id' => $employee->id,
@@ -30,6 +34,15 @@ class EmployeeObserver
             $user->assignRole('employee');
         }
 
+        if ($creator) {
+            Notification::make()
+                ->title('Utilizador criado')
+                ->body("O utilizador associado a {$employee->full_name} foi criado com sucesso.")
+                ->success()
+                ->send()
+                ->sendToDatabase($creator);
+        }
+
         // 2. Criar Contrato Inicial
         Contract::create([
             'employee_id' => $employee->id,
@@ -41,6 +54,15 @@ class EmployeeObserver
             'daily_work_minutes' => 480, // Default 8h
         ]);
 
+        if ($creator) {
+            Notification::make()
+                ->title('Contrato inicial gerado')
+                ->body("Um contrato placeholder para {$employee->full_name} foi criado.")
+                ->info()
+                ->send()
+                ->sendToDatabase($creator);
+        }
+
         // 3. Criar Banco de Horas Inicial
         HourBank::create([
             'employee_id' => $employee->id,
@@ -50,5 +72,14 @@ class EmployeeObserver
             'extra_hours_used' => 0,
             'previous_balance' => 0,
         ]);
+
+        if ($creator) {
+            Notification::make()
+                ->title('Banco de horas inicializado')
+                ->body("O banco de horas para {$employee->full_name} foi criado com saldo zero.")
+                ->warning()
+                ->send()
+                ->sendToDatabase($creator);
+        }
     }
 }

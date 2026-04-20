@@ -64,7 +64,8 @@ class PayrollResource extends Resource
                             ->title('Processamento concluído')
                             ->body("Salários processados para {$monthYear}")
                             ->success()
-                            ->send();
+                            ->send()
+                            ->sendToDatabase(auth()->user());
                     }),
             ]);
     }
