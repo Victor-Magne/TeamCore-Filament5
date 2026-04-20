@@ -91,7 +91,8 @@ class AttendanceCheckIn extends Page
                     ->title('Sucesso')
                     ->body($message)
                     ->success()
-                    ->send();
+                    ->send()
+                    ->sendToDatabase($user);
             });
     }
 

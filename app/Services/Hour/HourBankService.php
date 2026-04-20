@@ -18,7 +18,9 @@ class HourBankService
     public function recalculate(int $employeeId, string $monthYear): void
     {
         $key = "{$employeeId}-{$monthYear}";
-        if (isset($this->calculating[$key])) return;
+        if (isset($this->calculating[$key])) {
+            return;
+        }
         $this->calculating[$key] = true;
 
         try {
@@ -37,6 +39,7 @@ class HourBankService
 
             // 1. Calcular Horas Extras Ganhas (via AttendanceLog)
             $extraMinutesAdded = 0;
+            $extraMinutesUsedFromLogs = 0;
             $logs = AttendanceLog::where('employee_id', $employeeId)
                 ->whereBetween('time_in', [$startDate, $endDate])
                 ->get();
@@ -54,7 +57,7 @@ class HourBankService
                         $extraMinutesAdded += $diff;
                     } else {
                         // Se trabalhou menos que o esperado, conta como horas usadas (débito)
-                        $extraMinutesUsed += abs($diff);
+                        $extraMinutesUsedFromLogs += abs($diff);
                     }
                 }
             }
@@ -63,6 +66,8 @@ class HourBankService
             $extraMinutesUsed = Absence::where('employee_id', $employeeId)
                 ->whereBetween('absence_date', [$startDate->toDateString(), $endDate->toDateString()])
                 ->sum('hours_deducted');
+
+            $extraMinutesUsed += $extraMinutesUsedFromLogs;
 
             // 3. Obter o saldo anterior
             $previousBalance = $this->getPreviousBalance($employeeId, $monthYear);
@@ -106,7 +111,7 @@ class HourBankService
 
         // Se não existir, paramos a propagação (ou poderíamos criar se fosse necessário)
         // No entanto, o sistema cria HourBanks conforme necessário via observers
-        if (!$nextHourBank) {
+        if (! $nextHourBank) {
             return;
         }
 
