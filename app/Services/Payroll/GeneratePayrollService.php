@@ -5,6 +5,7 @@ namespace App\Services\Payroll;
 use App\Models\Employee;
 use App\Models\HourBank;
 use App\Models\Payroll;
+use Illuminate\Support\Carbon;
 
 class GeneratePayrollService
 {
@@ -25,7 +26,21 @@ class GeneratePayrollService
         $extraHoursMinutes = $hourBank?->extra_hours_added ?? 0;
         $usedHoursMinutes = $hourBank?->extra_hours_used ?? 0;
 
-        $hourlyRate = $baseSalary / 160; // 160h/mês padrão
+        // Calcular dias úteis no mês para um cálculo de valor hora mais preciso
+        $date = Carbon::createFromFormat('Y-m', $monthYear);
+        $daysInMonth = $date->daysInMonth;
+        $weekdays = 0;
+        for ($i = 1; $i <= $daysInMonth; $i++) {
+            $day = $date->copy()->day($i);
+            if ($day->isWeekday()) {
+                $weekdays++;
+            }
+        }
+
+        $dailyWorkMinutes = $contract?->daily_work_minutes ?? 480;
+        $monthlyWorkHours = ($weekdays * $dailyWorkMinutes) / 60;
+
+        $hourlyRate = $baseSalary / ($monthlyWorkHours ?: 160);
         $extraHoursAmount = ($extraHoursMinutes / 60) * $hourlyRate * 1.5;
         $deductions = ($usedHoursMinutes / 60) * $hourlyRate;
 

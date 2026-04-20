@@ -7,6 +7,10 @@
             {{ now()->translatedFormat('l, d \d\e F \d\e Y') }}
         </div>
 
+        <div class="mt-4 text-lg">
+            Tempo trabalhado hoje: <span class="font-semibold">{{ $this->timeWorkedToday }}</span>
+        </div>
+
         <div class="mt-8">
             {{ $this->checkInAction }}
         </div>
