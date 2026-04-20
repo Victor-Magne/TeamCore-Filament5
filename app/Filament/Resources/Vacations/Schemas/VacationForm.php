@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Vacations\Schemas;
 
+use App\Models\Vacation;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
@@ -43,7 +44,34 @@ class VacationForm
                         ->label('Data de Fim')
                         ->required()
                         ->native(false)
-                        ->live(),
+                        ->live()
+                        ->rules([
+                            fn (callable $get): \Closure => function (string $attribute, $value, \Closure $fail) use ($get) {
+                                $startDate = $get('start_date');
+                                $employeeId = $get('employee_id');
+                                $recordId = $get('id');
+
+                                if (! $startDate || ! $employeeId) {
+                                    return;
+                                }
+
+                                $overlap = Vacation::where('employee_id', $employeeId)
+                                    ->when($recordId, fn ($q) => $q->where('id', '!=', $recordId))
+                                    ->where(function ($query) use ($startDate, $value) {
+                                        $query->whereBetween('start_date', [$startDate, $value])
+                                            ->orWhereBetween('end_date', [$startDate, $value])
+                                            ->orWhere(function ($q) use ($startDate, $value) {
+                                                $q->where('start_date', '<=', $startDate)
+                                                    ->where('end_date', '>=', $value);
+                                            });
+                                    })
+                                    ->exists();
+
+                                if ($overlap) {
+                                    $fail('O funcionário já possui férias marcadas para este período.');
+                                }
+                            },
+                        ]),
 
                     TextInput::make('days_taken')
                         ->label('Dias Gozados')

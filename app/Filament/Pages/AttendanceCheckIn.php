@@ -128,4 +128,41 @@ class AttendanceCheckIn extends Page
     {
         return [];
     }
+
+    public function getTimeWorkedTodayProperty(): string
+    {
+        $user = Auth::user();
+        if (! $user || ! $user->employee_id) {
+            return '0h 0m';
+        }
+
+        $log = AttendanceLog::where('employee_id', $user->employee_id)
+            ->whereDate('time_in', Carbon::today())
+            ->first();
+
+        if (! $log) {
+            return '0h 0m';
+        }
+
+        $minutes = $log->total_minutes ?? $log->calculateTotalMinutes() ?? 0;
+
+        // Se ainda não deu o checkout final, calcula até o momento atual
+        if (! $log->time_out && $log->time_in) {
+            $now = Carbon::now();
+            $totalMinutes = $log->time_in->diffInMinutes($now);
+
+            if ($log->lunch_break_start) {
+                $lunchEnd = $log->lunch_break_end ?: $now;
+                $lunchMinutes = $log->lunch_break_start->diffInMinutes($lunchEnd);
+                $totalMinutes -= $lunchMinutes;
+            }
+
+            $minutes = max(0, $totalMinutes);
+        }
+
+        $hours = intdiv($minutes, 60);
+        $remainingMinutes = $minutes % 60;
+
+        return "{$hours}h {$remainingMinutes}m";
+    }
 }

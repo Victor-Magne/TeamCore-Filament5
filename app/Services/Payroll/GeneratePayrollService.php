@@ -5,6 +5,7 @@ namespace App\Services\Payroll;
 use App\Models\Employee;
 use App\Models\HourBank;
 use App\Models\Payroll;
+use Illuminate\Support\Carbon;
 
 class GeneratePayrollService
 {

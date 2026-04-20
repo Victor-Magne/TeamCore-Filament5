@@ -57,6 +57,14 @@ class PayrollsTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    BulkAction::make('mark_as_paid_bulk')
+                        ->label('Marcar como Pagos')
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->action(fn (Collection $records) => $records->each->update([
+                            'status' => 'paid',
+                            'paid_at' => now(),
+                        ])),
                     DeleteBulkAction::make(),
                 ]),
             ]);
