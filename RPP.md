@@ -46,10 +46,8 @@ Metodologia e Ferramentas	9
 Arquitetura de Dados Relacional	10
 Processo de Desenvolvimento	11
 Principais Implementações	12
-Painel Admin (/admin) – Gestão completa do sistema	14
-Painel RH (/hr) – Gestão de Recursos Humanos	14
-Painel Funcionário (/employee) – Acesso pessoal	14
-Características de cada painel	15
+Interface Administrativa Unificada e RBAC	14
+Características da Interface	15
 Controlo de Acesso e Segurança	15
 Gestão de Horas e Banco de Horas	16
 Experiência do Utilizador (UX)	18
@@ -73,8 +71,8 @@ Anexos	33
 
 Figura 1: Diagrama de Entidades e Relações (ER) - Estrutura da base de dados relacional	10
 Figura 2: Dashboard Admin com Widgets de Estatísticas (contratos, funcionários, presença)	12
-Figura 3: Painel HR - Gestão de Funcionários com tabela de dados	13
-Figura 4: Painel Funcionário - Visualização de Dados Pessoais e Banco de Horas	14
+Figura 3: Gestão de Funcionários com tabela de dados e filtros de acesso	13
+Figura 4: Visualização de Dados Pessoais e Banco de Horas com acesso restrito	14
 Figura 5: Diagrama RBAC - Hierarquia de Papeis (Admin, HR, Employee) e Permissões por Funcionalidade	15
 Figura 6: Registo de Presença (Attendance) com Campos de Entrada/Saída e Pausas	16
 Figura 7: Visualização do Banco de Horas (Hourbank) com Saldo Acumulado e Histórico	17
@@ -128,9 +126,9 @@ O presente relatório de PAP descreve o desenvolvimento da Aplicação TeamCore,
 
 A Aplicação TeamCore foi desenvolvida com o objetivo de alcançar uma gestão abrangente de dados de funcionários, cargos, contratos e férias, promover a automação de processos para minimizar a margem de erro, e fornecer auditoria completa de todas as operações. A qualidade técnica, focada na segurança, usabilidade e conformidade regulatória, foi um pilar central do desenvolvimento.
 
-A metodologia de trabalho incluiu o levantamento detalhado de requisitos, a modelação da base de dados relacional, e o desenvolvimento técnico utilizando a framework Laravel 13 com Filament 5 para o backend e frontend. O processo foi complementado por validação rigorosa de funcionalidades e testes automatizados.
+A metodologia de trabalho incluiu o levantamento detalhado de requisitos, a modelação da base de dados relacional, e o desenvolvimento técnico utilizando a framework Laravel v13 com Filament v5 para o backend e frontend. O processo foi complementado por validação rigorosa de funcionalidades e testes automatizados.
 
-Nota sobre o Estado da Aplicação: No momento da redação deste relatório (16 de Abril de 2026), a Aplicação TeamCore encontra-se numa fase de maturidade produção-ready com todas as funcionalidades core completamente implementadas, testadas e validadas. A aplicação inclui: 14 Models com isolamento de dados RBAC; 15 Filament Resources com políticas de autorização; 16 Policies para controlo granular; Sistema de banco de horas com validação automática de licenças; Auditoria completa via Spatie Activity Log; 1 Observer Pattern para automação de contratos; Autenticação segura via Filament Breezy e Passkeys; e testes automatizados com Pest 4. A aplicação está pronta para utilização em ambiente de produção.
+Nota sobre o Estado da Aplicação: No momento da redação deste relatório (16 de Abril de 2026), a Aplicação TeamCore encontra-se numa fase de maturidade produção-ready com todas as funcionalidades core completamente implementadas, testadas e validadas. A aplicação inclui: 15 Models com isolamento de dados RBAC; 16 Filament Resources com políticas de autorização; 17 Policies para controlo granular; Sistema de banco de horas com validação automática de licenças; Auditoria completa via Spatie Activity Log; 3 Observers para automação de processos; Autenticação segura via Filament Breezy e Passkeys; e testes automatizados com Pest v4. A aplicação está pronta para utilização em ambiente de produção.
 
 
 Introdução
@@ -165,17 +163,17 @@ Garantir a qualidade técnica: Assegurar a aplicação através de testes automa
 
 Abordagem e Metodologia
 O desenvolvimento foi realizado em ciclos iterativos, adotando:
-Tecnologias modernas: Laravel 12 como framework backend, Filament 3 como administrador de painéis, PHP 8.2+ e MySQL como base de dados relacional.
+Tecnologias modernas: Laravel v13 como framework backend, Filament v5 como interface administrativa unificada, PHP v8.3+ e MySQL como base de dados relacional.
 Testes automatizados: Desenvolvimento orientado a testes utilizando framework Pest/PHPUnit para validação contínua de funcionalidades.
 Validação com profissionais: Consulta com profissionais de RH durante o desenvolvimento para validar requisitos e funcionalidades essenciais.
-Boas práticas de engenharia: Isolamento de dados ao nível do modelo através de políticas Eloquent, arquitetura em camadas clara, padrões de código consistentes.
+Boas práticas de engenharia: Isolamento de dados ao nível do modelo através de Policies Eloquent, arquitetura em camadas clara, padrões de código consistentes.
 
 
 Desenvolvimento da Aplicação
 Metodologia e Ferramentas
-A Aplicação TeamCore foi desenvolvida com a framework Laravel 13, utilizando Filament 5 como administrador de painéis e PHP 8.3 como linguagem de desenvolvimento. A persistência de dados foi implementada em MySQL, com uma arquitetura relacional suportando entidades como Funcionários, Contratos, Departamentos, Designações, Bancos de Horas, Registos de Presença, Pedidos de Licença, Ausências e Logs de Auditoria.
+A Aplicação TeamCore foi desenvolvida com a framework Laravel v13, utilizando Filament v5 como interface administrativa unificada e PHP v8.3 como linguagem de desenvolvimento. A persistência de dados foi implementada em MySQL, com uma arquitetura relacional suportando entidades como Funcionários, Contratos, Departamentos, Designações, Bancos de Horas, Registos de Presença, Pedidos de Licença, Ausências e Logs de Auditoria.
 
-O processo de desenvolvimento adotou uma metodologia iterativa com ciclos bissemanais de análise, implementação, testes e validação. Foi feita a utilização Git para controlo de versão e manutenção de uma suíte de testes automatizados (Pest 4) que executam em cada novo commit, garantindo que regressões não ocorressem durante o desenvolvimento.
+O processo de desenvolvimento adotou uma metodologia iterativa com ciclos bissemanais de análise, implementação, testes e validação. Foi feita a utilização Git para controlo de versão e manutenção de uma suíte de testes automatizados (Pest v4) que executam em cada novo commit, garantindo que regressões não ocorressem durante o desenvolvimento.
 
 Tecnologia
 Aplicação
@@ -184,7 +182,7 @@ Laravel
 Framework Backend
 13.0
 Filament
-Construção dos painéis
+Construção da interface
 5.5+
 PHP
 Linguagem
@@ -219,40 +217,40 @@ Registos de Presença (AttendanceLog): Registos diários de entrada/saída/pausa
 Ausências (Absence): Auditoria de descontos de horas com tipos (unjustified_absence, partial_absence, other).
 Férias (Vacation): Gestão de férias anuais com saldo por ano, status de aprovação e dias tomados.
 Licenças e Ausências (LeaveAndAbsence): Gestão de licenças justificadas (sick_leave, parental, marriage, bereavement, justified_absence, unjustified) com aprovação workflow.
+Payroll: Processamento salarial automático com base em contratos e banco de horas.
 Localização: País, Estado e Cidade para preenchimento de dados de funcionários.
 Principais Implementações
-A aplicação implementa uma arquitetura multi-painel com isolamento de dados por função:
+A aplicação utiliza uma interface administrativa unificada (/admin) onde o acesso a recursos e dados é controlado dinamicamente via funções e permissões geridas pelo Filament Shield. Esta abordagem simplifica a navegação e centraliza a gestão, garantindo o isolamento de dados através de Policies Eloquent.
 
 Figura 2: Dashboard Admin com Widgets de Estatísticas (contratos, funcionários, presença).
 
+Figura 3: Gestão de Funcionários com tabela de dados e filtros de acesso.
 
-Figura 3: Painel HR - Gestão de Funcionários com tabela de dados.
+Figura 4: Visualização de Dados Pessoais e Banco de Horas com acesso restrito.
 
-Figura 4: Painel Funcionário - Visualização de Dados Pessoais e Banco de Horas.
-Painel Admin (/admin) – Gestão completa do sistema
-Gestão de utilizadores e papéis.
-Gestão de departamentos e cargos.
-Administração de benefícios.
-Controlo geral da aplicação.
+Principais Áreas de Gestão (Acesso via Roles):
 
-Painel RH (/hr) – Gestão de Recursos Humanos
-Gestão de funcionários.
-Gestão de contratos.
-Processamento de licenças e faltas.
-Relatórios estratégicos e análise.
+Administração (ADMIN)
+Gestão completa de utilizadores, papéis e unidades.
+Administração de cargos, benefícios e auditoria global.
+Controlo total de configurações da aplicação.
 
-Painel Funcionário (/employee) – Acesso pessoal
-Visualização de dados pessoais.
-Visualização e gestão de férias (criação de pedidos, acompanhamento de aprovações).
-Visualização e gestão de licenças/ausências com workflows de aprovação.
-Visualização de banco de horas.
-Dashboard interativo com widgets resumidos de férias, licenças, presença e banco de horas.
+Gestão de RH (HR)
+Gestão completa de funcionários e contratos.
+Processamento de licenças, faltas e salários (Payroll).
+Relatórios estratégicos e análise de produtividade.
 
-Características de cada painel
-Páginas dedicadas com um middleware específico para o controlo de acesso.
-Isolamento de dados ao nível do modelo através de políticas Eloquent.
-Componentes UI e funcionalidades condicionadas ao perfil do utilizador.
-Navegação e estrutura otimizadas para cada função.
+Acesso Pessoal (EMPLOYEE)
+Visualização de dados pessoais e banco de horas.
+Gestão de férias e pedidos de licenças com workflow de aprovação.
+Dashboard interativo com widgets detalhados de estatísticas, incluindo gráficos de contratos, densidade de unidades, salários por nível e banco de horas.
+
+Características da Interface Unificada
+Isolamento de dados ao nível do modelo através de Policies Eloquent (Scopes).
+Componentes UI, recursos e ações visíveis apenas para perfis autorizados.
+Menu de navegação dinâmico que se adapta às permissões do utilizador (Filament Navigation).
+Middleware robusto para verificação de permissões via Filament Shield.
+Navegação e estrutura otimizadas para uma experiência de utilizador fluida e centralizada.
 
 Controlo de Acesso e Segurança
 
@@ -264,23 +262,25 @@ HR — Gestor de recursos humanos, gestão de funcionários, contratos, licença
 EMPLOYEE — Colaborador, acesso limitado a dados pessoais e pedidos próprios.
 
 Implementação em 3 Camadas:
-Middleware de Rotas — Bloqueio de acesso inicial a painéis (usando role checks).
-Filament Policies — 16 policies implementadas para controlo granular (UserPolicy, EmployeePolicy, ContractPolicy, etc.).
+Middleware de Rotas — Bloqueio de acesso inicial (usando role checks via Shield).
+Filament Policies — 17 policies implementadas para controlo granular (UserPolicy, EmployeePolicy, ContractPolicy, etc.).
 Eloquent Scopes — Isolamento de dados ao nível da query (ex: Employees só veem seus dados, HR veem do seu departamento).
 
-Recursos Filament com Controlo de Acesso (15 total):
+Recursos Filament com Controlo de Acesso (16 total):
 Gestão de Sistema: Users, Roles, Units (Admin)
 Gestão de Funcionários: Employees, AttendanceLogs, ActivityLogs (HR/Admin)
 Gestão de Organização: Designations, Countries, States, Cities
 Gestão de Contratos: Contracts
 Gestão de Ausências: Vacations, LeaveAndAbsences
 Gestão de Banco de Horas: HourBanks, Absences
+Gestão de Salários: Payrolls
 
 Proteções de Segurança:
 Isolamento de dados: Employee só vê dados pessoais, HR vê do seu departamento
 Auto-aprovação bloqueada: Utilizador não pode aprovar seus próprios pedidos (via Policies)
 Soft deletes: Preservação de histórico em todos os modelos críticos
-Activity logging: Rastreio completo via Spatie Activity Log (automatic com LogsActivity trait)
+Activity logging: Rastreio completo via Spatie Activity Log (automatic com LogsActivity trait).
+Services especializados: Implementação de lógica de negócio complexa em Services (GeneratePayrollService, CalculateExtraHoursService, DeductHourBankService).
 CSRF protection: Tokens em formulários
 Autenticação: Filament Breezy com suporte a Passkeys
 Auditoria de Modelos: Registo automático de create, update e delete com user tracking
@@ -346,11 +346,9 @@ Colunas de tabelas traduzidas.
 Datas e números formatados para PT-PT.
 
 Notificações Contextuais:
-Trait 'NotifiesCreatedItems' para notificações por recurso.
 Mensagens específicas por ação realizada.
 
 Confirmações de Ação:
-'ConfirmsCancelAction' para evitar cancelamentos não intencionais.
 Diálogos de confirmação em ações destrutivas.
 Avisos de mudanças não salvas.
 
@@ -377,7 +375,7 @@ Proteção de privacidade e conformidade LGPD.
 Dados pessoais acessíveis apenas aos autorizados.
 Logs de acesso a dados sensíveis.
 
-Actions Condicionadas:
+Ações Condicionadas:
 Botões e ações visíveis apenas para perfis autorizados.
 Desativação contextual de funcionalidades.
 Guia visual das permissões do utilizador.
@@ -429,7 +427,7 @@ Cada contrato pode ser visualizado em lista e, numa ação especializada, pode s
 Figura 14: Resource ActivityLogResource - Visualização de Histórico de Auditoria com Filtros
 O ActivityLogResource registra todas as alterações importantes no sistema (criação de utilizadores, edição de salários, eliminação de registos). Esta informação é crítica para conformidade regulatória e para rastrear quem fez o quê e quando. Os filtros permitem procurar por tipo de ação, utilizador que realizou a ação, ou data, facilitando investigações e auditorias. Por exemplo, se surgir uma discrepância num banco de horas, é possível rapidamente ver todo o histórico de alterações nesse registo. Isto é particularmente importante em contexto empresarial onde são necessárias evidências documentadas de todas as operações para fins legais.
 
-A aplicação implementa 15 Resources Filament para gestão:
+A aplicação implementa 16 Resources Filament para gestão:
 
 Resource
 Modelo
@@ -437,6 +435,8 @@ EmployeeResource
 Employee
 ContractResource
 Contract
+PayrollResource
+Payroll
 UnitResource
 Unit (Unidades Organizacionais)
 DesignationResource
@@ -478,7 +478,11 @@ AuthenticationActivityLogger: Regista eventos de autenticação (login/logout) e
 Automação com Observers
 O sistema utiliza Observer Pattern para automatizar operações:
 
+EmployeeObserver: Cria automaticamente o utilizador, contrato inicial e banco de horas ao registar um novo funcionário.
+
 ContractObserver: Quando um novo contrato é criado/atualizado, sincroniza automaticamente a designation_id do Employee com base no contrato. Isto garante que a função do funcionário é sempre consistente com o contrato ativo.
+
+AttendanceLogObserver: Automatiza cálculos e validações nos registos de presença.
 
 Activity Logging com Spatie
 Todos os modelos críticos utilizam a trait LogsActivity do Spatie para rastreamento automático:
@@ -497,7 +501,7 @@ Conclusão
 Dificuldades Encontradas e Soluções Adotadas
 Ao longo do desenvolvimento da Aplicação TeamCore, enfrentei desafios importantes que foram determinantes para o sucesso da aplicação.
 
-Isolamento de dados complexo: Um dos maiores obstáculos foi implementar o isolamento de dados por função de utilizador de forma robusta. No sistema RBAC, não era suficiente apenas bloquear o acesso às páginas — era necessário garantir que cada utilizador só consultava os seus próprios dados ao nível da base de dados. A solução foi implementar Policies Eloquent em cada modelo e Query Scopes, garantindo que as queries já vinham filtradas da fonte.
+Isolamento de dados complexo: Um dos maiores obstáculos foi implementar o isolamento de dados por função de utilizador de forma robusta. No sistema RBAC, não era suficiente apenas bloquear o acesso aos recursos e páginas — era necessário garantir que cada utilizador só consultava os seus próprios dados ao nível da base de dados. A solução foi implementar Policies Eloquent em cada modelo e Query Scopes, garantindo que as queries já vinham filtradas da fonte.
 
 Automatização com Observers: Quando um contrato é criado, o sistema precisa sincronizar a designation do Employee para manter consistência. Implementei isto com Observers, assegurando que mudanças no contrato sempre refletem no Employee automaticamente.
 
@@ -518,10 +522,10 @@ Auditoria completa: Spatie Activity Log fornece rastreamento automático de toda
 
 RBAC dinâmico: Filament Shield permite gerir papéis e permissões de forma granular e flexível.
 
-Testes com cobertura: Pest 4 com testes que cobrem funcionalidades críticas.
+Testes com cobertura: Pest v4 com testes que cobrem funcionalidades críticas.
 
 Pontos a Melhorar
-Funcionalidades essenciais em falta: O sistema não tem processamento salarial automático, nem cálculo de férias remanescentes vs usadas. Isto limita uso em empresas reais.
+Funcionalidades essenciais em falta: Apesar da implementação do módulo de Payroll e gestão de férias, ainda são necessários refinamentos no cálculo de férias remanescentes vs usadas e integrações com sistemas bancários externos.
 
 Testes de carga: Não foi validado com volumes grandes de dados (milhares de funcionários, múltiplos utilizadores simultâneos).
 
@@ -555,7 +559,7 @@ Consigo implementar RBAC robusto, um requisito em qualquer sistema com múltiplo
 
 Compreendo a importância de auditoria e conformidade regulatória desde o design.
 
-Trabalho com ferramentas profissionais reais (Laravel 13, Filament 5, Spatie packages) e as aplico corretamente.
+Trabalho com ferramentas profissionais reais (Laravel v13, Filament v5, Spatie packages) e as aplico corretamente.
 
 Valorizo code quality, testes e boas práticas desde o início, não como afterthought.
 
