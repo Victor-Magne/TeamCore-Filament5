@@ -53,7 +53,7 @@ class AppPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/App/Resources'), for: 'App\Filament\App\Resources')
             ->discoverPages(in: app_path('Filament/App/Pages'), for: 'App\Filament\App\Pages')
             ->pages([
-                \App\Filament\App\Pages\Dashboard::class,
+                \App\Filament\App\Pages\EmployeeDashboard::class,
             ])
             ->widgets([
                 // Widgets are registered in the Dashboard class

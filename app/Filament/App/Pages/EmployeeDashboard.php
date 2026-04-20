@@ -10,7 +10,7 @@ use App\Filament\App\Widgets\EmployeeVacationWidget;
 use App\Filament\Widgets\HourBankStatsWidget;
 use Filament\Pages\Dashboard as BaseDashboard;
 
-class Dashboard extends BaseDashboard
+class EmployeeDashboard extends BaseDashboard
 {
     public function getWidgets(): array
     {
