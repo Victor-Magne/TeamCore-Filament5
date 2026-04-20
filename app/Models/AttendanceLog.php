@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Services\Hour\CalculateExtraHoursService;
+use App\Casts\ValidateUtf8String;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,6 +17,7 @@ class AttendanceLog extends Model
     protected $fillable = ['employee_id', 'time_in', 'lunch_break_start', 'lunch_break_end', 'time_out', 'total_minutes', 'metadata', 'notes'];
 
     protected $casts = [
+        'notes' => ValidateUtf8String::class,
         'time_in' => 'datetime',
         'lunch_break_start' => 'datetime',
         'lunch_break_end' => 'datetime',

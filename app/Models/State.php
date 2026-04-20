@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\ValidateUtf8String;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -13,6 +14,10 @@ class State extends Model
     use HasFactory, LogsActivity, SoftDeletes;
 
     protected $fillable = ['name', 'country_id'];
+
+    protected $casts = [
+        'name' => ValidateUtf8String::class,
+    ];
 
     public function country()
     {

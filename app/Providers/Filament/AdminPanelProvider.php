@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Http\Middleware\CheckAdminPanelAccess;
 use AzGasim\FilamentUnsavedChangesModal\FilamentUnsavedChangesModalPlugin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
@@ -18,7 +19,6 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
-
 // Plugins
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
@@ -65,7 +65,7 @@ class AdminPanelProvider extends PanelProvider
                 FilamentShieldPlugin::make(),
                 FilamentUnsavedChangesModalPlugin::make(),
             ])
-            
+
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
@@ -86,6 +86,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                CheckAdminPanelAccess::class,
             ])
             ->authMiddleware([
                 Authenticate::class,

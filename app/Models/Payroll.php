@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\ValidateUtf8String;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,6 +26,8 @@ class Payroll extends Model
     ];
 
     protected $casts = [
+        'month_year' => ValidateUtf8String::class,
+        'status' => ValidateUtf8String::class,
         'base_salary' => 'decimal:2',
         'hourly_rate' => 'decimal:2',
         'extra_hours' => 'integer',

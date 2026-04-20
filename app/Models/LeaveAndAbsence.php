@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\ValidateUtf8String;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,6 +19,11 @@ class LeaveAndAbsence extends Model
     protected $fillable = ['employee_id', 'type', 'start_date', 'end_date', 'reason', 'is_paid', 'justification_doc', 'status', 'approved_by', 'rejection_reason'];
 
     protected $casts = [
+        'type' => ValidateUtf8String::class,
+        'reason' => ValidateUtf8String::class,
+        'status' => ValidateUtf8String::class,
+        'rejection_reason' => ValidateUtf8String::class,
+        'justification_doc' => ValidateUtf8String::class,
         'start_date' => 'date',
         'end_date' => 'date',
         'is_paid' => 'boolean',

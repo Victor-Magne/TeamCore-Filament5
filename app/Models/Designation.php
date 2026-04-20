@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\ValidateUtf8String;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -18,6 +19,7 @@ class Designation extends Model
     use SoftDeletes;
 
     protected $casts = [
+        'name' => ValidateUtf8String::class,
         'base_salary' => 'decimal:2',
     ];
 

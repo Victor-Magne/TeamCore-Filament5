@@ -2,14 +2,13 @@
 
 namespace App\Filament\App\Widgets;
 
-use App\Models\Contract;
 use App\Services\ContractPdfService;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Auth;
 
 class EmployeeContractWidget extends Widget
 {
-    protected static string $view = 'filament.app.widgets.employee-contract-widget';
+    protected string $view = 'filament.app.widgets.employee-contract-widget';
 
     protected int|string|array $columnSpan = 1;
 

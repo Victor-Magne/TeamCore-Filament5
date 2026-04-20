@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\ValidateUtf8String;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,6 +18,8 @@ class Vacation extends Model
     protected $fillable = ['employee_id', 'year_reference', 'start_date', 'end_date', 'days_taken', 'status', 'approved_by', 'rejection_reason'];
 
     protected $casts = [
+        'status' => ValidateUtf8String::class,
+        'rejection_reason' => ValidateUtf8String::class,
         'start_date' => 'date',
         'end_date' => 'date',
     ];

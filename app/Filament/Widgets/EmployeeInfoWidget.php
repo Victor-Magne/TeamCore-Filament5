@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 
 class EmployeeInfoWidget extends Widget
 {
-    protected static string $view = 'filament.app.widgets.employee-info-widget';
+    protected string $view = 'filament.app.widgets.employee-info-widget';
 
     protected int|string|array $columnSpan = 1;
 

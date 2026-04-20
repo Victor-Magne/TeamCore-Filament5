@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\ValidateUtf8String;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,6 +27,7 @@ class HourBank extends Model
     ];
 
     protected $casts = [
+        'month_year' => ValidateUtf8String::class,
         'balance' => 'integer',
         'extra_hours_added' => 'integer',
         'extra_hours_used' => 'integer',

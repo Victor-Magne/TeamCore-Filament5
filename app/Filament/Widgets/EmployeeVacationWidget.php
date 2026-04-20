@@ -3,6 +3,7 @@
 namespace App\Filament\App\Widgets;
 
 use App\Models\Vacation;
+use Filament\Actions\Action;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -50,8 +51,8 @@ class EmployeeVacationWidget extends BaseWidget
                     }),
             ])
             ->headerActions([
-                Tables\Actions\Action::make('balance')
-                    ->label(fn () => "Saldo Restante: " . ($employee?->vacation_balance ?? 0) . " dias")
+                Action::make('balance')
+                    ->label(fn () => 'Saldo Restante: '.($employee?->vacation_balance ?? 0).' dias')
                     ->button()
                     ->disabled()
                     ->color('info'),

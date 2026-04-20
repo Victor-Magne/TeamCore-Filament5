@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\App\Widgets;
+namespace App\Filament\Widgets;
 
 use App\Models\LeaveAndAbsence;
 use App\Models\Vacation;
@@ -18,12 +18,17 @@ use Filament\Widgets\Widget;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
-class EmployeeActionsWidget extends Widget implements HasForms, HasActions
+class EmployeeActionsWidget extends Widget implements HasActions, HasForms
 {
     use InteractsWithActions;
     use InteractsWithForms;
 
-    protected static string $view = 'filament.app.widgets.employee-actions-widget';
+    protected string $view = 'filament.app.widgets.employee-actions-widget';
+
+    public static function canView(): bool
+    {
+        return Auth::user()?->can('View:EmployeeActionsWidget') ?? false;
+    }
 
     protected int|string|array $columnSpan = 1;
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\ValidateUtf8String;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,6 +24,8 @@ class Absence extends Model
     ];
 
     protected $casts = [
+        'deduction_type' => ValidateUtf8String::class,
+        'reason' => ValidateUtf8String::class,
         'absence_date' => 'date',
         'hours_deducted' => 'integer',
     ];

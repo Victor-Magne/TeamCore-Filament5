@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\ValidateUtf8String;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,6 +25,11 @@ class Unit extends Model
         'parent_id',
         'manager_id',
         'is_main_direction',
+    ];
+
+    protected $casts = [
+        'name' => ValidateUtf8String::class,
+        'description' => ValidateUtf8String::class,
     ];
 
     public function parent(): BelongsTo

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\ValidateUtf8String;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -36,6 +37,8 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            'name' => ValidateUtf8String::class,
+            'email' => ValidateUtf8String::class,
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'must_change_password' => 'boolean',
