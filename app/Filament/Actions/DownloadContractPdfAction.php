@@ -19,6 +19,7 @@ class DownloadContractPdfAction extends Action
         $this->label('Descarregar PDF')
             ->icon('heroicon-o-arrow-down-tray')
             ->tooltip('Descarregar contrato em PDF')
-            ->url(fn (Contract $record) => route('contracts.pdf.single', $record));
+            ->url(fn (Contract $record) => route('contracts.pdf.single', $record))
+            ->openUrlInNewTab();
     }
 }

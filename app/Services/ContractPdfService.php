@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Contract;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class ContractPdfService
 {
@@ -39,23 +40,12 @@ class ContractPdfService
     {
         $filename = sprintf(
             'contrato_%s_%s.pdf',
-            $contract->employee->first_name,
+            Str::slug($contract->employee->first_name),
             now()->format('Y-m-d')
         );
 
-        $pdf = $this->generateSingleContractPdf($contract);
-
-        return response()
-            ->streamDownload(
-                function () use ($pdf) {
-                    echo $pdf->output();
-                },
-                $filename,
-                [
-                    'Content-Type' => 'application/pdf',
-                    'Content-Disposition' => 'attachment; filename="'.$filename.'"',
-                ]
-            );
+        return $this->generateSingleContractPdf($contract)
+            ->download($filename);
     }
 
     /**
@@ -65,18 +55,7 @@ class ContractPdfService
     {
         $filename = sprintf('contratos_relatorio_%s.pdf', now()->format('Y-m-d'));
 
-        $pdf = $this->generateMultipleContractsPdf($contracts);
-
-        return response()
-            ->streamDownload(
-                function () use ($pdf) {
-                    echo $pdf->output();
-                },
-                $filename,
-                [
-                    'Content-Type' => 'application/pdf',
-                    'Content-Disposition' => 'attachment; filename="'.$filename.'"',
-                ]
-            );
+        return $this->generateMultipleContractsPdf($contracts)
+            ->download($filename);
     }
 }
