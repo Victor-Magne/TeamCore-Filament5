@@ -25,9 +25,9 @@
             <div class="max-w-7xl mx-auto px-6 lg:px-8 py-4 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <img src="{{ asset('images/Teamcorelogo.svg') }}" alt="TeamCore" class="h-8 w-auto">
-                    <span class="font-semibold text-lg">TeamCore</span>
+                    <span class="font-semibold text-lg"></span>
                 </div>
-                
+
                 <div class="hidden md:flex items-center gap-8">
                     <a href="#funcionalidades" class="text-sm hover:text-amber-700 dark:hover:text-amber-500 transition">Funcionalidades</a>
                     <a href="#paineis" class="text-sm hover:text-amber-700 dark:hover:text-amber-500 transition">Painéis</a>
@@ -53,7 +53,7 @@
         <!-- Hero Section -->
         <section class="relative overflow-hidden pt-20 pb-32 md:pt-32 md:pb-48">
             <div class="absolute inset-0 bg-gradient-to-br from-amber-50 via-white to-orange-50 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900"></div>
-            
+
             <div class="relative max-w-7xl mx-auto px-6 lg:px-8">
                 <div class="grid md:grid-cols-2 gap-12 items-center">
                     <!-- Conteúdo -->
@@ -280,7 +280,7 @@
                         </ul>
                     </div>
                 </div>
-                
+
                 <div class="border-t border-gray-200 dark:border-slate-700 pt-8 text-center text-sm text-gray-600 dark:text-gray-400">
                     <p>&copy; 2026 TeamCore. Todos os direitos reservados.</p>
                 </div>
