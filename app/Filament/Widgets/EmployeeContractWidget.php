@@ -1,14 +1,22 @@
 <?php
 
-namespace App\Filament\App\Widgets;
+namespace App\Filament\Widgets;
 
 use App\Services\ContractPdfService;
+use Filament\Actions\Action;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Auth;
 
-class EmployeeContractWidget extends Widget
+class EmployeeContractWidget extends Widget implements HasForms, HasActions
 {
-    protected string $view = 'filament.app.widgets.employee-contract-widget';
+    use InteractsWithForms;
+    use InteractsWithActions;
+
+    protected string $view = 'filament.widgets.employee-contract-widget';
 
     protected int|string|array $columnSpan = 1;
 
@@ -20,14 +28,20 @@ class EmployeeContractWidget extends Widget
             ->first();
     }
 
-    public function download()
+    public function downloadAction(): Action
     {
-        $contract = $this->getContract();
+        return Action::make('download')
+            ->label('Descarregar Contrato (PDF)')
+            ->icon('heroicon-m-arrow-down-tray')
+            ->color('gray')
+            ->action(function () {
+                $contract = $this->getContract();
 
-        if (! $contract) {
-            return;
-        }
+                if (! $contract) {
+                    return;
+                }
 
-        return app(ContractPdfService::class)->downloadSingleContractPdf($contract);
+                return app(ContractPdfService::class)->downloadSingleContractPdf($contract);
+            });
     }
 }

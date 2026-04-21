@@ -23,7 +23,7 @@ class EmployeeActionsWidget extends Widget implements HasActions, HasForms
     use InteractsWithActions;
     use InteractsWithForms;
 
-    protected string $view = 'filament.app.widgets.employee-actions-widget';
+    protected string $view = 'filament.widgets.employee-actions-widget';
 
     public static function canView(): bool
     {

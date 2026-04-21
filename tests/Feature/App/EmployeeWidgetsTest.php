@@ -1,8 +1,8 @@
 <?php
 
-use App\Filament\App\Widgets\EmployeeInfoWidget;
-use App\Filament\App\Widgets\EmployeeLeaveWidget;
-use App\Filament\App\Widgets\EmployeeVacationWidget;
+use App\Filament\Widgets\EmployeeInfoWidget;
+use App\Filament\Widgets\EmployeeLeaveWidget;
+use App\Filament\Widgets\EmployeeVacationWidget;
 use App\Filament\Widgets\EmployeeActionsWidget;
 use App\Models\Employee;
 use App\Models\User;
