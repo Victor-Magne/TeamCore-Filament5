@@ -2,7 +2,7 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\App\Pages\EmployeeDashboard;
+use App\Filament\Pages\EmployeeDashboard;
 use App\Http\Middleware\CheckAppPanelAccess;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;

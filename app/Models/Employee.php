@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Casts\ValidateUtf8String;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -36,15 +35,6 @@ class Employee extends Model
     ];
 
     protected $casts = [
-        'first_name' => ValidateUtf8String::class,
-        'last_name' => ValidateUtf8String::class,
-        'email' => ValidateUtf8String::class,
-        'phone_number' => ValidateUtf8String::class,
-        'gender' => ValidateUtf8String::class,
-        'nif' => ValidateUtf8String::class,
-        'nss' => ValidateUtf8String::class,
-        'address' => ValidateUtf8String::class,
-        'zip_code' => ValidateUtf8String::class,
         'date_of_birth' => 'date',
         'date_hired' => 'date',
         'date_dismissed' => 'datetime',
