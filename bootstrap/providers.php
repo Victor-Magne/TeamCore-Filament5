@@ -3,10 +3,12 @@
 use App\Providers\AppServiceProvider;
 use App\Providers\EventServiceProvider;
 use App\Providers\Filament\AdminPanelProvider;
+use App\Providers\Filament\AppPanelProvider;
+use App\Providers\ResponseServiceProvider;
 
 return [
     AppServiceProvider::class,
     EventServiceProvider::class,
     AdminPanelProvider::class,
-    \App\Providers\Filament\AppPanelProvider::class,
+    AppPanelProvider::class,
 ];

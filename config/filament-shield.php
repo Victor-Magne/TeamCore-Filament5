@@ -245,9 +245,14 @@ return [
     */
 
     'custom_permissions' => [
-        'scope_view_dept_heads',       // Atribuir ao Diretor Geral
-        'scope_view_section_chiefs',   // Atribuir ao Chefe de Departamento
-        'scope_view_base_employees',   // Atribuir ao Chefe de Secção
+        // Acesso aos Painéis
+        'Access:AdminPanel',           // Acesso ao painel Admin
+        'Access:AppPanel',             // Acesso ao painel App
+
+        // Scope de Visualização
+        'Scope:ViewDeptHeads',         // Atribuir ao Diretor Geral
+        'Scope:ViewSectionChiefs',     // Atribuir ao Chefe de Departamento
+        'Scope:ViewBaseEmployees',     // Atribuir ao Chefe de Secção
     ],
 
     /*

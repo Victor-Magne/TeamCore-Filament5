@@ -9,3 +9,4 @@ php artisan db:seed --class=ShieldSeeder
 php artisan permission:cache-reset 
 
  php artisan shield:super-admin
+

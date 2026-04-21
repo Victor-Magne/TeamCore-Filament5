@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Filament\App\Widgets;
+namespace App\Filament\Widgets;
 
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Auth;
 
 class EmployeeInfoWidget extends Widget
 {
-    protected static string $view = 'filament.app.widgets.employee-info-widget';
+    protected string $view = 'filament.widgets.employee-info-widget';
 
     protected int|string|array $columnSpan = 1;
 

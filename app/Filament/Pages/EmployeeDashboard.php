@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Filament\App\Pages;
+namespace App\Filament\Pages;
 
-use App\Filament\App\Widgets\EmployeeActionsWidget;
-use App\Filament\App\Widgets\EmployeeContractWidget;
-use App\Filament\App\Widgets\EmployeeInfoWidget;
-use App\Filament\App\Widgets\EmployeeLeaveWidget;
-use App\Filament\App\Widgets\EmployeeVacationWidget;
+use App\Filament\Widgets\EmployeeActionsWidget;
+use App\Filament\Widgets\EmployeeContractWidget;
+use App\Filament\Widgets\EmployeeInfoWidget;
+use App\Filament\Widgets\EmployeeLeaveWidget;
+use App\Filament\Widgets\EmployeeVacationWidget;
 use App\Filament\Widgets\HourBankStatsWidget;
 use Filament\Pages\Dashboard as BaseDashboard;
 
