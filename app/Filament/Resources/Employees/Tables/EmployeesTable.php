@@ -26,7 +26,8 @@ class EmployeesTable
                 TextColumn::make('last_name')
                     ->label('Apelido')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('email')
                     ->label('Email')
                     ->searchable()
