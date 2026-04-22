@@ -86,7 +86,7 @@ class EmployeeActionsWidget extends Widget implements HasActions, HasSchemas
         return Action::make('requestLeave')
             ->label('Solicitar Licença / Falta')
             ->icon('heroicon-m-calendar')
-            ->color('secondary')
+            ->color('primary')
             ->size('sm')
             ->form([
                 Select::make('type')

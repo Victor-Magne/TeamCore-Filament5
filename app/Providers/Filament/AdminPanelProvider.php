@@ -36,20 +36,20 @@ class AdminPanelProvider extends PanelProvider
             ->unsavedChangesAlerts() // Alertas de mudanças não salvas
             ->spa() // Ativa o modo SPA para navegação sem recarregamento
             ->colors([
-                // Primary/Brand colors: warm earth tones (WCAG AA compliant on light backgrounds)
-                'primary' => '#582f0e',      // Rich brown - main CTA, active states
-                'secondary' => '#7f4f24',    // Golden brown - secondary CTAs, accents
-
-                // Semantic colors: optimized for accessibility
-                'success' => '#2d5016',      // Deep green - improved contrast
-                'warning' => '#b45309',      // Amber/orange - pending states, important alerts
-                'danger' => '#7f1d1d',       // Deep red - errors, rejections
-                'info' => '#936639',         // Warm tan - informational content
-
-                // Neutral grayscale: improved contrast and visual hierarchy
-                'gray' => '#4b5563',         // Neutral dark gray
-                'muted' => '#6b7280',        // Medium gray - distinct from gray
-                'accent' => '#414833',       // Very dark olive - dark accents
+                'primary' => [
+                    50 => '#fef7ed',
+                    100 => '#fdeed5',
+                    200 => '#fbdcaa',
+                    300 => '#f6c376',
+                    400 => '#f0a247',
+                    500 => '#e67f1a', // Your main brand color
+                    600 => '#d06513',
+                    700 => '#a84c11',
+                    800 => '#853e13',
+                    900 => '#6d3514',
+                    950 => '#3e1b07',
+                ],
+                // Repeat the array structure for 'secondary', 'success', etc.
             ])
             ->brandLogo(asset('images/Teamcorelogo.svg')) // Logo personalizada
             // Registo de Plugins

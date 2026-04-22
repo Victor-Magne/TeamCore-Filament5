@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\App\Pages\EmployeeDashboard;
+use App\Filament\Pages\AttendanceCheckIn;
 use App\Http\Middleware\CheckAppPanelAccess;
 use AzGasim\FilamentUnsavedChangesModal\FilamentUnsavedChangesModalPlugin;
 use Filament\Http\Middleware\Authenticate;
@@ -18,7 +19,6 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
-
 class AppPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -31,15 +31,17 @@ class AppPanelProvider extends PanelProvider
             ->unsavedChangesAlerts()
             ->spa()
             ->colors([
-                'primary' => '#582f0e',
-                'secondary' => '#7f4f24',
-                'success' => '#2d5016',
-                'warning' => '#b45309',
-                'danger' => '#7f1d1d',
-                'info' => '#936639',
-                'gray' => '#4b5563',
-                'muted' => '#6b7280',
-                'accent' => '#414833',
+            50 => '#fef7ed',
+            100 => '#fdeed5',
+            200 => '#fbdcaa',
+            300 => '#f6c376',
+            400 => '#f0a247',
+            500 => '#e67f1a', // Your main brand color
+            600 => '#d06513',
+            700 => '#a84c11',
+            800 => '#853e13',
+            900 => '#6d3514',
+            950 => '#3e1b07',
             ])
             ->brandLogo(asset('images/Teamcorelogo.svg'))
             ->plugins([
@@ -57,6 +59,7 @@ class AppPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/App/Pages'), for: 'App\Filament\App\Pages')
             ->pages([
                 EmployeeDashboard::class,
+                AttendanceCheckIn::class,
             ])
             ->widgets([
                 // Widgets are registered in the Dashboard class

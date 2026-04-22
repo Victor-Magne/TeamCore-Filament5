@@ -24,7 +24,7 @@ class EmployeeContractWidget extends Widget implements HasActions, HasSchemas
     protected string $view = 'filament.widgets.employee-contract-widget';
 
     // 1. Expandido para ocupar a largura total
-    protected int|string|array $columnSpan = 1;
+    protected int|string|array $columnSpan = 2;
 
     public function getContract()
     {

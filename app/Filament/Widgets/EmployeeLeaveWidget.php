@@ -25,6 +25,7 @@ class EmployeeLeaveWidget extends BaseWidget
             ->query(
                 LeaveAndAbsence::where('employee_id', $employee?->id)
                     ->latest()
+                    
                     ->limit(5)
             )
             ->columns([

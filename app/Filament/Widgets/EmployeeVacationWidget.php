@@ -32,14 +32,14 @@ class EmployeeVacationWidget extends BaseWidget
                     ->label('Início')
                     ->date('d/m/Y')
                     ->icon('heroicon-m-calendar-days')
-                    ->iconColor('gray')
-                    ->sortable(),
+                    ->iconColor('gray'),
+                    
                 Tables\Columns\TextColumn::make('end_date')
                     ->label('Fim')
                     ->date('d/m/Y')
                     ->icon('heroicon-m-calendar-days')
-                    ->iconColor('gray')
-                    ->sortable(),
+                    ->iconColor('gray'),
+                    
                 Tables\Columns\TextColumn::make('days_taken')
                     ->label('Dias')
                     ->badge()
