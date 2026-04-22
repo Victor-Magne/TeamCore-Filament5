@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Pages;
+namespace App\Filament\App\Pages;
 
 use App\Filament\Widgets\EmployeeActionsWidget;
 use App\Filament\Widgets\EmployeeContractWidget;

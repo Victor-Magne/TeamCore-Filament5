@@ -11,26 +11,28 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
+
 use Filament\Widgets\Widget;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
-class EmployeeActionsWidget extends Widget implements HasActions, HasForms
+class EmployeeActionsWidget extends Widget implements HasActions, HasSchemas
 {
     use InteractsWithActions;
-    use InteractsWithForms;
+    use InteractsWithSchemas;
 
     protected string $view = 'filament.widgets.employee-actions-widget';
+
+    // 1. Expandido para ocupar toda a largura
+    protected int|string|array $columnSpan = 1;
 
     public static function canView(): bool
     {
         return Auth::user()?->can('View:EmployeeActionsWidget') ?? false;
     }
-
-    protected int|string|array $columnSpan = 1;
 
     public function requestVacationAction(): Action
     {
@@ -38,6 +40,7 @@ class EmployeeActionsWidget extends Widget implements HasActions, HasForms
             ->label('Solicitar Férias')
             ->icon('heroicon-m-sun')
             ->color('primary')
+            ->size('sm')
             ->form([
                 DatePicker::make('start_date')
                     ->label('Data de Início')
@@ -63,10 +66,10 @@ class EmployeeActionsWidget extends Widget implements HasActions, HasForms
                 }
 
                 Vacation::create([
-                    'employee_id' => $employee->id,
-                    'start_date' => $data['start_date'],
-                    'end_date' => $data['end_date'],
-                    'status' => 'pending',
+                    'employee_id'    => $employee->id,
+                    'start_date'     => $data['start_date'],
+                    'end_date'       => $data['end_date'],
+                    'status'         => 'pending',
                     'year_reference' => Carbon::parse($data['start_date'])->year,
                 ]);
 
@@ -84,14 +87,15 @@ class EmployeeActionsWidget extends Widget implements HasActions, HasForms
             ->label('Solicitar Licença / Falta')
             ->icon('heroicon-m-calendar')
             ->color('secondary')
+            ->size('sm')
             ->form([
                 Select::make('type')
                     ->label('Tipo de Ausência')
                     ->options([
-                        'sick_leave' => 'Baixa Médica (SNS)',
-                        'parental' => 'Licença Parental',
-                        'marriage' => 'Licença de Casamento',
-                        'bereavement' => 'Nojo (Falecimento)',
+                        'sick_leave'        => 'Baixa Médica (SNS)',
+                        'parental'          => 'Licença Parental',
+                        'marriage'          => 'Licença de Casamento',
+                        'bereavement'       => 'Nojo (Falecimento)',
                         'justified_absence' => 'Falta Justificada',
                     ])
                     ->required()
@@ -126,13 +130,13 @@ class EmployeeActionsWidget extends Widget implements HasActions, HasForms
                 }
 
                 LeaveAndAbsence::create([
-                    'employee_id' => $employee->id,
-                    'type' => $data['type'],
-                    'start_date' => $data['start_date'],
-                    'end_date' => $data['end_date'],
-                    'reason' => $data['reason'],
+                    'employee_id'       => $employee->id,
+                    'type'              => $data['type'],
+                    'start_date'        => $data['start_date'],
+                    'end_date'          => $data['end_date'],
+                    'reason'            => $data['reason'],
                     'justification_doc' => $data['justification_doc'],
-                    'status' => 'pending',
+                    'status'            => 'pending',
                 ]);
 
                 Notification::make()

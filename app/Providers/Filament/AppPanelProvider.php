@@ -2,13 +2,13 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Pages\EmployeeDashboard;
+use App\Filament\App\Pages\EmployeeDashboard;
 use App\Http\Middleware\CheckAppPanelAccess;
+use AzGasim\FilamentUnsavedChangesModal\FilamentUnsavedChangesModalPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -28,6 +28,7 @@ class AppPanelProvider extends PanelProvider
             ->path('app')
             ->login()
             ->databaseNotifications()
+            ->unsavedChangesAlerts()
             ->spa()
             ->colors([
                 'primary' => '#582f0e',
@@ -50,6 +51,7 @@ class AppPanelProvider extends PanelProvider
                         slug: 'my-profile'
                     )
                     ->enableTwoFactorAuthentication(),
+                FilamentUnsavedChangesModalPlugin::make(),
             ])
             ->discoverResources(in: app_path('Filament/App/Resources'), for: 'App\Filament\App\Resources')
             ->discoverPages(in: app_path('Filament/App/Pages'), for: 'App\Filament\App\Pages')

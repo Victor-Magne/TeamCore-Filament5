@@ -8,6 +8,7 @@ use App\Filament\Resources\Roles\Pages\CreateRole;
 use App\Filament\Resources\Roles\Pages\EditRole;
 use App\Filament\Resources\Roles\Pages\ListRoles;
 use App\Filament\Resources\Roles\Pages\ViewRole;
+use BackedEnum;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use BezhanSalleh\FilamentShield\Traits\HasShieldFormComponents;
@@ -42,7 +43,15 @@ class RoleResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-shield-check';
+
     protected static string|UnitEnum|null $navigationGroup = 'Administração';
+
+    #[Override]
+    public static function getNavigationIcon(): string|BackedEnum|null
+    {
+        return 'heroicon-o-shield-check';
+    }
 
     #[Override]
     public static function form(Schema $schema): Schema

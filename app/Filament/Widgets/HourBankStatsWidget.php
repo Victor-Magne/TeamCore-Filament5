@@ -8,7 +8,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class HourBankStatsWidget extends BaseWidget
 {
-    protected static ?int $sort = 3;
+    protected static ?int $sort = -1;
 
     /**
      * Mostrar este widget apenas na página do Employee
