@@ -16,8 +16,9 @@ Orientador/a(es):
 	Zélia Capitão
 
 Data 
-16/04/2026
-Data de Versão Anterior: 01/07/2026Agradecimentos a: 
+22/04/2026
+Data de Versão Anterior: 16/04/2026
+Agradecimentos a:
 Jorge Lafuente — tutor de estágio ao longo do 11.º e do 12.º ano, e uma das pessoas que mais influenciou o rumo desta aplicação. Foi quem me apresentou o Laravel e o Filament, despertando em mim o interesse por estas tecnologias, e quem sugeriu funcionalidades concretas que acabaram por enriquecer significativamente a aplicação. O seu acompanhamento e partilha de experiência profissional foram determinantes para o resultado final.
 Zélia Capitão — orientadora da aplicação, pelo acompanhamento contínuo e disponibilidade ao longo de todo o processo, e pelas orientações que permitiram manter o trabalho no rumo certo.
 Ana Paula Azevedo — docente de Sistemas Informáticos e Aplicações Web, pelos conhecimentos transmitidos ao longo do curso, que constituíram a base técnica essencial para a concretização desta aplicação.
@@ -83,6 +84,8 @@ Figura 11: Formulário de Criação de Funcionário (EmployeeResource) com Valid
 Figura 12: Resource EmployeeResource - Lista com Tabela, Filtros e Ações	24
 Figura 13: Resource ContractResource com Ação de Download PDF de Contrato	25
 Figura 14: Resource ActivityLogResource - Visualização de Histórico de Auditoria com Filtros	26
+Figura 15: Página de Check-in Simplificado com botões de ação dinâmica e histórico diário	16
+Figura 16: Dashboard do Funcionário com widgets de resumo e ações rápidas	13
 
 
 
@@ -128,7 +131,7 @@ A Aplicação TeamCore foi desenvolvida com o objetivo de alcançar uma gestão 
 
 A metodologia de trabalho incluiu o levantamento detalhado de requisitos, a modelação da base de dados relacional, e o desenvolvimento técnico utilizando a framework Laravel v13 com Filament v5 para o backend e frontend. O processo foi complementado por validação rigorosa de funcionalidades e testes automatizados.
 
-Nota sobre o Estado da Aplicação: No momento da redação deste relatório (16 de Abril de 2026), a Aplicação TeamCore encontra-se numa fase de maturidade produção-ready com todas as funcionalidades core completamente implementadas, testadas e validadas. A aplicação inclui: 15 Models com isolamento de dados RBAC; 16 Filament Resources com políticas de autorização; 17 Policies para controlo granular; Sistema de banco de horas com validação automática de licenças; Auditoria completa via Spatie Activity Log; 3 Observers para automação de processos; Autenticação segura via Filament Breezy e Passkeys; e testes automatizados com Pest v4. A aplicação está pronta para utilização em ambiente de produção.
+Nota sobre o Estado da Aplicação: No momento da redação deste relatório (22 de Abril de 2026), a Aplicação TeamCore encontra-se numa fase de maturidade produção-ready com todas as funcionalidades core completamente implementadas, testadas e validadas. A aplicação inclui: 15 Models com isolamento de dados RBAC; 16 Filament Resources com políticas de autorização; 17 Policies para controlo granular; Sistema de banco de horas com validação automática de licenças; Auditoria completa via Spatie Activity Log; 4 Observers para automação de processos; Autenticação segura via Filament Breezy e Passkeys; e testes automatizados com Pest v4. A aplicação está pronta para utilização em ambiente de produção.
 
 
 Introdução
@@ -223,10 +226,13 @@ Principais Implementações
 A aplicação utiliza uma interface administrativa unificada (/admin) onde o acesso a recursos e dados é controlado dinamicamente via funções e permissões geridas pelo Filament Shield. Esta abordagem simplifica a navegação e centraliza a gestão, garantindo o isolamento de dados através de Policies Eloquent.
 
 Figura 2: Dashboard Admin com Widgets de Estatísticas (contratos, funcionários, presença).
+(Instrução de print: Aceder a /admin com utilizador Admin)
 
 Figura 3: Gestão de Funcionários com tabela de dados e filtros de acesso.
+(Instrução de print: Aceder a /admin/employees)
 
 Figura 4: Visualização de Dados Pessoais e Banco de Horas com acesso restrito.
+(Instrução de print: Aceder a /admin/employees/{id})
 
 Principais Áreas de Gestão (Acesso via Roles):
 
@@ -244,6 +250,10 @@ Acesso Pessoal (EMPLOYEE)
 Visualização de dados pessoais e banco de horas.
 Gestão de férias e pedidos de licenças com workflow de aprovação.
 Dashboard interativo com widgets detalhados de estatísticas, incluindo gráficos de contratos, densidade de unidades, salários por nível e banco de horas.
+O portal do funcionário utiliza um `EmployeeDashboard` personalizado que centraliza informações críticas, como detalhes do contrato ativo, saldo de férias e widgets de ações rápidas, garantindo que o colaborador tenha uma visão 360º da sua situação na empresa.
+
+Figura 16: Dashboard do Funcionário com widgets de resumo e ações rápidas.
+(Instrução de print: Aceder a /app com um utilizador que tenha role employee)
 
 Características da Interface Unificada
 Isolamento de dados ao nível do modelo através de Policies Eloquent (Scopes).
@@ -288,8 +298,21 @@ Auditoria de Modelos: Registo automático de create, update e delete com user tr
 Gestão de Horas e Banco de Horas
 
 Figura 6: Registo de Presença (Attendance) com Campos de Entrada/Saída e Pausas
+(Instrução de print: Aceder a /admin/attendance-logs/create)
 
 Figura 7: Visualização do Banco de Horas (HourBank) com Saldo Acumulado e Histórico
+(Instrução de print: Aceder a /admin/hour-banks)
+
+Sistema de Check-in Simplificado (AttendanceCheckIn)
+A aplicação disponibiliza uma interface dedicada para o registo de presença simplificado. Esta página permite ao funcionário realizar o "Check-in" e "Check-out" com um único clique, capturando automaticamente o timestamp do servidor. O sistema gere inteligentemente o estado do dia, alternando entre:
+- Entrada (Time In)
+- Início de Pausa (Lunch Break Start)
+- Fim de Pausa (Lunch Break End)
+- Saída (Time Out)
+A página valida se o utilizador possui um `employee_id` associado antes de permitir o acesso, garantindo a integridade dos dados.
+
+Figura 15: Página de Check-in Simplificado com botões de ação dinâmica e histórico diário.
+(Instrução de print: Aceder a /app/attendance-check-in com um utilizador que tenha employee_id)
 
 Registos de Trabalho:
 Entrada/saída com timestamp automático.
@@ -321,6 +344,7 @@ Experiência do Utilizador (UX)
 
 
 Figura 8: Notificações Toast ao Criar Funcionário - 4 Mensagens de Sucesso (Utilizador, Contrato, Banco de Horas)
+(Instrução de print: Capturar o ecrã imediatamente após clicar em 'Create' num novo Employee)
 Notificações Toast ao Criar Funcionário
 Quando um utilizador de RH cria um novo funcionário, o sistema executa automaticamente um fluxo encadeado que cria múltiplas entidades (Utilizador, Contrato e Banco de Horas). Para dar feedback claro de cada operação realizada, foram implementadas notificações individuais em toast com ícones e cores distintos. As 4 notificações enviadas são:
 Utilizador criado (email, role, status força troca de senha).
@@ -329,9 +353,11 @@ Banco de horas criado (saldo inicial, accrual_date).
 Notificação consolidada final com checkmarks de sucesso.
 
 Figura 9: Diálogo de Confirmação de Ações Destrutivas com Avisos Visuais
+(Instrução de print: Clicar no botão de 'Delete' em qualquer registo para abrir o modal)
 Diálogos de Confirmação de Ações Destrutivas
 Operações críticas como eliminar um funcionário ou encerrar um contrato são irreversíveis e podem ter impacto significativo nos dados. O sistema implementa diálogos de confirmação antes de qualquer ação destrutiva, apresentando claramente o que será eliminado e pedindo confirmação explícita. Os avisos visuais (cores de alerta, ícones) tornam óbvio que se trata de uma ação importante, protegendo contra erros acidentais.
 Figura 10: Badges Visuais - Indicadores de Funções (Admin/HR/Employee) e Estados de Contrato (Ativo/Encerrado/Suspenso)
+(Instrução de print: Ver a lista de /admin/users ou /admin/contracts)
 
 Badges Visuais e Indicadores de Estado
 As badges (pequenos rótulos coloridos) permitem identificar rapidamente o papel de cada utilizador e o estado de cada contrato, sem necessidade de ler texto em tabelas longas:
@@ -390,6 +416,7 @@ Separação de responsabilidades clara.
 Validação de E-mail e Automação de Criação
 
 Figura 11: Formulário de Criação de Funcionário (EmployeeResource) com Validação de E-mail
+(Instrução de print: Aceder a /admin/employees/create e introduzir um email inválido)
 O formulário de criação de funcionário inclui um campo de e-mail que valida em tempo real se o domínio é válido (exemplo: rejeita `usuario@empresa` mas aceita `usuario@empresa.com`). A validação visual (com mensagens de erro claras) é apresentada imediatamente, evitando que o utilizador submeta o formulário com dados inválidos. Isto é particularmente importante porque emails inválidos comprometem toda a comunicação automática do sistema e a criação do utilizador associado. A implementação de uma regra customizada de validação garante que a qualidade dos dados seja mantida desde o ponto de entrada.
 
 Validação Rigorosa de E-mail
@@ -418,13 +445,16 @@ ActivityLogResource mostra created_at desabilitado (read-only).
 Recursos Filament Implementados
 
 Figura 12: Resource EmployeeResource - Lista com Tabela, Filtros e Ações
+(Instrução de print: Aceder a /admin/employees)
 
 O Resource EmployeeResource apresenta todos os funcionários numa tabela interativa com capacidades avançadas: filtros permitem procurar por departamento, designação ou status de contrato; a pesquisa permite localizar rapidamente um funcionário pelo nome ou e-mail; as ações em cada linha (editar, ver detalhes, eliminar) estão sempre acessíveis. O isolamento de dados garante que utilizadores de RH só veem funcionários do seu departamento, enquanto Admin vê toda a organização. Esta interface reduz significativamente o tempo necessário para encontrar e atualizar informações de funcionários, comparado com sistemas que exigem navegação através de menus complexos.
 Figura 13: Resource ContractResource com Ação de Download PDF de Contrato
+(Instrução de print: Aceder a /admin/contracts e mostrar o botão de ação de PDF)
 Cada contrato pode ser visualizado em lista e, numa ação especializada, pode ser descarregado como PDF com toda a informação formatada profissionalmente. Esta funcionalidade é crítica para fins legais e administrativos — permite que o RH mantenha cópias arquivadas dos contratos, e aos funcionários ter acesso aos seus documentos sem necessidade de contactar o departamento. A implementação de PDF automático elimina trabalho manual repetitivo e garante consistência na documentação.
 
 
 Figura 14: Resource ActivityLogResource - Visualização de Histórico de Auditoria com Filtros
+(Instrução de print: Aceder a /admin/activity-logs)
 O ActivityLogResource registra todas as alterações importantes no sistema (criação de utilizadores, edição de salários, eliminação de registos). Esta informação é crítica para conformidade regulatória e para rastrear quem fez o quê e quando. Os filtros permitem procurar por tipo de ação, utilizador que realizou a ação, ou data, facilitando investigações e auditorias. Por exemplo, se surgir uma discrepância num banco de horas, é possível rapidamente ver todo o histórico de alterações nesse registo. Isto é particularmente importante em contexto empresarial onde são necessárias evidências documentadas de todas as operações para fins legais.
 
 A aplicação implementa 16 Resources Filament para gestão:
@@ -484,6 +514,8 @@ ContractObserver: Quando um novo contrato é criado/atualizado, sincroniza autom
 
 AttendanceLogObserver: Automatiza cálculos e validações nos registos de presença.
 
+AbsenceObserver: Monitoriza a criação, atualização e eliminação de ausências, despoletando o recálculo automático do saldo do Banco de Horas para o mês correspondente, garantindo que o saldo esteja sempre sincronizado.
+
 Activity Logging com Spatie
 Todos os modelos críticos utilizam a trait LogsActivity do Spatie para rastreamento automático:
 Employee, User, Contract, Vacation, LeaveAndAbsence, AttendanceLog, HourBank, Absence, Unit, etc.
@@ -512,6 +544,10 @@ Validação de Banco de Horas: O sistema que valida licenças antes de descontar
 Pontos Fortes da Aplicação
 A aplicação conseguiu alcançar os seus objetivos principais com qualidade:
 
+Gestão Salarial Automatizada (Payroll): Implementação de um motor de cálculo que considera o salário base contratual, horas extras do banco de horas e deduções, gerando recibos de vencimento de forma automática.
+
+Gestão Inteligente de Férias: Sistema de controlo de saldo que debita automaticamente dias ao aprovar férias e restaura o saldo em caso de cancelamento ou rejeição, prevenindo erros manuais.
+
 Arquitetura bem estruturada: Separação clara das responsabilidades, com isolamento de dados ao nível do modelo via Policies. As scopes Eloquent garantem segurança sem depender apenas de frontend.
 
 Autenticação robusta: Integração com Filament Breezy e Passkeys oferece camadas de segurança modernas.
@@ -525,15 +561,15 @@ RBAC dinâmico: Filament Shield permite gerir papéis e permissões de forma gra
 Testes com cobertura: Pest v4 com testes que cobrem funcionalidades críticas.
 
 Pontos a Melhorar
-Funcionalidades essenciais em falta: Apesar da implementação do módulo de Payroll e gestão de férias, ainda são necessários refinamentos no cálculo de férias remanescentes vs usadas e integrações com sistemas bancários externos.
+Integrações Externas: Falta de ligação com sistemas bancários externos para automatização real de pagamentos e exportação de ficheiros SEPA.
 
 Testes de carga: Não foi validado com volumes grandes de dados (milhares de funcionários, múltiplos utilizadores simultâneos).
 
-Documentação de código: Apesar de boas práticas, faltam comentários explicativos em lógicas complexas.
+Documentação Técnica: Apesar de boas práticas, faltam comentários explicativos detalhados em algoritmos complexos de cálculo de horas e payroll.
 
-Edge cases em operações críticas: Algumas transações podem deixar o sistema em estado inconsistente em cenários raros.
+Edge cases em operações críticas: Refinar a gestão de transações em fluxos encadeados (ex: criação de funcionário) para garantir atomicidade absoluta em cenários de falha de base de dados.
 
-Cobertura de testes: Precisam de mais testes de integração para cenários complexos com múltiplas entidades.
+Cobertura de testes unitários: Expandir a cobertura de testes para cobrir cenários de borda em cálculos de horas extras e fusos horários.
 
 O que Aprendi com a Aplicação
 Esta aplicação consolidou conhecimentos fundamentais em engenharia de software:
