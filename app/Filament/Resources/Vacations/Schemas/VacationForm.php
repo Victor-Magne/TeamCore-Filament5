@@ -25,7 +25,8 @@ class VacationForm
                         ->searchable()
                         ->preload()
                         ->required()
-                        ->columnSpanFull(),
+                        ->columnSpanFull()
+                        ->live(),
                 ]),
 
             Section::make('Período de Férias')
@@ -96,7 +97,13 @@ class VacationForm
                         ])
                         ->default('pending')
                         ->required()
-                        ->native(false),
+                        ->native(false)
+                        ->disabled(fn (?Vacation $record, callable $get): bool =>
+                            (($record && $record->employee_id === auth()->user()?->employee_id) ||
+                             ((int) $get('employee_id') === auth()->user()?->employee_id)) &&
+                            ! auth()->user()?->can('Approve:OwnVacation')
+                        )
+                        ->dehydrated(),
 
                     Textarea::make('rejection_reason')
                         ->label('Razão da Rejeição')

@@ -22,7 +22,8 @@ class LeaveAndAbsenceForm
                         ->relationship('employee', 'first_name')
                         ->searchable()
                         ->preload()
-                        ->required(),
+                        ->required()
+                        ->live(),
 
                     Select::make('type')
                         ->label('Tipo de Ausência')
@@ -77,7 +78,13 @@ class LeaveAndAbsenceForm
                             'rejected' => 'Rejeitado',
                         ])
                         ->required()
-                        ->native(false),
+                        ->native(false)
+                        ->disabled(fn ($record, callable $get): bool =>
+                            (($record && $record->employee_id === auth()->user()?->employee_id) ||
+                             ((int) $get('employee_id') === auth()->user()?->employee_id)) &&
+                            ! auth()->user()?->can('Approve:OwnLeaveAndAbsence')
+                        )
+                        ->dehydrated(),
 
                     Textarea::make('rejection_reason')
                         ->label('Razão da Rejeição')

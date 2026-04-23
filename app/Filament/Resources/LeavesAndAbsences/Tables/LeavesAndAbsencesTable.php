@@ -57,7 +57,11 @@ class LeavesAndAbsencesTable
                         'approved' => 'Aprovado',
                         'rejected' => 'Rejeitado',
                     ])
-                    ->native(false),
+                    ->native(false)
+                    ->disabled(fn ($record): bool =>
+                        $record->employee_id === auth()->user()?->employee_id &&
+                        ! auth()->user()?->can('Approve:OwnLeaveAndAbsence')
+                    ),
                 TextColumn::make('approver.name')
                     ->label('Aprovado Por')
                     ->toggleable(isToggledHiddenByDefault: false),

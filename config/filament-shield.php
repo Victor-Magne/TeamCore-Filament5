@@ -253,6 +253,10 @@ return [
         'Scope:ViewDeptHeads',         // Atribuir ao Diretor Geral
         'Scope:ViewSectionChiefs',     // Atribuir ao Chefe de Departamento
         'Scope:ViewBaseEmployees',     // Atribuir ao Chefe de Secção
+
+        // Conflito de Interesses
+        'Approve:OwnVacation',
+        'Approve:OwnLeaveAndAbsence',
     ],
 
     /*

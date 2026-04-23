@@ -32,6 +32,15 @@ class LeaveAndAbsencePolicy
         return $authUser->can('Update:LeaveAndAbsence');
     }
 
+    public function approve(AuthUser $authUser, LeaveAndAbsence $leaveAndAbsence): bool
+    {
+        if ($leaveAndAbsence->employee_id === $authUser->employee_id) {
+            return $authUser->can('Approve:OwnLeaveAndAbsence');
+        }
+
+        return $authUser->can('Update:LeaveAndAbsence');
+    }
+
     public function delete(AuthUser $authUser, LeaveAndAbsence $leaveAndAbsence): bool
     {
         return $authUser->can('Delete:LeaveAndAbsence');
