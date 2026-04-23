@@ -27,6 +27,11 @@ class DesignationsTable
                     ->color('gray')
                     ->searchable(),
 
+                TextColumn::make('role_name')
+                    ->label('Role Associada')
+                    ->badge()
+                    ->color('primary'),
+
                 TextColumn::make('base_salary')
                     ->label('Salário Base')
                     ->money('EUR') // Mude para a sua moeda (USD, AOA, BRL, etc.)

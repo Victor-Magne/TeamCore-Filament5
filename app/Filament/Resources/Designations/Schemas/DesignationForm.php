@@ -35,6 +35,13 @@ class DesignationForm
                             ->required()
                             ->native(false),
 
+                        Select::make('role_name')
+                            ->label('Role Associada')
+                            ->helperText('A role que será atribuída automaticamente aos funcionários com este cargo.')
+                            ->relationship('role', 'name')
+                            ->searchable()
+                            ->native(false),
+
                         TextInput::make('base_salary')
                             ->label('Salário Base')
                             ->numeric()
