@@ -32,6 +32,15 @@ class VacationPolicy
         return $authUser->can('Update:Vacation');
     }
 
+    public function approve(AuthUser $authUser, Vacation $vacation): bool
+    {
+        if ($vacation->employee_id === $authUser->employee_id) {
+            return $authUser->can('Approve:OwnVacation');
+        }
+
+        return $authUser->can('Update:Vacation');
+    }
+
     public function delete(AuthUser $authUser, Vacation $vacation): bool
     {
         return $authUser->can('Delete:Vacation');
