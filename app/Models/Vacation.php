@@ -33,12 +33,24 @@ class Vacation extends Model
 
     /**
      * Calcular automaticamente os dias gozados entre as datas
+     * ⚠️ IMPORTANTE: Conta apenas dias ÚTEIS (segunda a sexta)
+     * Se precisar contar feriados nacionais, adicione uma verificação aqui
      */
     public function calculateDaysTaken(): void
     {
         if ($this->start_date && $this->end_date) {
-            $daysDiff = $this->start_date->diffInDays($this->end_date) + 1;
-            $this->days_taken = max(1, $daysDiff);
+            // Contar apenas dias úteis (segunda a sexta)
+            $workingDays = 0;
+            $currentDate = $this->start_date->copy();
+
+            while ($currentDate->lte($this->end_date)) {
+                if ($currentDate->isWeekday()) {
+                    $workingDays++;
+                }
+                $currentDate->addDay();
+            }
+
+            $this->days_taken = max(1, $workingDays);
         }
     }
 

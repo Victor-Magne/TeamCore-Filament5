@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Models\HourBank;
-use App\Traits\HasHierarchicalPolicy;
-use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
+use App\Models\HourBank;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 class HourBankPolicy
 {
     use HandlesAuthorization;
-    use HasHierarchicalPolicy;
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:HourBank');
@@ -21,7 +19,7 @@ class HourBankPolicy
 
     public function view(AuthUser $authUser, HourBank $hourBank): bool
     {
-        return $authUser->can('View:HourBank') && $this->canAccessModel($authUser, $hourBank);
+        return $authUser->can('View:HourBank');
     }
 
     public function create(AuthUser $authUser): bool
@@ -31,12 +29,12 @@ class HourBankPolicy
 
     public function update(AuthUser $authUser, HourBank $hourBank): bool
     {
-        return $authUser->can('Update:HourBank') && $this->canAccessModel($authUser, $hourBank);
+        return $authUser->can('Update:HourBank');
     }
 
     public function delete(AuthUser $authUser, HourBank $hourBank): bool
     {
-        return $authUser->can('Delete:HourBank') && $this->canAccessModel($authUser, $hourBank);
+        return $authUser->can('Delete:HourBank');
     }
 
     public function deleteAny(AuthUser $authUser): bool
@@ -46,12 +44,12 @@ class HourBankPolicy
 
     public function restore(AuthUser $authUser, HourBank $hourBank): bool
     {
-        return $authUser->can('Restore:HourBank') && $this->canAccessModel($authUser, $hourBank);
+        return $authUser->can('Restore:HourBank');
     }
 
     public function forceDelete(AuthUser $authUser, HourBank $hourBank): bool
     {
-        return $authUser->can('ForceDelete:HourBank') && $this->canAccessModel($authUser, $hourBank);
+        return $authUser->can('ForceDelete:HourBank');
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
@@ -66,11 +64,12 @@ class HourBankPolicy
 
     public function replicate(AuthUser $authUser, HourBank $hourBank): bool
     {
-        return $authUser->can('Replicate:HourBank') && $this->canAccessModel($authUser, $hourBank);
+        return $authUser->can('Replicate:HourBank');
     }
 
     public function reorder(AuthUser $authUser): bool
     {
         return $authUser->can('Reorder:HourBank');
     }
+
 }
