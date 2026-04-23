@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources\Payrolls\Tables;
 
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
@@ -34,7 +36,7 @@ class PayrollsTable
                 TextColumn::make('status')
                     ->label('Estado')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'pending' => 'warning',
                         'paid' => 'success',
                         'cancelled' => 'danger',
@@ -55,13 +57,14 @@ class PayrollsTable
                             ]),
                     ]),
             ])
-            ->toolbarActions([
+            // 3. Alterado de toolbarActions para bulkActions
+            ->bulkActions([
                 BulkActionGroup::make([
                     BulkAction::make('mark_as_paid_bulk')
                         ->label('Marcar como Pagos')
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
-                        ->action(fn (Collection $records) => $records->each->update([
+                        ->action(fn(Collection $records) => $records->each->update([
                             'status' => 'paid',
                             'paid_at' => now(),
                         ])),
