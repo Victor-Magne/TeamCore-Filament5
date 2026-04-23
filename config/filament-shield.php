@@ -249,10 +249,9 @@ return [
         'Access:AdminPanel',           // Acesso ao painel Admin
         'Access:AppPanel',             // Acesso ao painel App
 
-        // Scope de Visualização
-        'Scope:ViewDeptHeads',         // Atribuir ao Diretor Geral
-        'Scope:ViewSectionChiefs',     // Atribuir ao Chefe de Departamento
-        'Scope:ViewBaseEmployees',     // Atribuir ao Chefe de Secção
+        // Scope de Visualização (Hierarquia Simplificada)
+        'Scope:View:All',              // Ver todos os registos (ex: Diretor Geral)
+        'Scope:View:Subordinates',     // Ver registos próprios e de subordinados
 
         // Conflito de Interesses
         'Approve:OwnVacation',

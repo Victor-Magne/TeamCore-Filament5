@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Payroll;
+use App\Traits\HasHierarchicalPolicy;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class PayrollPolicy
 {
     use HandlesAuthorization;
-    
+    use HasHierarchicalPolicy;
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Payroll');
@@ -19,7 +21,7 @@ class PayrollPolicy
 
     public function view(AuthUser $authUser, Payroll $payroll): bool
     {
-        return $authUser->can('View:Payroll');
+        return $authUser->can('View:Payroll') && $this->canAccessModel($authUser, $payroll);
     }
 
     public function create(AuthUser $authUser): bool
@@ -29,12 +31,12 @@ class PayrollPolicy
 
     public function update(AuthUser $authUser, Payroll $payroll): bool
     {
-        return $authUser->can('Update:Payroll');
+        return $authUser->can('Update:Payroll') && $this->canAccessModel($authUser, $payroll);
     }
 
     public function delete(AuthUser $authUser, Payroll $payroll): bool
     {
-        return $authUser->can('Delete:Payroll');
+        return $authUser->can('Delete:Payroll') && $this->canAccessModel($authUser, $payroll);
     }
 
     public function deleteAny(AuthUser $authUser): bool
@@ -44,12 +46,12 @@ class PayrollPolicy
 
     public function restore(AuthUser $authUser, Payroll $payroll): bool
     {
-        return $authUser->can('Restore:Payroll');
+        return $authUser->can('Restore:Payroll') && $this->canAccessModel($authUser, $payroll);
     }
 
     public function forceDelete(AuthUser $authUser, Payroll $payroll): bool
     {
-        return $authUser->can('ForceDelete:Payroll');
+        return $authUser->can('ForceDelete:Payroll') && $this->canAccessModel($authUser, $payroll);
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
@@ -64,12 +66,11 @@ class PayrollPolicy
 
     public function replicate(AuthUser $authUser, Payroll $payroll): bool
     {
-        return $authUser->can('Replicate:Payroll');
+        return $authUser->can('Replicate:Payroll') && $this->canAccessModel($authUser, $payroll);
     }
 
     public function reorder(AuthUser $authUser): bool
     {
         return $authUser->can('Reorder:Payroll');
     }
-
 }

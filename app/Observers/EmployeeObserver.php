@@ -30,9 +30,7 @@ class EmployeeObserver
             'email_verified_at' => now(),
         ]);
 
-        if (Role::where('name', 'employee')->exists()) {
-            $user->assignRole('employee');
-        }
+        $this->syncUserRoles($user, $employee);
 
         if ($creator) {
             Notification::make()
@@ -80,6 +78,49 @@ class EmployeeObserver
                 ->warning()
                 ->send()
                 ->sendToDatabase($creator);
+        }
+    }
+
+    /**
+     * Handle the Employee "updated" event.
+     */
+    public function updated(Employee $employee): void
+    {
+        if ($employee->isDirty('designation_id') || $employee->isDirty('email') || $employee->isDirty('first_name') || $employee->isDirty('last_name')) {
+            $user = $employee->user;
+            if ($user) {
+                $user->update([
+                    'name' => $employee->full_name,
+                    'email' => $employee->email,
+                ]);
+
+                if ($employee->isDirty('designation_id')) {
+                    $this->syncUserRoles($user, $employee);
+                }
+            }
+        }
+    }
+
+    /**
+     * Sincroniza as roles do utilizador baseadas na designação do funcionário.
+     */
+    protected function syncUserRoles(User $user, Employee $employee): void
+    {
+        $roles = [];
+
+        // Role base obrigatória
+        if (Role::where('name', 'employee')->exists()) {
+            $roles[] = 'employee';
+        }
+
+        // Role associada ao cargo
+        $roleName = $employee->designation?->role_name;
+        if ($roleName && Role::where('name', $roleName)->exists()) {
+            $roles[] = $roleName;
+        }
+
+        if (! empty($roles)) {
+            $user->syncRoles($roles);
         }
     }
 }

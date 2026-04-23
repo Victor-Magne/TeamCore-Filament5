@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\LeaveAndAbsence;
+use App\Traits\HasHierarchicalPolicy;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class LeaveAndAbsencePolicy
 {
     use HandlesAuthorization;
-    
+    use HasHierarchicalPolicy;
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:LeaveAndAbsence');
@@ -19,7 +21,7 @@ class LeaveAndAbsencePolicy
 
     public function view(AuthUser $authUser, LeaveAndAbsence $leaveAndAbsence): bool
     {
-        return $authUser->can('View:LeaveAndAbsence');
+        return $authUser->can('View:LeaveAndAbsence') && $this->canAccessModel($authUser, $leaveAndAbsence);
     }
 
     public function create(AuthUser $authUser): bool
@@ -29,12 +31,12 @@ class LeaveAndAbsencePolicy
 
     public function update(AuthUser $authUser, LeaveAndAbsence $leaveAndAbsence): bool
     {
-        return $authUser->can('Update:LeaveAndAbsence');
+        return $authUser->can('Update:LeaveAndAbsence') && $this->canAccessModel($authUser, $leaveAndAbsence);
     }
 
     public function delete(AuthUser $authUser, LeaveAndAbsence $leaveAndAbsence): bool
     {
-        return $authUser->can('Delete:LeaveAndAbsence');
+        return $authUser->can('Delete:LeaveAndAbsence') && $this->canAccessModel($authUser, $leaveAndAbsence);
     }
 
     public function deleteAny(AuthUser $authUser): bool
@@ -44,12 +46,12 @@ class LeaveAndAbsencePolicy
 
     public function restore(AuthUser $authUser, LeaveAndAbsence $leaveAndAbsence): bool
     {
-        return $authUser->can('Restore:LeaveAndAbsence');
+        return $authUser->can('Restore:LeaveAndAbsence') && $this->canAccessModel($authUser, $leaveAndAbsence);
     }
 
     public function forceDelete(AuthUser $authUser, LeaveAndAbsence $leaveAndAbsence): bool
     {
-        return $authUser->can('ForceDelete:LeaveAndAbsence');
+        return $authUser->can('ForceDelete:LeaveAndAbsence') && $this->canAccessModel($authUser, $leaveAndAbsence);
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
@@ -64,7 +66,7 @@ class LeaveAndAbsencePolicy
 
     public function replicate(AuthUser $authUser, LeaveAndAbsence $leaveAndAbsence): bool
     {
-        return $authUser->can('Replicate:LeaveAndAbsence');
+        return $authUser->can('Replicate:LeaveAndAbsence') && $this->canAccessModel($authUser, $leaveAndAbsence);
     }
 
     public function reorder(AuthUser $authUser): bool
@@ -72,4 +74,18 @@ class LeaveAndAbsencePolicy
         return $authUser->can('Reorder:LeaveAndAbsence');
     }
 
+    public function approve(AuthUser $authUser, LeaveAndAbsence $leaveAndAbsence): bool
+    {
+        $meuEmployee = $authUser->employee;
+
+        if (! $meuEmployee) {
+            return false;
+        }
+
+        if ($meuEmployee->id === $leaveAndAbsence->employee_id) {
+            return $authUser->can('Approve:OwnLeaveAndAbsence');
+        }
+
+        return $authUser->can('Update:LeaveAndAbsence') && $this->canAccessModel($authUser, $leaveAndAbsence);
+    }
 }
