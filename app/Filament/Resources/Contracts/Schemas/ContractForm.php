@@ -42,7 +42,8 @@ class ContractForm
                         ->label('Tipo de Contrato')
                         ->options([
                             'permanent' => 'Efetivo / Tempo Indeterminado',
-                            'fixed-term' => 'Prazo Certo',
+                            'fixed_term' => 'Prazo Certo',
+                            'unfixed_term' => 'Prazo Incerto',
                             'internship' => 'Estágio',
                             'freelance' => 'Prestação de Serviços',
                         ])
