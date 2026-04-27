@@ -51,6 +51,21 @@ class Unit extends Model
         return $this->belongsToMany(Employee::class, 'unit_manager', 'unit_id', 'employee_id');
     }
 
+    /**
+     * Obtém recursivamente todos os IDs das unidades descendentes.
+     */
+    public function getAllDescendantIds(): array
+    {
+        $ids = [];
+
+        foreach ($this->children as $child) {
+            $ids[] = $child->id;
+            $ids = array_merge($ids, $child->getAllDescendantIds());
+        }
+
+        return $ids;
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()

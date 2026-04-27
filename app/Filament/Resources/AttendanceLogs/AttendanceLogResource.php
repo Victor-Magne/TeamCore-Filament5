@@ -30,7 +30,7 @@ class AttendanceLogResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('Registros de Presença');
+        return __('Registos de Presença');
     }
 
     public static function form(Schema $schema): Schema

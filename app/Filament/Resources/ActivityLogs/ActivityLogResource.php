@@ -26,7 +26,7 @@ class ActivityLogResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('Logs de Atividade');
+        return __('Logs de Actividade');
     }
 
     public static function infolist(Schema $schema): Schema

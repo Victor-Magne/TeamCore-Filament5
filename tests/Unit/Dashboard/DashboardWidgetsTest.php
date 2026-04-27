@@ -48,7 +48,7 @@ test('dashboard columns are configured for responsive layout', function () {
     $columns = $dashboard->getColumns();
 
     expect($columns)->toBe([
-        'default' => 1,
+        'default' => 'full',
         'md' => 2,
         'xl' => 3,
     ]);

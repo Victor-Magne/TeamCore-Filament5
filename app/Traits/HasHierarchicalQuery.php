@@ -11,58 +11,43 @@ trait HasHierarchicalQuery
         $query = parent::getEloquentQuery();
         $user = auth()->user();
 
-        // 0. REGRA SUPER ADMIN: Super admin vê todos os registos
-        if ($user->hasRole('super_admin')) {
+        // 0. REGRA SUPER ADMIN / SCOPE ALL: Vê todos os registos
+        if ($user->hasRole('super_admin') || $user->can('Scope:View:All')) {
             return $query;
         }
 
         $meuEmployee = $user->employee;
 
         if (! $meuEmployee) {
+            // Se não for super_admin e não tiver employee associado, não vê nada em recursos hierárquicos
             return $query->whereRaw('1 = 0');
         }
 
-        $minhaUnitId = $meuEmployee->unit_id;
-
-        return $query->where(function (Builder $q) use ($user, $meuEmployee, $minhaUnitId) {
+        return $query->where(function (Builder $q) use ($user, $meuEmployee) {
+            $model = $q->getModel();
 
             // 1. REGRA UNIVERSAL: Vê os próprios registos
-            $q->where('employee_id', $meuEmployee->id);
-
-            // 2. DIRETOR: Vê os Chefes de Departamento (que estão nas unidades "filhas" da sua direção)
-            if ($user->can('scope_view_dept_heads')) {
-                $q->orWhereHas('employee', function (Builder $empQuery) use ($minhaUnitId) {
-                    $empQuery->whereHas('unit', function (Builder $unitQuery) use ($minhaUnitId) {
-                        // A unidade do funcionário alvo tem de ter como 'pai' a unidade atual
-                        $unitQuery->where('parent_id', $minhaUnitId)
-                            ->where('type', 'department');
-                    })->whereHas('user.roles', function (Builder $roleQuery) {
-                        $roleQuery->where('name', 'chefe_departamento');
-                    });
-                });
+            if ($model instanceof \App\Models\Employee) {
+                $q->where('id', $meuEmployee->id);
+            } else {
+                $q->where('employee_id', $meuEmployee->id);
             }
 
-            // 3. CHEFE DE DEPARTAMENTO: Vê os Chefes de Secção (nas unidades "filhas" do departamento)
-            if ($user->can('scope_view_section_chiefs')) {
-                $q->orWhereHas('employee', function (Builder $empQuery) use ($minhaUnitId) {
-                    $empQuery->whereHas('unit', function (Builder $unitQuery) use ($minhaUnitId) {
-                        // A secção do funcionário alvo tem de ter como 'pai' o departamento atual
-                        $unitQuery->where('parent_id', $minhaUnitId)
-                            ->where('type', 'section');
-                    })->whereHas('user.roles', function (Builder $roleQuery) {
-                        $roleQuery->where('name', 'chefe_seccao');
-                    });
-                });
-            }
+            // 2. REGRA SUBORDINADOS: Vê registos de quem pertence à sua unidade ou unidades descendentes
+            if ($user->can('Scope:View:Subordinates')) {
+                $minhaUnit = $meuEmployee->unit;
 
-            // 4. CHEFE DE SECÇÃO: Vê os Colaboradores da SUA secção (mesma unidade)
-            if ($user->can('scope_view_base_employees')) {
-                $q->orWhereHas('employee', function (Builder $empQuery) use ($minhaUnitId) {
-                    $empQuery->where('unit_id', $minhaUnitId) // Mesmo ID de unidade
-                        ->whereDoesntHave('user.roles', function (Builder $roleQuery) {
-                            $roleQuery->whereIn('name', ['diretor_geral', 'chefe_departamento', 'chefe_seccao']);
+                if ($minhaUnit) {
+                    $unitIds = array_merge([$minhaUnit->id], $minhaUnit->getAllDescendantIds());
+
+                    if ($model instanceof \App\Models\Employee) {
+                        $q->orWhereIn('unit_id', $unitIds);
+                    } else {
+                        $q->orWhereHas('employee', function (Builder $empQuery) use ($unitIds) {
+                            $empQuery->whereIn('unit_id', $unitIds);
                         });
-                });
+                    }
+                }
             }
         });
     }

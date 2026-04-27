@@ -60,7 +60,7 @@ class ContractExpirationsStat extends StatsOverviewWidget
 
         return [
             Stat::make('Críticos (< 7 dias)', $criticalExpiring)
-                ->description('Ação imediata necessária')
+                ->description('Acção imediata necessária')
                 ->descriptionIcon('heroicon-m-exclamation-circle')
                 ->color($criticalExpiring > 0 ? 'danger' : 'success'),
             Stat::make('Próximos 30 Dias', $expiringSoon)

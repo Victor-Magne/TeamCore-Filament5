@@ -14,7 +14,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
-
 use Filament\Widgets\Widget;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -25,8 +24,6 @@ class EmployeeActionsWidget extends Widget implements HasActions, HasSchemas
     use InteractsWithSchemas;
 
     protected string $view = 'filament.widgets.employee-actions-widget';
-
-    // 1. Expandido para ocupar toda a largura
     protected int|string|array $columnSpan = 1;
 
     public static function canView(): bool
@@ -41,6 +38,7 @@ class EmployeeActionsWidget extends Widget implements HasActions, HasSchemas
             ->icon('heroicon-m-sun')
             ->color('primary')
             ->size('sm')
+            ->visible(fn() => Auth::user()?->employee !== null) // ✅
             ->form([
                 DatePicker::make('start_date')
                     ->label('Data de Início')
@@ -61,7 +59,6 @@ class EmployeeActionsWidget extends Widget implements HasActions, HasSchemas
                         ->body('Não foi encontrado um perfil de funcionário associado ao seu utilizador.')
                         ->danger()
                         ->send();
-
                     return;
                 }
 
@@ -88,6 +85,7 @@ class EmployeeActionsWidget extends Widget implements HasActions, HasSchemas
             ->icon('heroicon-m-calendar')
             ->color('primary')
             ->size('sm')
+            ->visible(fn() => Auth::user()?->employee !== null) // ✅
             ->form([
                 Select::make('type')
                     ->label('Tipo de Ausência')
@@ -125,7 +123,6 @@ class EmployeeActionsWidget extends Widget implements HasActions, HasSchemas
                         ->body('Não foi encontrado um perfil de funcionário associado ao seu utilizador.')
                         ->danger()
                         ->send();
-
                     return;
                 }
 

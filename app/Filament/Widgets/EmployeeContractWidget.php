@@ -2,16 +2,14 @@
 
 namespace App\Filament\Widgets;
 
-use App\Services\ContractPdfService;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Components\Grid; // Alterado de Section para Grid
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
-
 use Filament\Support\Enums\TextSize;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Auth;
@@ -23,8 +21,12 @@ class EmployeeContractWidget extends Widget implements HasActions, HasSchemas
 
     protected string $view = 'filament.widgets.employee-contract-widget';
 
-    // 1. Expandido para ocupar a largura total
     protected int|string|array $columnSpan = 2;
+
+    public static function canView(): bool
+    {
+        return Auth::user()?->can('View:EmployeeContractWidget') ?? false;
+    }
 
     public function getContract()
     {
@@ -34,12 +36,19 @@ class EmployeeContractWidget extends Widget implements HasActions, HasSchemas
             ->first();
     }
 
+    public function getEmployee()
+    {
+        return Auth::user()?->employee;
+    }
+
     public function contractInfolist(Schema $schema): Schema
     {
+        $contract = $this->getContract();
+        $employee = $this->getEmployee();
+
         return $schema
-            ->record($this->getContract())
+            ->record($contract)
             ->components([
-                // 2. Usar Grid em vez de Section para os itens partilharem a mesma linha horizontal
                 Grid::make([
                     'default' => 1,
                     'sm' => 2,
@@ -51,39 +60,33 @@ class EmployeeContractWidget extends Widget implements HasActions, HasSchemas
                             ->label('Tipo')
                             ->size(TextSize::Small)
                             ->badge()
-                            ->formatStateUsing(fn($state) => str_replace('_', ' ', ucfirst($state))),
-
+                            ->formatStateUsing(fn ($state) => str_replace('_', ' ', ucfirst($state))),
                         TextEntry::make('salary')
-                            ->label('Remuneração Base')
+                            ->label('RemuneraÃ§Ã£o Base')
                             ->size(TextSize::Small)
-                            ->formatStateUsing(fn($state) => number_format($state, 2, ',', '.') . ' €'),
-
+                            ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' â‚¬'),
                         TextEntry::make('designation.name')
-                            ->label('Vínculo')
+                            ->label('VÃ­nculo')
                             ->size(TextSize::Small)
-                            ->default('N/A'), // Removido columnSpanFull()
-
-                        // Contratos temporários / a prazo
+                            ->default('N/A'),
                         TextEntry::make('start_date')
-                            ->label('Início')
+                            ->label('InÃ­cio')
                             ->size(TextSize::Small)
                             ->date('d/m/Y')
-                            ->hidden(fn($record) => ! in_array($record?->type, ['temporary', 'fixed_term'])),
-
+                            ->hidden(fn ($record) => ! in_array($record?->type, ['temporary', 'fixed_term'])),
                         TextEntry::make('end_date')
                             ->label('Fim Previsto')
                             ->size(TextSize::Small)
                             ->date('d/m/Y')
-                            ->default('Indeterminado')
-                            ->hidden(fn($record) => ! in_array($record?->type, ['temporary', 'fixed_term'])),
-
-                        // Contratos sem termo
+                            ->placeholder('Indeterminado')
+                            ->hidden(fn ($record) => ! in_array($record?->type, ['temporary', 'fixed_term'])),
                         TextEntry::make('start_date')
-                            ->label('Data de Admissão')
+                            ->label('Data de AdmissÃ£o')
                             ->size(TextSize::Small)
                             ->date('d/m/Y')
-                            ->hidden(fn($record) => in_array($record?->type, ['temporary', 'fixed_term'])),
-                    ]),
+                            ->hidden(fn ($record) => in_array($record?->type, ['temporary', 'fixed_term'])),
+                    ])
+                    ->visible(fn () => $contract !== null && $employee !== null),
             ]);
     }
 
@@ -94,7 +97,7 @@ class EmployeeContractWidget extends Widget implements HasActions, HasSchemas
             ->icon('heroicon-m-arrow-down-tray')
             ->color('gray')
             ->size('sm')
-            // Em vez de usar ->action(), usamos ->url() para chamar a sua rota diretamente
+            ->visible(fn () => $this->getContract() !== null)
             ->url(function () {
                 $contract = $this->getContract();
 
@@ -102,10 +105,8 @@ class EmployeeContractWidget extends Widget implements HasActions, HasSchemas
                     return '#';
                 }
 
-                // Presumindo que o nome da rota no seu routes/web.php é 'contracts.pdf.single'
-                // Ajuste se o nome da rota for ligeiramente diferente
                 return route('contracts.pdf.single', $contract);
             })
-            ->openUrlInNewTab(); // Abre o PDF numa nova aba sem quebrar a página do Livewire
+            ->openUrlInNewTab();
     }
 }

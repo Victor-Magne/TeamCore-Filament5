@@ -13,9 +13,14 @@ use Illuminate\Support\Facades\Auth;
 
 class EmployeeVacationWidget extends BaseWidget
 {
-    protected static ?string $heading = 'Minhas Férias';
+    protected static ?string $heading = 'Minhas FÃ©rias';
 
     protected int|string|array $columnSpan = 'full';
+
+    public static function canView(): bool
+    {
+        return Auth::user()?->can('View:EmployeeVacationWidget') ?? false;
+    }
 
     public function table(Table $table): Table
     {
@@ -29,17 +34,15 @@ class EmployeeVacationWidget extends BaseWidget
             )
             ->columns([
                 Tables\Columns\TextColumn::make('start_date')
-                    ->label('Início')
+                    ->label('InÃ­cio')
                     ->date('d/m/Y')
                     ->icon('heroicon-m-calendar-days')
                     ->iconColor('gray'),
-                    
                 Tables\Columns\TextColumn::make('end_date')
                     ->label('Fim')
                     ->date('d/m/Y')
                     ->icon('heroicon-m-calendar-days')
                     ->iconColor('gray'),
-                    
                 Tables\Columns\TextColumn::make('days_taken')
                     ->label('Dias')
                     ->badge()
@@ -69,7 +72,7 @@ class EmployeeVacationWidget extends BaseWidget
             ])
             ->headerActions([
                 Action::make('balance')
-                    ->label(fn () => 'Saldo: '.($employee?->vacation_balance ?? 0).' dias')
+                    ->label(fn () => 'Saldo: ' . ($employee?->vacation_balance ?? 0) . ' dias')
                     ->button()
                     ->disabled()
                     ->color('info')
@@ -95,7 +98,7 @@ class EmployeeVacationWidget extends BaseWidget
                         \Filament\Schemas\Components\Grid::make(2)
                             ->schema([
                                 \Filament\Forms\Components\DatePicker::make('start_date')
-                                    ->label('Início'),
+                                    ->label('InÃ­cio'),
                                 \Filament\Forms\Components\DatePicker::make('end_date')
                                     ->label('Fim'),
                                 \Filament\Forms\Components\TextInput::make('days_taken')
@@ -108,14 +111,14 @@ class EmployeeVacationWidget extends BaseWidget
                                         'rejected' => 'Rejeitado',
                                         default => $state,
                                     }),
-                            ])
+                            ]),
                     ])
-                    ->modalHeading('Detalhes das Férias')
+                    ->modalHeading('Detalhes das FÃ©rias')
                     ->icon('heroicon-m-eye')
                     ->iconButton(),
             ])
-            ->emptyStateHeading('Sem registos de férias')
-            ->emptyStateDescription('Ainda não efetuou nenhum pedido de férias.')
+            ->emptyStateHeading('Sem registos de fÃ©rias')
+            ->emptyStateDescription('Ainda nÃ£o efetuou nenhum pedido de fÃ©rias.')
             ->emptyStateIcon('heroicon-o-sun');
     }
 }

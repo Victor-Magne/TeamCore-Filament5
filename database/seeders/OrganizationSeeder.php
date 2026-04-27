@@ -23,46 +23,55 @@ class OrganizationSeeder extends Seeder
             [
                 'name' => 'Diretor',
                 'level' => 'lead',
+                'role_name' => 'diretor_geral',
                 'base_salary' => 3500.00,
             ],
             [
                 'name' => 'Subdiretor',
                 'level' => 'senior',
+                'role_name' => null,
                 'base_salary' => 2800.00,
             ],
             [
                 'name' => 'Chefe de Departamento',
                 'level' => 'senior',
+                'role_name' => 'chefe_departamento',
                 'base_salary' => 2400.00,
             ],
             [
                 'name' => 'Chefe de Secção',
                 'level' => 'pleno',
+                'role_name' => 'chefe_seccao',
                 'base_salary' => 1900.00,
             ],
             [
                 'name' => 'Especialista',
                 'level' => 'specialist',
+                'role_name' => null,
                 'base_salary' => 2000.00,
             ],
             [
                 'name' => 'Técnico Sênior',
                 'level' => 'senior',
+                'role_name' => null,
                 'base_salary' => 1800.00,
             ],
             [
                 'name' => 'Técnico Pleno',
                 'level' => 'pleno',
+                'role_name' => null,
                 'base_salary' => 1400.00,
             ],
             [
                 'name' => 'Técnico Junior',
                 'level' => 'junior',
+                'role_name' => null,
                 'base_salary' => 900.00,
             ],
             [
                 'name' => 'Administrativo',
                 'level' => 'junior',
+                'role_name' => null,
                 'base_salary' => 850.00,
             ],
         ];

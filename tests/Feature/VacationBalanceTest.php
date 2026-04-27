@@ -3,20 +3,20 @@
 use App\Models\Employee;
 use App\Models\User;
 use App\Models\Vacation;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
 test('vacation balance is decremented when vacation is approved', function () {
-    // Disable observer to avoid duplicate user creation for this test
-    Employee::unsetEventDispatcher();
-    $employee = Employee::factory()->create(['vacation_balance' => 22]);
+    $employee = Employee::withoutEvents(fn () => Employee::factory()->create(['vacation_balance' => 22]));
     $admin = User::factory()->create(['employee_id' => null]);
     $this->actingAs($admin);
 
     $vacation = Vacation::factory()->create([
         'employee_id' => $employee->id,
-        'days_taken' => 5,
+        'start_date' => Carbon::create(2026, 4, 20),
+        'end_date' => Carbon::create(2026, 4, 24),
         'status' => 'pending',
     ]);
 
@@ -28,14 +28,14 @@ test('vacation balance is decremented when vacation is approved', function () {
 });
 
 test('vacation balance is NOT decremented when vacation is rejected', function () {
-    Employee::unsetEventDispatcher();
-    $employee = Employee::factory()->create(['vacation_balance' => 22]);
+    $employee = Employee::withoutEvents(fn () => Employee::factory()->create(['vacation_balance' => 22]));
     $admin = User::factory()->create(['employee_id' => null]);
     $this->actingAs($admin);
 
     $vacation = Vacation::factory()->create([
         'employee_id' => $employee->id,
-        'days_taken' => 5,
+        'start_date' => Carbon::create(2026, 4, 20),
+        'end_date' => Carbon::create(2026, 4, 24),
         'status' => 'pending',
     ]);
 

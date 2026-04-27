@@ -1,6 +1,7 @@
 <x-filament-widgets::widget>
     <x-filament::section compact>
-        
+        @if ($this->getContract())
+            
         {{-- Cabeçalho da Secção com o Botão Alinhado à Direita --}}
         <x-slot name="heading">
             <div class="flex items-center justify-between w-full">
@@ -29,7 +30,7 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">Nenhum contrato ativo encontrado.</p>
             </div>
         @endif
-        
+        @endif
     </x-filament::section>
 
     <x-filament-actions::modals />

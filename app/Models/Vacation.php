@@ -21,6 +21,10 @@ class Vacation extends Model
         'end_date' => 'date',
     ];
 
+    protected ?string $originalStatusForUpdate = null;
+
+    protected ?int $originalDaysTakenForUpdate = null;
+
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
@@ -31,73 +35,92 @@ class Vacation extends Model
         return $this->belongsTo(User::class, 'approved_by');
     }
 
-    /**
-     * Calcular automaticamente os dias gozados entre as datas
-     */
     public function calculateDaysTaken(): void
     {
         if ($this->start_date && $this->end_date) {
-            $daysDiff = $this->start_date->diffInDays($this->end_date) + 1;
-            $this->days_taken = max(1, $daysDiff);
+            $workingDays = 0;
+            $currentDate = $this->start_date->copy();
+
+            while ($currentDate->lte($this->end_date)) {
+                if ($currentDate->isWeekday()) {
+                    $workingDays++;
+                }
+
+                $currentDate->addDay();
+            }
+
+            $this->days_taken = max(1, $workingDays);
         }
     }
 
     protected static function booted(): void
     {
-        // Calcular year_reference automaticamente se não estiver definido
         static::creating(function (self $model) {
             if (blank($model->year_reference)) {
                 $model->year_reference = $model->start_date?->year ?? Carbon::now()->year;
             }
-        });
 
-        // Calcular days_taken automaticamente ao criar ou atualizar
-        static::creating(function (self $model) {
             $model->calculateDaysTaken();
         });
 
         static::updating(function (self $model) {
+            $model->originalStatusForUpdate = $model->getOriginal('status');
+            $model->originalDaysTakenForUpdate = (int) $model->getOriginal('days_taken');
             $model->calculateDaysTaken();
         });
 
-        // Atualizar approved_by ao salvar
         static::saving(function (self $model) {
             if ($model->isDirty('status') && in_array($model->status, ['approved', 'rejected'])) {
-                $model->approved_by = auth()->id();
+                $user = auth()->user();
+
+                if ($user && $user->employee_id === $model->employee_id && ! $user->can('Approve:OwnVacation')) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'status' => 'Conflito de Interesses: Nao tem permissao para alterar o estado do seu proprio registo.',
+                    ]);
+                }
+
+                $model->approved_by = $user?->id;
             }
         });
 
         static::created(function (self $model) {
             if ($model->status === 'approved') {
                 $employee = $model->employee;
+
                 if ($employee && $model->days_taken > 0) {
                     $employee->decrement('vacation_balance', $model->days_taken);
                 }
             }
         });
 
-        // Deduzir do saldo de férias ao aprovar ou restaurar se desaprovado
         static::updated(function (self $model) {
-            if ($model->wasChanged('status')) {
-                $employee = $model->employee;
-                if (! $employee) {
-                    return;
+            $originalStatus = $model->originalStatusForUpdate ?? $model->getOriginal('status');
+            $originalDaysTaken = $model->originalDaysTakenForUpdate ?? (int) $model->getOriginal('days_taken');
+            $currentDaysTaken = (int) $model->days_taken;
+
+            $employee = $model->employee;
+
+            if (! $employee) {
+                return;
+            }
+
+            if ($originalStatus !== $model->status) {
+                if ($model->status === 'approved') {
+                    $employee->decrement('vacation_balance', $currentDaysTaken);
+                } elseif ($originalStatus === 'approved') {
+                    $employee->increment('vacation_balance', $originalDaysTaken);
                 }
 
-                if ($model->status === 'approved') {
-                    $employee->decrement('vacation_balance', $model->days_taken);
-                } elseif ($model->getOriginal('status') === 'approved') {
-                    $employee->increment('vacation_balance', $model->getOriginal('days_taken'));
-                }
-            } elseif ($model->wasChanged('days_taken') && $model->status === 'approved') {
-                $employee = $model->employee;
-                if ($employee) {
-                    $diff = $model->days_taken - $model->getOriginal('days_taken');
-                    if ($diff > 0) {
-                        $employee->decrement('vacation_balance', $diff);
-                    } elseif ($diff < 0) {
-                        $employee->increment('vacation_balance', abs($diff));
-                    }
+                return;
+            }
+
+            if ($model->status === 'approved' && $originalDaysTaken !== $currentDaysTaken) {
+                $diff = $currentDaysTaken - $originalDaysTaken;
+
+                if ($diff > 0) {
+                    $employee->decrement('vacation_balance', $diff);
+                } elseif ($diff < 0) {
+                    $employee->increment('vacation_balance', abs($diff));
                 }
             }
         });
@@ -105,6 +128,7 @@ class Vacation extends Model
         static::deleted(function (self $model) {
             if ($model->status === 'approved') {
                 $employee = $model->employee;
+
                 if ($employee) {
                     $employee->increment('vacation_balance', $model->days_taken);
                 }

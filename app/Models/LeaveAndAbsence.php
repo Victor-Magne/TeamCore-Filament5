@@ -37,8 +37,14 @@ class LeaveAndAbsence extends Model
     {
         static::saving(function (self $model) {
             if ($model->isDirty('status') && in_array($model->status, ['approved', 'rejected'])) {
-                /** @noinspection PhpUndefinedMethodInspection - auth() helper returns Authenticatable **/
-                $model->approved_by = auth()->id();
+                /** @var \App\Models\User|null $user */
+                $user = auth()->user();
+                if ($user && $user->employee_id === $model->employee_id && ! $user->can('Approve:OwnLeaveAndAbsence')) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'status' => 'Conflito de Interesses: Não tem permissão para alterar o estado do seu próprio registo.',
+                    ]);
+                }
+                $model->approved_by = $user?->id;
             }
         });
     }

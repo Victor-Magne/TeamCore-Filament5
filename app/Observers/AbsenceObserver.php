@@ -31,7 +31,7 @@ class AbsenceObserver
     public function updated(Absence $absence): void
     {
         // Se a data mudou, recalcular ambos os meses
-        if ($absence->isDirty('absence_date')) {
+        if ($absence->wasChanged('absence_date')) {
             $originalDate = $absence->getOriginal('absence_date');
             $this->hourBankService->recalculate(
                 $absence->employee_id,

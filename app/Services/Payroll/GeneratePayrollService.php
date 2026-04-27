@@ -24,9 +24,17 @@ class GeneratePayrollService
      */
     public function handle(Employee $employee, string $monthYear): Payroll
     {
+        $period = Carbon::createFromFormat('Y-m', $monthYear);
+
         // 1. Obter o contrato ativo
         $contract = $employee->contracts()
             ->where('status', 'active')
+            ->where('start_date', '<=', $period->copy()->endOfMonth()->toDateString())
+            ->where(function ($query) use ($period) {
+                $query->whereNull('end_date')
+                    ->orWhere('end_date', '>=', $period->copy()->startOfMonth()->toDateString());
+            })
+            ->orderByDesc('start_date')
             ->first();
 
         if (! $contract) {

@@ -8,6 +8,7 @@ use App\Filament\Resources\Employees\Pages\ListEmployees;
 use App\Filament\Resources\Employees\Schemas\EmployeeForm;
 use App\Filament\Resources\Employees\Tables\EmployeesTable;
 use App\Models\Employee;
+use App\Traits\HasHierarchicalQuery;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -19,6 +20,8 @@ use UnitEnum;
 
 class EmployeeResource extends Resource
 {
+    use HasHierarchicalQuery;
+
     protected static ?string $model = Employee::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Identification;
