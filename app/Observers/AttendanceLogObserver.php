@@ -28,7 +28,7 @@ class AttendanceLogObserver
     {
         // Primeiro, processa ausências (falta completa)
         $this->processAbsence($attendanceLog);
-        
+
         // Recalcular banco de horas para este mês
         $this->hourBankService->recalculate(
             $attendanceLog->employee_id,
@@ -44,7 +44,7 @@ class AttendanceLogObserver
     {
         // Se os tempos foram alterados, precisa gerir a Absence e recalcular
         if ($attendanceLog->isDirty(['time_in', 'time_out', 'total_minutes'])) {
-            
+
             // Se mudou o mês, recalcular o mês original
             if ($attendanceLog->isDirty('time_in')) {
                 $originalTimeIn = $attendanceLog->getOriginal('time_in');

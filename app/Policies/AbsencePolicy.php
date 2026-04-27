@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Models\Absence;
-use App\Traits\HasHierarchicalPolicy;
-use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
+use App\Models\Absence;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 class AbsencePolicy
 {
     use HandlesAuthorization;
-    use HasHierarchicalPolicy;
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Absence');
@@ -21,7 +19,7 @@ class AbsencePolicy
 
     public function view(AuthUser $authUser, Absence $absence): bool
     {
-        return $authUser->can('View:Absence') && $this->canAccessModel($authUser, $absence);
+        return $authUser->can('View:Absence');
     }
 
     public function create(AuthUser $authUser): bool
@@ -31,12 +29,12 @@ class AbsencePolicy
 
     public function update(AuthUser $authUser, Absence $absence): bool
     {
-        return $authUser->can('Update:Absence') && $this->canAccessModel($authUser, $absence);
+        return $authUser->can('Update:Absence');
     }
 
     public function delete(AuthUser $authUser, Absence $absence): bool
     {
-        return $authUser->can('Delete:Absence') && $this->canAccessModel($authUser, $absence);
+        return $authUser->can('Delete:Absence');
     }
 
     public function deleteAny(AuthUser $authUser): bool
@@ -46,12 +44,12 @@ class AbsencePolicy
 
     public function restore(AuthUser $authUser, Absence $absence): bool
     {
-        return $authUser->can('Restore:Absence') && $this->canAccessModel($authUser, $absence);
+        return $authUser->can('Restore:Absence');
     }
 
     public function forceDelete(AuthUser $authUser, Absence $absence): bool
     {
-        return $authUser->can('ForceDelete:Absence') && $this->canAccessModel($authUser, $absence);
+        return $authUser->can('ForceDelete:Absence');
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
@@ -66,11 +64,12 @@ class AbsencePolicy
 
     public function replicate(AuthUser $authUser, Absence $absence): bool
     {
-        return $authUser->can('Replicate:Absence') && $this->canAccessModel($authUser, $absence);
+        return $authUser->can('Replicate:Absence');
     }
 
     public function reorder(AuthUser $authUser): bool
     {
         return $authUser->can('Reorder:Absence');
     }
+
 }

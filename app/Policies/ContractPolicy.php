@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Models\Contract;
-use App\Traits\HasHierarchicalPolicy;
-use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
+use App\Models\Contract;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ContractPolicy
 {
     use HandlesAuthorization;
-    use HasHierarchicalPolicy;
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Contract');
@@ -21,7 +19,7 @@ class ContractPolicy
 
     public function view(AuthUser $authUser, Contract $contract): bool
     {
-        return $authUser->can('View:Contract') && $this->canAccessModel($authUser, $contract);
+        return $authUser->can('View:Contract');
     }
 
     public function create(AuthUser $authUser): bool
@@ -31,12 +29,12 @@ class ContractPolicy
 
     public function update(AuthUser $authUser, Contract $contract): bool
     {
-        return $authUser->can('Update:Contract') && $this->canAccessModel($authUser, $contract);
+        return $authUser->can('Update:Contract');
     }
 
     public function delete(AuthUser $authUser, Contract $contract): bool
     {
-        return $authUser->can('Delete:Contract') && $this->canAccessModel($authUser, $contract);
+        return $authUser->can('Delete:Contract');
     }
 
     public function deleteAny(AuthUser $authUser): bool
@@ -46,12 +44,12 @@ class ContractPolicy
 
     public function restore(AuthUser $authUser, Contract $contract): bool
     {
-        return $authUser->can('Restore:Contract') && $this->canAccessModel($authUser, $contract);
+        return $authUser->can('Restore:Contract');
     }
 
     public function forceDelete(AuthUser $authUser, Contract $contract): bool
     {
-        return $authUser->can('ForceDelete:Contract') && $this->canAccessModel($authUser, $contract);
+        return $authUser->can('ForceDelete:Contract');
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
@@ -66,11 +64,12 @@ class ContractPolicy
 
     public function replicate(AuthUser $authUser, Contract $contract): bool
     {
-        return $authUser->can('Replicate:Contract') && $this->canAccessModel($authUser, $contract);
+        return $authUser->can('Replicate:Contract');
     }
 
     public function reorder(AuthUser $authUser): bool
     {
         return $authUser->can('Reorder:Contract');
     }
+
 }
