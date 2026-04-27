@@ -40,10 +40,23 @@ class AttendanceLog extends Model
 
         $totalMinutes = $this->time_in->diffInMinutes($this->time_out);
 
-        // Subtrair o tempo de almoço se ambas as datas existem
+        // Obter contrato para saber duração do almoço esperada
+        $contract = $this->employee->contracts()
+            ->where('status', 'active')
+            ->where('start_date', '<=', $this->time_in)
+            ->orderByDesc('start_date')
+            ->first();
+
+        $expectedLunchMinutes = $contract?->lunch_duration_minutes ?? 60;
+
+        // Subtrair o tempo de almoço efetivo ou o esperado (o que for maior)
         if ($this->lunch_break_start && $this->lunch_break_end) {
-            $lunchMinutes = $this->lunch_break_start->diffInMinutes($this->lunch_break_end);
-            $totalMinutes -= $lunchMinutes;
+            $actualLunchMinutes = $this->lunch_break_start->diffInMinutes($this->lunch_break_end);
+            $lunchToDeduct = max($actualLunchMinutes, $expectedLunchMinutes);
+            $totalMinutes -= $lunchToDeduct;
+        } else {
+            // Se não registou almoço, desconta o esperado por defeito
+            $totalMinutes -= $expectedLunchMinutes;
         }
 
         return max(0, $totalMinutes); // Garantir que não é negativo

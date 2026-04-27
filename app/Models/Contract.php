@@ -18,6 +18,8 @@ class Contract extends Model
         'type',
         'salary',
         'daily_work_minutes',
+        'expected_start_time',
+        'lunch_duration_minutes',
         'status',
         'start_date',
         'end_date',

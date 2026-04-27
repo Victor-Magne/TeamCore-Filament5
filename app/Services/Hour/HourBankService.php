@@ -10,6 +10,13 @@ use Illuminate\Support\Facades\DB;
 
 class HourBankService
 {
+    protected CalculateExtraHoursService $calculateService;
+
+    public function __construct(CalculateExtraHoursService $calculateService)
+    {
+        $this->calculateService = $calculateService;
+    }
+
     /**
      * Recalcula o banco de horas de um funcionário para um mês específico
      */
@@ -45,20 +52,16 @@ class HourBankService
                 ->get();
 
             foreach ($logs as $log) {
-                $dailyWorkMinutes = $log->employee->contracts()
-                    ->where('status', 'active')
-                    ->where('start_date', '<=', $log->time_in)
-                    ->orderByDesc('start_date')
-                    ->first()?->daily_work_minutes ?? 480;
+                $extraMinutesAdded += $this->calculateService->handle($log);
 
-                if ($log->total_minutes) {
-                    $diff = $log->total_minutes - $dailyWorkMinutes;
-                    if ($diff > 0) {
-                        $extraMinutesAdded += $diff;
-                    } else {
-                        // Se trabalhou menos que o esperado, conta como horas usadas (débito)
-                        $extraMinutesUsedFromLogs += abs($diff);
-                    }
+                // Só contar o défice do log se não houver um registo de Absence para este dia
+                // (Para evitar duplicar descontos de atraso/falta que já estão no absences)
+                $hasAbsence = Absence::where('employee_id', $employeeId)
+                    ->where('absence_date', $log->time_in->toDateString())
+                    ->exists();
+
+                if (!$hasAbsence) {
+                    $extraMinutesUsedFromLogs += $this->calculateService->calculateDeficit($log);
                 }
             }
 
