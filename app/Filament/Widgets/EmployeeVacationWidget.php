@@ -26,7 +26,7 @@ class EmployeeVacationWidget extends BaseWidget
                 Vacation::where('employee_id', $employee?->id)
                     ->latest()
                     ->limit(5)
-            )
+            ) 
             ->columns([
                 Tables\Columns\TextColumn::make('start_date')
                     ->label('Início')

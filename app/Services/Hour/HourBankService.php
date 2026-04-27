@@ -38,13 +38,28 @@ class HourBankService
             $endDate = $month->copy()->endOfMonth();
 
             // 1. Calcular Horas Extras Ganhas (via AttendanceLog)
+            // ⚠️ IMPORTANTE: Se houver uma Absence (falta integral) no mesmo dia,
+            //    ignorar o AttendanceLog para evitar dupla penalização
             $extraMinutesAdded = 0;
             $extraMinutesUsedFromLogs = 0;
             $logs = AttendanceLog::where('employee_id', $employeeId)
                 ->whereBetween('time_in', [$startDate, $endDate])
                 ->get();
 
+            // Carregar todas as absences do mês para verificação rápida
+            $absenceDates = Absence::where('employee_id', $employeeId)
+                ->whereBetween('absence_date', [$startDate->toDateString(), $endDate->toDateString()])
+                ->pluck('absence_date')
+                ->map(fn ($date) => $date->format('Y-m-d'))
+                ->toArray();
+
             foreach ($logs as $log) {
+                // Se há uma Absence para este dia, ignorar o AttendanceLog
+                // (a Absence já contabiliza a penalização)
+                if (in_array($log->time_in->format('Y-m-d'), $absenceDates)) {
+                    continue;
+                }
+
                 $dailyWorkMinutes = $log->employee->contracts()
                     ->where('status', 'active')
                     ->where('start_date', '<=', $log->time_in)

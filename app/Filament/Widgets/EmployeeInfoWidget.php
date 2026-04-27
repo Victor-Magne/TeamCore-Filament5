@@ -30,8 +30,10 @@ class EmployeeInfoWidget extends Widget implements HasSchemas
 
     public function employeeInfolist(Schema $schema): Schema
     {
+        $employee = $this->getEmployee(); // ✅ atribuir à variável
+
         return $schema
-            ->record($this->getEmployee())
+            ->record($employee)
             ->components([
                 Section::make()
                     ->schema([
@@ -42,39 +44,33 @@ class EmployeeInfoWidget extends Widget implements HasSchemas
                                     ->size(TextSize::Large)
                                     ->weight(FontWeight::Bold)
                                     ->columnSpan(2),
-
                                 TextEntry::make('designation.name')
                                     ->label('Cargo')
                                     ->default('Sem Cargo Definido')
                                     ->icon('heroicon-m-briefcase')
                                     ->columnSpan(2),
-
                                 TextEntry::make('email')
                                     ->label('Email Corporativo')
                                     ->icon('heroicon-m-envelope')
                                     ->default('N/A'),
-
                                 TextEntry::make('unit.name')
                                     ->label('Departamento')
                                     ->icon('heroicon-m-building-office')
                                     ->default('N/A'),
-
                                 TextEntry::make('phone_number')
                                     ->label('Contacto')
                                     ->icon('heroicon-m-phone')
                                     ->default('Não registado'),
-
                                 TextEntry::make('date_hired')
                                     ->label('Data de Admissão')
                                     ->icon('heroicon-m-calendar')
                                     ->date('d/m/Y')
-                                    ->default('N/A'),
-
+                                    ->placeholder('N/A'),
                                 TextEntry::make('address')
                                     ->label('Morada')
                                     ->icon('heroicon-m-map-pin')
-                                    ->default('N/A')
                                     ->formatStateUsing(function ($state, $record) {
+                                        if (!$record) return 'N/A';
                                         return collect([
                                             $state,
                                             $record->zip_code,
@@ -83,7 +79,8 @@ class EmployeeInfoWidget extends Widget implements HasSchemas
                                     })
                                     ->columnSpan(2),
                             ]),
-                    ]),
+                    ])
+                    ->visible(fn() => $employee !== null), // ✅ agora $employee existe
             ]);
     }
 }
