@@ -67,18 +67,21 @@ class EmployeeInfoWidget extends Widget implements HasSchemas
                                 TextEntry::make('date_hired')
                                     ->label('Data de Admissão')
                                     ->icon('heroicon-m-calendar')
-                                    ->date('d/m/Y')
-                                    ->default('N/A'),
+                                    ->formatStateUsing(
+                                        fn($state) =>
+                                        filled($state)
+                                            ? \Carbon\Carbon::parse($state)->format('d/m/Y')
+                                            : 'N/A'
+                                    ),
 
                                 TextEntry::make('address')
                                     ->label('Morada')
                                     ->icon('heroicon-m-map-pin')
-                                    ->default('N/A')
                                     ->formatStateUsing(function ($state, $record) {
                                         return collect([
                                             $state,
-                                            $record->zip_code,
-                                            $record->city?->name,
+                                            $record?->zip_code,
+                                            $record?->city?->name,
                                         ])->filter()->join(', ') ?: 'N/A';
                                     })
                                     ->columnSpan(2),
