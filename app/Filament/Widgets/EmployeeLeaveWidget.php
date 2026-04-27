@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Auth;
 
 class EmployeeLeaveWidget extends BaseWidget
 {
-    protected static ?string $heading = 'Minhas LicenÃ§as e AusÃªncias';
+    protected static ?string $heading = 'Minhas Licenças e Ausências';
 
     protected int|string|array $columnSpan = 'full';
 
@@ -36,9 +36,9 @@ class EmployeeLeaveWidget extends BaseWidget
                 Tables\Columns\TextColumn::make('type')
                     ->label('Tipo')
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'sick_leave' => 'Baixa MÃ©dica',
-                        'parental' => 'LicenÃ§a Parental',
-                        'marriage' => 'LicenÃ§a Casamento',
+                        'sick_leave' => 'Baixa Médica',
+                        'parental' => 'Licença Parental',
+                        'marriage' => 'Licença Casamento',
                         'bereavement' => 'Nojo (Falecimento)',
                         'justified_absence' => 'Falta Justificada',
                         'unjustified' => 'Falta Injustificada',
@@ -48,7 +48,7 @@ class EmployeeLeaveWidget extends BaseWidget
                     ->icon('heroicon-m-tag')
                     ->iconColor('primary'),
                 Tables\Columns\TextColumn::make('start_date')
-                    ->label('PerÃ­odo')
+                    ->label('Período')
                     ->formatStateUsing(fn (LeaveAndAbsence $record): string => $record->start_date->format('d/m/Y') . ' - ' . $record->end_date->format('d/m/Y'))
                     ->icon('heroicon-m-calendar')
                     ->iconColor('gray'),
@@ -96,9 +96,9 @@ class EmployeeLeaveWidget extends BaseWidget
                                 \Filament\Forms\Components\TextInput::make('type')
                                     ->label('Tipo')
                                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                                        'sick_leave' => 'Baixa MÃ©dica',
-                                        'parental' => 'LicenÃ§a Parental',
-                                        'marriage' => 'LicenÃ§a Casamento',
+                                        'sick_leave' => 'Baixa Médica',
+                                        'parental' => 'Licença Parental',
+                                        'marriage' => 'Licença Casamento',
                                         'bereavement' => 'Nojo (Falecimento)',
                                         'justified_absence' => 'Falta Justificada',
                                         'unjustified' => 'Falta Injustificada',
@@ -113,7 +113,7 @@ class EmployeeLeaveWidget extends BaseWidget
                                         default => $state,
                                     }),
                                 \Filament\Forms\Components\DatePicker::make('start_date')
-                                    ->label('InÃ­cio'),
+                                    ->label('Início'),
                                 \Filament\Forms\Components\DatePicker::make('end_date')
                                     ->label('Fim'),
                                 \Filament\Forms\Components\Textarea::make('reason')
@@ -121,12 +121,12 @@ class EmployeeLeaveWidget extends BaseWidget
                                     ->columnSpanFull(),
                             ]),
                     ])
-                    ->modalHeading('Detalhes da AusÃªncia')
+                    ->modalHeading('Detalhes da Ausência')
                     ->icon('heroicon-m-eye')
                     ->iconButton(),
             ])
-            ->emptyStateHeading('Sem registos de ausÃªncias')
-            ->emptyStateDescription('Ainda nÃ£o efetuou nenhum pedido de licenÃ§a ou ausÃªncia.')
+            ->emptyStateHeading('Sem registos de ausências')
+            ->emptyStateDescription('Ainda não efetuou nenhum pedido de licença ou ausência.')
             ->emptyStateIcon('heroicon-o-calendar-days');
     }
 }

@@ -17,7 +17,7 @@ class AttendanceCheckIn extends Page
 
     protected string $view = 'filament.pages.attendance-check-in';
 
-    protected static string|UnitEnum|null $navigationGroup = 'GestÃ£o de Pessoal';
+    protected static string|UnitEnum|null $navigationGroup = 'Gestão de Pessoal';
 
     public ?int $timeIn = null;
 

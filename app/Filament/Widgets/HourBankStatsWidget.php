@@ -38,16 +38,16 @@ class HourBankStatsWidget extends BaseWidget
         };
 
         return [
-            Stat::make('Saldo Atual (MÃªs)', $formatTime($currentBalance))
+            Stat::make('Saldo Atual (Mês)', $formatTime($currentBalance))
                 ->description('Ciclo: ' . ($currentMonth?->month_year ?? now()->format('Y-m')))
                 ->color($currentBalance >= 0 ? 'success' : 'danger')
                 ->icon($currentBalance >= 0 ? 'heroicon-m-plus-circle' : 'heroicon-m-minus-circle'),
             Stat::make('Extras / Faltas', $formatTime($extraHoursAdded) . ' / ' . $formatTime($extraHoursUsed))
-                ->description('Ganhos vs DÃ©bitos (MÃªs)')
+                ->description('Ganhos vs Débitos (Mês)')
                 ->color('info')
                 ->icon('heroicon-m-arrows-right-left'),
             Stat::make('Saldo Acumulado', $formatTime($totalBalance))
-                ->description('Total atÃ© Ã  data')
+                ->description('Total até à data')
                 ->color($totalBalance >= 0 ? 'success' : 'danger')
                 ->icon('heroicon-m-chart-bar-square'),
         ];

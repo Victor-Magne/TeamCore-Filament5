@@ -65,9 +65,9 @@ class EmployeeInfoWidget extends Widget implements HasSchemas
                                 TextEntry::make('phone_number')
                                     ->label('Contacto')
                                     ->icon('heroicon-m-phone')
-                                    ->default('NÃ£o registado'),
+                                    ->default('Não registado'),
                                 TextEntry::make('date_hired')
-                                    ->label('Data de AdmissÃ£o')
+                                    ->label('Data de Admissão')
                                     ->icon('heroicon-m-calendar')
                                     ->date('d/m/Y')
                                     ->placeholder('N/A'),

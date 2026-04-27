@@ -24,12 +24,12 @@ class UserForm
     public static function schema(): array
     {
         return [
-            Section::make('AssociaÃ§Ã£o com FuncionÃ¡rio')
-                ->description('Selecione o funcionÃ¡rio para importar automaticamente os dados de identidade.')
+            Section::make('Associação com Funcionário')
+                ->description('Selecione o funcionário para importar automaticamente os dados de identidade.')
                 ->icon('heroicon-o-identification')
                 ->schema([
                     Select::make('employee_id')
-                        ->label('FuncionÃ¡rio Correspondente')
+                        ->label('Funcionário Correspondente')
                         ->relationship('employee', 'first_name')
                         ->searchable()
                         ->preload()
@@ -46,20 +46,20 @@ class UserForm
                                 $set('email', $employee->email);
                             }
                         })
-                        ->helperText('Ao selecionar um funcionÃ¡rio, o sistema preencherÃ¡ o Nome e Email automaticamente.'),
+                        ->helperText('Ao selecionar um funcionário, o sistema preencherá o Nome e Email automaticamente.'),
                 ]),
             Section::make('Credenciais de Acesso')
-                ->description('Configure as informaÃ§Ãµes necessÃ¡rias para o login no sistema.')
+                ->description('Configure as informações necessárias para o login no sistema.')
                 ->icon('heroicon-o-key')
                 ->columns(2)
                 ->schema([
                     TextInput::make('name')
-                        ->label('Nome de ExibiÃ§Ã£o')
+                        ->label('Nome de Exibição')
                         ->required()
                         ->maxLength(255)
-                        ->placeholder('Ex: JoÃ£o Silva'),
+                        ->placeholder('Ex: João Silva'),
                     TextInput::make('email')
-                        ->label('EndereÃ§o de E-mail')
+                        ->label('Endereço de E-mail')
                         ->email()
                         ->required()
                         ->unique(ignoreRecord: true)
@@ -76,17 +76,17 @@ class UserForm
                         ->helperText(
                             fn (string $context): string => $context === 'edit'
                                 ? 'Deixe em branco para manter a palavra-passe atual.'
-                                : 'Palavra-passe padrÃ£o: ChangeMe123!'
+                                : 'Palavra-passe padrão: ChangeMe123!'
                         ),
                     Toggle::make('must_change_password')
-                        ->label('Exigir alteraÃ§Ã£o de palavra-passe no prÃ³ximo login')
+                        ->label('Exigir alteração de palavra-passe no próximo login')
                         ->default(true)
-                        ->helperText('Recomenda-se ativar esta opÃ§Ã£o para novos utilizadores.'),
+                        ->helperText('Recomenda-se ativar esta opção para novos utilizadores.'),
                     Toggle::make('is_active')
                         ->label('Conta Ativa')
                         ->default(true),
                     Select::make('roles')
-                        ->label('FunÃ§Ãµes e PermissÃµes (Shield)')
+                        ->label('Funções e Permissões (Shield)')
                         ->relationship('roles', 'name', modifyQueryUsing: function (Builder $query): Builder {
                             return $query->whereIn('id', UserResource::getAssignableRoleIds());
                         })

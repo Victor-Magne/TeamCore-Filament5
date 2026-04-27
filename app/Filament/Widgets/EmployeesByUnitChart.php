@@ -11,7 +11,7 @@ class EmployeesByUnitChart extends ChartWidget
 {
     protected static ?int $sort = 20;
 
-    protected ?string $heading = 'FuncionÃ¡rios por Tipo de Unidade';
+    protected ?string $heading = 'Funcionários por Tipo de Unidade';
 
     protected ?string $pollingInterval = '30s';
 
@@ -48,7 +48,7 @@ class EmployeesByUnitChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'DireÃ§Ãµes',
+                    'label' => 'Direções',
                     'data' => $direcoesData,
                     'backgroundColor' => '#059669',
                     'borderRadius' => 0,
@@ -60,7 +60,7 @@ class EmployeesByUnitChart extends ChartWidget
                     'borderRadius' => 0,
                 ],
                 [
-                    'label' => 'SecÃ§Ãµes',
+                    'label' => 'Secções',
                     'data' => $seccoesData,
                     'backgroundColor' => '#8b5cf6',
                     'borderRadius' => 0,

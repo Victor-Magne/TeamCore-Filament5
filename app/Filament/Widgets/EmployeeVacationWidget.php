@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Auth;
 
 class EmployeeVacationWidget extends BaseWidget
 {
-    protected static ?string $heading = 'Minhas FÃ©rias';
+    protected static ?string $heading = 'Minhas Férias';
 
     protected int|string|array $columnSpan = 'full';
 
@@ -34,7 +34,7 @@ class EmployeeVacationWidget extends BaseWidget
             )
             ->columns([
                 Tables\Columns\TextColumn::make('start_date')
-                    ->label('InÃ­cio')
+                    ->label('Início')
                     ->date('d/m/Y')
                     ->icon('heroicon-m-calendar-days')
                     ->iconColor('gray'),
@@ -98,7 +98,7 @@ class EmployeeVacationWidget extends BaseWidget
                         \Filament\Schemas\Components\Grid::make(2)
                             ->schema([
                                 \Filament\Forms\Components\DatePicker::make('start_date')
-                                    ->label('InÃ­cio'),
+                                    ->label('Início'),
                                 \Filament\Forms\Components\DatePicker::make('end_date')
                                     ->label('Fim'),
                                 \Filament\Forms\Components\TextInput::make('days_taken')
@@ -113,12 +113,12 @@ class EmployeeVacationWidget extends BaseWidget
                                     }),
                             ]),
                     ])
-                    ->modalHeading('Detalhes das FÃ©rias')
+                    ->modalHeading('Detalhes das Férias')
                     ->icon('heroicon-m-eye')
                     ->iconButton(),
             ])
-            ->emptyStateHeading('Sem registos de fÃ©rias')
-            ->emptyStateDescription('Ainda nÃ£o efetuou nenhum pedido de fÃ©rias.')
+            ->emptyStateHeading('Sem registos de férias')
+            ->emptyStateDescription('Ainda não efetuou nenhum pedido de férias.')
             ->emptyStateIcon('heroicon-o-sun');
     }
 }

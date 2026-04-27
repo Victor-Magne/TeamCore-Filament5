@@ -62,15 +62,15 @@ class EmployeeContractWidget extends Widget implements HasActions, HasSchemas
                             ->badge()
                             ->formatStateUsing(fn ($state) => str_replace('_', ' ', ucfirst($state))),
                         TextEntry::make('salary')
-                            ->label('RemuneraÃ§Ã£o Base')
+                            ->label('Remuneração Base')
                             ->size(TextSize::Small)
                             ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' â‚¬'),
                         TextEntry::make('designation.name')
-                            ->label('VÃ­nculo')
+                            ->label('Vínculo')
                             ->size(TextSize::Small)
                             ->default('N/A'),
                         TextEntry::make('start_date')
-                            ->label('InÃ­cio')
+                            ->label('Início')
                             ->size(TextSize::Small)
                             ->date('d/m/Y')
                             ->hidden(fn ($record) => ! in_array($record?->type, ['temporary', 'fixed_term'])),
@@ -81,7 +81,7 @@ class EmployeeContractWidget extends Widget implements HasActions, HasSchemas
                             ->placeholder('Indeterminado')
                             ->hidden(fn ($record) => ! in_array($record?->type, ['temporary', 'fixed_term'])),
                         TextEntry::make('start_date')
-                            ->label('Data de AdmissÃ£o')
+                            ->label('Data de Admissão')
                             ->size(TextSize::Small)
                             ->date('d/m/Y')
                             ->hidden(fn ($record) => in_array($record?->type, ['temporary', 'fixed_term'])),
