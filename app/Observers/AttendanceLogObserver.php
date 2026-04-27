@@ -36,10 +36,10 @@ class AttendanceLogObserver
     public function updated(AttendanceLog $attendanceLog): void
     {
         // Se os tempos foram alterados, precisa recalcular
-        if ($attendanceLog->isDirty(['time_in', 'time_out', 'total_minutes'])) {
+        if ($attendanceLog->wasChanged(['time_in', 'time_out', 'total_minutes'])) {
 
             // Se mudou o mês, recalcular o mês original
-            if ($attendanceLog->isDirty('time_in')) {
+            if ($attendanceLog->wasChanged('time_in')) {
                 $originalTimeIn = $attendanceLog->getOriginal('time_in');
                 if ($originalTimeIn) {
                     $this->hourBankService->recalculate(
@@ -68,4 +68,3 @@ class AttendanceLogObserver
         );
     }
 }
-

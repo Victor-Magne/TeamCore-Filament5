@@ -2,7 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Employee;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -10,13 +9,9 @@ class HourBankStatsWidget extends BaseWidget
 {
     protected static ?int $sort = -1;
 
-    /**
-     * Mostrar este widget apenas na página do Employee
-     */
     public static function canView(): bool
     {
-        // Mostrar apenas em contextos específicos se necessário
-        return true;
+        return auth()->user()?->can('View:HourBankStatsWidget') ?? false;
     }
 
     protected function getStats(): array
@@ -34,7 +29,6 @@ class HourBankStatsWidget extends BaseWidget
         $extraHoursAdded = $currentMonth?->extra_hours_added ?? 0;
         $extraHoursUsed = $currentMonth?->extra_hours_used ?? 0;
 
-        // Converter minutos para horas com símbolos
         $formatTime = function (int $minutes): string {
             $hours = intdiv(abs($minutes), 60);
             $mins = abs($minutes) % 60;
@@ -44,18 +38,16 @@ class HourBankStatsWidget extends BaseWidget
         };
 
         return [
-            Stat::make('Saldo Atual (Mês)', $formatTime($currentBalance))
+            Stat::make('Saldo Atual (MÃªs)', $formatTime($currentBalance))
                 ->description('Ciclo: ' . ($currentMonth?->month_year ?? now()->format('Y-m')))
                 ->color($currentBalance >= 0 ? 'success' : 'danger')
                 ->icon($currentBalance >= 0 ? 'heroicon-m-plus-circle' : 'heroicon-m-minus-circle'),
-
             Stat::make('Extras / Faltas', $formatTime($extraHoursAdded) . ' / ' . $formatTime($extraHoursUsed))
-                ->description('Ganhos vs Débitos (Mês)')
+                ->description('Ganhos vs DÃ©bitos (MÃªs)')
                 ->color('info')
                 ->icon('heroicon-m-arrows-right-left'),
-
             Stat::make('Saldo Acumulado', $formatTime($totalBalance))
-                ->description('Total até à data')
+                ->description('Total atÃ© Ã  data')
                 ->color($totalBalance >= 0 ? 'success' : 'danger')
                 ->icon('heroicon-m-chart-bar-square'),
         ];

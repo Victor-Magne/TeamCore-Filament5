@@ -2,43 +2,45 @@
 
 namespace App\Traits;
 
+use App\Models\Employee;
 use App\Models\User;
 
 trait HasHierarchicalPolicy
 {
-    protected function canAccessModel(User $user, $model): bool
+    protected function canAccessWithPermission(User $user, string $permission, mixed $model): bool
     {
-        // 0. REGRA SUPER ADMIN / SCOPE ALL: Vê tudo
+        return $user->can($permission) && $this->canAccessModel($user, $model);
+    }
+
+    protected function canAccessModel(User $user, mixed $model): bool
+    {
         if ($user->hasRole('super_admin') || $user->can('Scope:View:All')) {
             return true;
         }
 
-        $meuEmployee = $user->employee;
-        $donoDoModel = $model->employee ?? null;
+        $myEmployee = $user->employee;
+        $ownerEmployee = $model instanceof Employee
+            ? $model
+            : ($model->employee ?? null);
 
-        if (! $meuEmployee || ! $donoDoModel) {
+        if (! $myEmployee || ! $ownerEmployee) {
             return false;
         }
 
-        // 1. REGRA UNIVERSAL: É o próprio registo
-        if ($meuEmployee->id === $donoDoModel->id) {
+        if ($myEmployee->id === $ownerEmployee->id) {
             return true;
         }
 
-        // 2. REGRA SUBORDINADOS: O dono pertence à minha unidade ou unidades descendentes?
         if ($user->can('Scope:View:Subordinates')) {
-            $minhaUnit = $meuEmployee->unit;
-            $unitDoAlvo = $donoDoModel->unit;
+            $myUnit = $myEmployee->unit;
+            $targetUnit = $ownerEmployee->unit;
 
-            if ($minhaUnit && $unitDoAlvo) {
-                // Se for a mesma unidade
-                if ($minhaUnit->id === $unitDoAlvo->id) {
+            if ($myUnit && $targetUnit) {
+                if ($myUnit->id === $targetUnit->id) {
                     return true;
                 }
 
-                // Ou se for uma unidade descendente
-                $descendantIds = $minhaUnit->getAllDescendantIds();
-                if (in_array($unitDoAlvo->id, $descendantIds)) {
+                if (in_array($targetUnit->id, $myUnit->getAllDescendantIds(), true)) {
                     return true;
                 }
             }

@@ -17,11 +17,16 @@ class EmployeeInfoWidget extends Widget implements HasSchemas
 {
     use InteractsWithSchemas;
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     protected static ?int $sort = -1;
 
     protected string $view = 'filament.widgets.employee-info-widget';
+
+    public static function canView(): bool
+    {
+        return auth()->user()?->can('View:EmployeeInfoWidget') ?? false;
+    }
 
     private function getEmployee(): ?Employee
     {
@@ -30,7 +35,7 @@ class EmployeeInfoWidget extends Widget implements HasSchemas
 
     public function employeeInfolist(Schema $schema): Schema
     {
-        $employee = $this->getEmployee(); // ✅ atribuir à variável
+        $employee = $this->getEmployee();
 
         return $schema
             ->record($employee)
@@ -60,9 +65,9 @@ class EmployeeInfoWidget extends Widget implements HasSchemas
                                 TextEntry::make('phone_number')
                                     ->label('Contacto')
                                     ->icon('heroicon-m-phone')
-                                    ->default('Não registado'),
+                                    ->default('NÃ£o registado'),
                                 TextEntry::make('date_hired')
-                                    ->label('Data de Admissão')
+                                    ->label('Data de AdmissÃ£o')
                                     ->icon('heroicon-m-calendar')
                                     ->date('d/m/Y')
                                     ->placeholder('N/A'),
@@ -70,7 +75,10 @@ class EmployeeInfoWidget extends Widget implements HasSchemas
                                     ->label('Morada')
                                     ->icon('heroicon-m-map-pin')
                                     ->formatStateUsing(function ($state, $record) {
-                                        if (!$record) return 'N/A';
+                                        if (! $record) {
+                                            return 'N/A';
+                                        }
+
                                         return collect([
                                             $state,
                                             $record->zip_code,
@@ -80,7 +88,7 @@ class EmployeeInfoWidget extends Widget implements HasSchemas
                                     ->columnSpan(2),
                             ]),
                     ])
-                    ->visible(fn() => $employee !== null), // ✅ agora $employee existe
+                    ->visible(fn () => $employee !== null),
             ]);
     }
 }

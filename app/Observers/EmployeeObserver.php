@@ -86,7 +86,7 @@ class EmployeeObserver
      */
     public function updated(Employee $employee): void
     {
-        if ($employee->isDirty('designation_id') || $employee->isDirty('email') || $employee->isDirty('first_name') || $employee->isDirty('last_name')) {
+        if ($employee->wasChanged(['designation_id', 'email', 'first_name', 'last_name'])) {
             $user = $employee->user;
             if ($user) {
                 $user->update([
@@ -94,7 +94,7 @@ class EmployeeObserver
                     'email' => $employee->email,
                 ]);
 
-                if ($employee->isDirty('designation_id')) {
+                if ($employee->wasChanged('designation_id')) {
                     $this->syncUserRoles($user, $employee);
                 }
             }

@@ -1,6 +1,5 @@
 <?php
 
-use App\Console\Commands\DetectUnregisteredAbsences;
 use App\Models\Absence;
 use App\Models\AttendanceLog;
 use App\Models\Contract;
@@ -23,25 +22,22 @@ describe('DetectUnregisteredAbsences Command', function () {
             'daily_work_minutes' => 480,
         ]);
 
-        $targetDate = Carbon::create(2026, 4, 16)->toDateString(); // Quinta-feira
+        $targetDate = Carbon::create(2026, 4, 16)->toDateString();
 
-        // Nenhum AttendanceLog registado
         expect(AttendanceLog::where('employee_id', $employee->id)
             ->whereDate('time_in', $targetDate)
             ->exists())->toBeFalse();
 
-        // Executar comando
         $this->artisan('absences:detect-unregistered', [
             '--date' => $targetDate,
         ]);
 
-        // Verificar que foi criada uma Absence
         $absence = Absence::where('employee_id', $employee->id)
-            ->where('absence_date', $targetDate)
+            ->whereDate('absence_date', $targetDate)
             ->first();
 
         expect($absence)->not->toBeNull();
-        expect($absence->hours_deducted)->toBe(480); // daily_work_minutes do contrato
+        expect($absence->hours_deducted)->toBe(480);
         expect($absence->deduction_type)->toBe('unjustified_absence');
     });
 
@@ -55,23 +51,19 @@ describe('DetectUnregisteredAbsences Command', function () {
 
         $targetDate = Carbon::create(2026, 4, 16)->toDateString();
 
-        // Criar licença aprovada
-        LeaveAndAbsence::factory()->create([
+        LeaveAndAbsence::factory()->approved()->create([
             'employee_id' => $employee->id,
             'type' => 'sick_leave',
             'start_date' => $targetDate,
             'end_date' => $targetDate,
-            'status' => 'approved',
         ]);
 
-        // Executar comando
         $this->artisan('absences:detect-unregistered', [
             '--date' => $targetDate,
         ]);
 
-        // Não deve criar Absence
         $absence = Absence::where('employee_id', $employee->id)
-            ->where('absence_date', $targetDate)
+            ->whereDate('absence_date', $targetDate)
             ->first();
 
         expect($absence)->toBeNull();
@@ -87,22 +79,18 @@ describe('DetectUnregisteredAbsences Command', function () {
 
         $targetDate = Carbon::create(2026, 4, 16);
 
-        // Criar férias aprovadas
-        Vacation::factory()->create([
+        Vacation::factory()->approved()->create([
             'employee_id' => $employee->id,
             'start_date' => $targetDate,
             'end_date' => $targetDate,
-            'status' => 'approved',
         ]);
 
-        // Executar comando
         $this->artisan('absences:detect-unregistered', [
             '--date' => $targetDate->toDateString(),
         ]);
 
-        // Não deve criar Absence
         $absence = Absence::where('employee_id', $employee->id)
-            ->where('absence_date', $targetDate->toDateString())
+            ->whereDate('absence_date', $targetDate->toDateString())
             ->first();
 
         expect($absence)->toBeNull();
@@ -118,21 +106,18 @@ describe('DetectUnregisteredAbsences Command', function () {
 
         $targetDate = Carbon::create(2026, 4, 16);
 
-        // Criar AttendanceLog (mesmo que sem time_out, há registro)
         AttendanceLog::create([
             'employee_id' => $employee->id,
-            'time_in' => $targetDate->setHour(9, 0),
+            'time_in' => $targetDate->copy()->setHour(9, 0),
             'time_out' => null,
         ]);
 
-        // Executar comando
         $this->artisan('absences:detect-unregistered', [
             '--date' => $targetDate->toDateString(),
         ]);
 
-        // Não deve criar Absence (já há AttendanceLog)
         $count = Absence::where('employee_id', $employee->id)
-            ->where('absence_date', $targetDate->toDateString())
+            ->whereDate('absence_date', $targetDate->toDateString())
             ->count();
 
         expect($count)->toBe(0);
@@ -146,16 +131,14 @@ describe('DetectUnregisteredAbsences Command', function () {
             'start_date' => Carbon::create(2026, 1, 1),
         ]);
 
-        $saturday = Carbon::create(2026, 4, 18)->toDateString(); // Sábado
+        $saturday = Carbon::create(2026, 4, 18)->toDateString();
 
-        // Executar comando para sábado
         $this->artisan('absences:detect-unregistered', [
             '--date' => $saturday,
         ]);
 
-        // Não deve criar nenhuma Absence
         $count = Absence::where('employee_id', $employee->id)
-            ->where('absence_date', $saturday)
+            ->whereDate('absence_date', $saturday)
             ->count();
 
         expect($count)->toBe(0);
@@ -167,21 +150,20 @@ describe('DetectUnregisteredAbsences Command', function () {
             'employee_id' => $employee->id,
             'status' => 'active',
             'start_date' => Carbon::create(2026, 1, 1),
-            'daily_work_minutes' => 240, // Part-time: 4 horas
+            'daily_work_minutes' => 240,
         ]);
 
         $targetDate = Carbon::create(2026, 4, 16)->toDateString();
 
-        // Executar comando
         $this->artisan('absences:detect-unregistered', [
             '--date' => $targetDate,
         ]);
 
-        // Verificar que usou 240 minutos do contrato
         $absence = Absence::where('employee_id', $employee->id)
-            ->where('absence_date', $targetDate)
+            ->whereDate('absence_date', $targetDate)
             ->first();
 
+        expect($absence)->not->toBeNull();
         expect($absence->hours_deducted)->toBe(240);
     });
 });

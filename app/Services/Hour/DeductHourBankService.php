@@ -10,20 +10,14 @@ use Carbon\Carbon;
 
 class DeductHourBankService
 {
-    /**
-     * Jornada diária padrão em minutos (8 horas)
-     */
-    private const DAILY_WORK_HOURS = 480; // 8 * 60
+    private const DAILY_WORK_HOURS = 480;
 
-    /**
-     * Verifica se há uma leave/absence ou férias registadas para uma data
-     */
     private function checkForLeaveOrVacation(int $employeeId, Carbon $date): array
     {
-        // Buscar leave/absence para esta data
         $leave = LeaveAndAbsence::where('employee_id', $employeeId)
-            ->where('start_date', '<=', $date->toDateString())
-            ->where('end_date', '>=', $date->toDateString())
+            ->whereDate('start_date', '<=', $date->toDateString())
+            ->whereDate('end_date', '>=', $date->toDateString())
+            ->where('status', 'approved')
             ->first();
 
         if ($leave) {
@@ -35,11 +29,10 @@ class DeductHourBankService
             ];
         }
 
-        // Buscar vacation para esta data
         $vacation = Vacation::where('employee_id', $employeeId)
-            ->where('start_date', '<=', $date->toDateString())
-            ->where('end_date', '>=', $date->toDateString())
-            ->where('status', 'approved') // Apenas férias aprovadas
+            ->whereDate('start_date', '<=', $date->toDateString())
+            ->whereDate('end_date', '>=', $date->toDateString())
+            ->where('status', 'approved')
             ->first();
 
         if ($vacation) {
@@ -53,9 +46,6 @@ class DeductHourBankService
         return ['has_leave' => false];
     }
 
-    /**
-     * Verifica se o tipo de licença justifica a deduação
-     */
     private function isJustifiedLeave(string $leaveType): bool
     {
         $justifiedTypes = config('hour_bank.justified_leave_types', [
@@ -69,10 +59,6 @@ class DeductHourBankService
         return in_array($leaveType, $justifiedTypes);
     }
 
-    /**
-     * Obtém as horas diárias de trabalho do funcionário (do contrato ativo)
-     * Se nenhum contrato ativo existir, retorna o padrão de 480 minutos (8h)
-     */
     private function getDailyWorkMinutes(int $employeeId, ?Carbon $date = null): int
     {
         $employee = Employee::findOrFail($employeeId);
@@ -81,7 +67,11 @@ class DeductHourBankService
             ->where('status', 'active');
 
         if ($date) {
-            $query = $query->where('start_date', '<=', $date->toDateString());
+            $query = $query->whereDate('start_date', '<=', $date->toDateString())
+                ->where(function ($query) use ($date) {
+                    $query->whereNull('end_date')
+                        ->orWhereDate('end_date', '>=', $date->toDateString());
+                });
         }
 
         $contract = $query->orderByDesc('start_date')->first();
@@ -89,12 +79,6 @@ class DeductHourBankService
         return $contract?->daily_work_minutes ?? self::DAILY_WORK_HOURS;
     }
 
-    /**
-     * Desconta horas criando um registo de Absence
-     * (O recálculo do HourBank é tratado pelo AbsenceObserver)
-     * 
-     * Se hoursToDeduct não for especificado, usa o daily_work_minutes do contrato ativo
-     */
     public function handle(
         int $employeeId,
         Carbon $absenceDate,
@@ -103,12 +87,10 @@ class DeductHourBankService
         ?string $reason = null,
         bool $forceDeduction = false
     ): ?Absence {
-        // Se não foi especificado quantas horas descontar, usar o contrato ativo
         if ($hoursToDeduct === null) {
             $hoursToDeduct = $this->getDailyWorkMinutes($employeeId, $absenceDate);
         }
 
-        // Verificar se validação de licenças está ativada
         $validateLeaves = config('hour_bank.validate_leaves_before_deduction', true);
 
         if ($validateLeaves && ! $forceDeduction) {
@@ -125,7 +107,6 @@ class DeductHourBankService
             }
         }
 
-        // Registar a ausência. O AbsenceObserver tratará de atualizar o HourBank.
         return Absence::create([
             'employee_id' => $employeeId,
             'absence_date' => $absenceDate,
@@ -134,10 +115,7 @@ class DeductHourBankService
             'reason' => $reason,
         ]);
     }
-    /**
-     * Desconta horas de um período inteiro (múltiplos dias)
-     * Usa daily_work_minutes do contrato para cada dia
-     */
+
     public function handlePeriod(
         int $employeeId,
         Carbon $startDate,
@@ -151,7 +129,6 @@ class DeductHourBankService
 
         while ($currentDate->lte($endDate)) {
             if ($currentDate->isWeekday()) {
-                // Usar o daily_work_minutes do contrato para esta data
                 $dailyMinutes = $this->getDailyWorkMinutes($employeeId, $currentDate->copy());
 
                 $absence = $this->handle(
@@ -167,6 +144,7 @@ class DeductHourBankService
                     $absences[] = $absence;
                 }
             }
+
             $currentDate->addDay();
         }
 

@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Vacation;
+use App\Traits\HasHierarchicalPolicy;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class VacationPolicy
 {
     use HandlesAuthorization;
-    
+    use HasHierarchicalPolicy;
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Vacation');
@@ -19,7 +21,7 @@ class VacationPolicy
 
     public function view(AuthUser $authUser, Vacation $vacation): bool
     {
-        return $authUser->can('View:Vacation');
+        return $this->canAccessWithPermission($authUser, 'View:Vacation', $vacation);
     }
 
     public function create(AuthUser $authUser): bool
@@ -29,12 +31,12 @@ class VacationPolicy
 
     public function update(AuthUser $authUser, Vacation $vacation): bool
     {
-        return $authUser->can('Update:Vacation');
+        return $this->canAccessWithPermission($authUser, 'Update:Vacation', $vacation);
     }
 
     public function delete(AuthUser $authUser, Vacation $vacation): bool
     {
-        return $authUser->can('Delete:Vacation');
+        return $this->canAccessWithPermission($authUser, 'Delete:Vacation', $vacation);
     }
 
     public function deleteAny(AuthUser $authUser): bool
@@ -44,12 +46,12 @@ class VacationPolicy
 
     public function restore(AuthUser $authUser, Vacation $vacation): bool
     {
-        return $authUser->can('Restore:Vacation');
+        return $this->canAccessWithPermission($authUser, 'Restore:Vacation', $vacation);
     }
 
     public function forceDelete(AuthUser $authUser, Vacation $vacation): bool
     {
-        return $authUser->can('ForceDelete:Vacation');
+        return $this->canAccessWithPermission($authUser, 'ForceDelete:Vacation', $vacation);
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
@@ -64,12 +66,11 @@ class VacationPolicy
 
     public function replicate(AuthUser $authUser, Vacation $vacation): bool
     {
-        return $authUser->can('Replicate:Vacation');
+        return $this->canAccessWithPermission($authUser, 'Replicate:Vacation', $vacation);
     }
 
     public function reorder(AuthUser $authUser): bool
     {
         return $authUser->can('Reorder:Vacation');
     }
-
 }

@@ -88,22 +88,30 @@ class HourBankService
             $previousBalance = $this->getPreviousBalance($employeeId, $monthYear);
 
             // 4. Atualizar ou Criar o registo do HourBank
-            $hourBank = HourBank::where('employee_id', $employeeId)
+            $hourBank = HourBank::withTrashed()->where('employee_id', $employeeId)
                 ->where('month_year', $monthYear)
                 ->first();
 
-            $hourBank = HourBank::updateOrCreate(
-                [
+            $attributes = [
+                'previous_balance' => $previousBalance,
+                'extra_hours_added' => $extraMinutesAdded,
+                'extra_hours_used' => $extraMinutesUsed,
+                'balance' => $previousBalance + $extraMinutesAdded - $extraMinutesUsed,
+            ];
+
+            if ($hourBank) {
+                if ($hourBank->trashed()) {
+                    $hourBank->restore();
+                }
+
+                $hourBank->fill($attributes)->save();
+            } else {
+                $hourBank = HourBank::create([
                     'employee_id' => $employeeId,
                     'month_year' => $monthYear,
-                ],
-                [
-                    'previous_balance' => $previousBalance,
-                    'extra_hours_added' => $extraMinutesAdded,
-                    'extra_hours_used' => $extraMinutesUsed,
-                    'balance' => $previousBalance + $extraMinutesAdded - $extraMinutesUsed,
-                ]
-            );
+                    ...$attributes,
+                ]);
+            }
 
             // 5. Propagar a alteração para os meses seguintes
             $this->propagate($employeeId, $monthYear);

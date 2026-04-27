@@ -9,9 +9,17 @@ use App\Filament\Widgets\EmployeeLeaveWidget;
 use App\Filament\Widgets\EmployeeVacationWidget;
 use App\Filament\Widgets\HourBankStatsWidget;
 use Filament\Pages\Dashboard as BaseDashboard;
+use Illuminate\Support\Facades\Auth;
 
 class EmployeeDashboard extends BaseDashboard
 {
+    public static function canAccess(): bool
+    {
+        $user = Auth::user();
+
+        return ($user?->can('View:Dashboard') ?? false) && filled($user?->employee_id);
+    }
+
     public function getWidgets(): array
     {
         return [

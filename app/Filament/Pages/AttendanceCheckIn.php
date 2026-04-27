@@ -14,29 +14,41 @@ use UnitEnum;
 class AttendanceCheckIn extends Page
 {
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-clock';
-    protected string $view = 'filament.pages.attendance-check-in';
-    protected static string|UnitEnum|null $navigationGroup = 'Gestão de Pessoal';
 
-    // Propriedades públicas para sincronização reativa com Alpine.js
+    protected string $view = 'filament.pages.attendance-check-in';
+
+    protected static string|UnitEnum|null $navigationGroup = 'GestÃ£o de Pessoal';
+
     public ?int $timeIn = null;
+
     public ?int $lunchStart = null;
+
     public ?int $lunchEnd = null;
+
     public ?int $timeOut = null;
+
     public int $serverTimestamp;
+
+    public static function canAccess(): bool
+    {
+        $user = Auth::user();
+
+        return ($user?->can('View:AttendanceCheckIn') ?? false) && filled($user?->employee_id);
+    }
 
     public function mount(): void
     {
         $user = Auth::user();
+
         if (! $user || ! $user->employee_id) {
             $this->redirect(config('filament.path'));
+
             return;
         }
+
         $this->refreshTimestamps();
     }
 
-    /**
-     * Atualiza os valores das propriedades com o que está na BD
-     */
     public function refreshTimestamps(): void
     {
         $log = AttendanceLog::where('employee_id', Auth::user()->employee_id)
@@ -75,23 +87,36 @@ class AttendanceCheckIn extends Page
                     $log->update(['time_out' => $now]);
                 }
 
-                $this->refreshTimestamps(); // Atualiza os dados para o JS
+                $this->refreshTimestamps();
                 Notification::make()->title('Registo efetuado')->success()->send();
             });
     }
 
     public function getCheckInLabel(): string
     {
-        if (!$this->timeIn) return __('widgets.attendance.entry');
-        if (!$this->lunchStart) return __('widgets.attendance.lunch_start');
-        if (!$this->lunchEnd) return __('widgets.attendance.lunch_end');
-        if (!$this->timeOut) return __('widgets.attendance.exit');
+        if (! $this->timeIn) {
+            return __('widgets.attendance.entry');
+        }
+
+        if (! $this->lunchStart) {
+            return __('widgets.attendance.lunch_start');
+        }
+
+        if (! $this->lunchEnd) {
+            return __('widgets.attendance.lunch_end');
+        }
+
+        if (! $this->timeOut) {
+            return __('widgets.attendance.exit');
+        }
+
         return __('widgets.attendance.completed');
     }
 
     protected function getCheckInColor(): string
     {
         $label = $this->getCheckInLabel();
+
         return match ($label) {
             __('widgets.attendance.entry') => 'success',
             __('widgets.attendance.lunch_start') => 'warning',
@@ -104,6 +129,7 @@ class AttendanceCheckIn extends Page
     protected function getCheckInIcon(): string
     {
         $label = $this->getCheckInLabel();
+
         return match ($label) {
             __('widgets.attendance.entry') => 'heroicon-m-arrow-right-end-on-rectangle',
             __('widgets.attendance.lunch_start') => 'heroicon-m-cake',

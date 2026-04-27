@@ -33,7 +33,6 @@ class LeaveAndAbsenceForm
                             'marriage' => 'Licença de Casamento',
                             'bereavement' => 'Nojo (Falecimento)',
                             'justified_absence' => 'Falta Justificada',
-                            'unjustified' => 'Falta Injustificada',
                         ])
                         ->required()
                         ->native(false),
@@ -77,14 +76,14 @@ class LeaveAndAbsenceForm
                             'approved' => 'Aprovado',
                             'rejected' => 'Rejeitado',
                         ])
+                        ->default('pending')
                         ->required()
                         ->native(false)
-                        ->disabled(fn ($record, callable $get): bool =>
+                        ->hidden(fn ($record, callable $get): bool =>
                             (($record && $record->employee_id === auth()->user()?->employee_id) ||
                              ((int) $get('employee_id') === auth()->user()?->employee_id)) &&
                             ! auth()->user()?->can('Approve:OwnLeaveAndAbsence')
-                        )
-                        ->dehydrated(),
+                        ),
 
                     Textarea::make('rejection_reason')
                         ->label('Razão da Rejeição')

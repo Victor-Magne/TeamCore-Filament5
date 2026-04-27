@@ -2,17 +2,14 @@
 
 namespace App\Filament\Widgets;
 
-use App\Services\ContractPdfService;
 use Filament\Actions\Action;
-use App\Models\Employee;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Components\Grid; // Alterado de Section para Grid
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
-
 use Filament\Support\Enums\TextSize;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Auth;
@@ -24,8 +21,12 @@ class EmployeeContractWidget extends Widget implements HasActions, HasSchemas
 
     protected string $view = 'filament.widgets.employee-contract-widget';
 
-    // 1. Expandido para ocupar a largura total
     protected int|string|array $columnSpan = 2;
+
+    public static function canView(): bool
+    {
+        return Auth::user()?->can('View:EmployeeContractWidget') ?? false;
+    }
 
     public function getContract()
     {
@@ -35,9 +36,14 @@ class EmployeeContractWidget extends Widget implements HasActions, HasSchemas
             ->first();
     }
 
+    public function getEmployee()
+    {
+        return Auth::user()?->employee;
+    }
+
     public function contractInfolist(Schema $schema): Schema
     {
-        $contract = $this->getContract(); // ✅ atribuir à variável
+        $contract = $this->getContract();
         $employee = $this->getEmployee();
 
         return $schema
@@ -54,34 +60,33 @@ class EmployeeContractWidget extends Widget implements HasActions, HasSchemas
                             ->label('Tipo')
                             ->size(TextSize::Small)
                             ->badge()
-                            ->formatStateUsing(fn($state) => str_replace('_', ' ', ucfirst($state))),
+                            ->formatStateUsing(fn ($state) => str_replace('_', ' ', ucfirst($state))),
                         TextEntry::make('salary')
-                            ->label('Remuneração Base')
+                            ->label('RemuneraÃ§Ã£o Base')
                             ->size(TextSize::Small)
-                            ->formatStateUsing(fn($state) => number_format($state, 2, ',', '.') . ' €'),
-                        TextEntry::make('designation.name') 
-                            ->label('Vínculo')
+                            ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' â‚¬'),
+                        TextEntry::make('designation.name')
+                            ->label('VÃ­nculo')
                             ->size(TextSize::Small)
                             ->default('N/A'),
                         TextEntry::make('start_date')
-                            ->label('Início')
+                            ->label('InÃ­cio')
                             ->size(TextSize::Small)
                             ->date('d/m/Y')
-                            ->hidden(fn($record) => ! in_array($record?->type, ['temporary', 'fixed_term'])),
+                            ->hidden(fn ($record) => ! in_array($record?->type, ['temporary', 'fixed_term'])),
                         TextEntry::make('end_date')
                             ->label('Fim Previsto')
                             ->size(TextSize::Small)
                             ->date('d/m/Y')
-                            ->placeholder('Indeterminado') // ✅ placeholder em vez de default
-                            ->hidden(fn($record) => ! in_array($record?->type, ['temporary', 'fixed_term'])),
+                            ->placeholder('Indeterminado')
+                            ->hidden(fn ($record) => ! in_array($record?->type, ['temporary', 'fixed_term'])),
                         TextEntry::make('start_date')
-                            ->label('Data de Admissão')
+                            ->label('Data de AdmissÃ£o')
                             ->size(TextSize::Small)
                             ->date('d/m/Y')
-                            ->hidden(fn($record) => in_array($record?->type, ['temporary', 'fixed_term'])),
+                            ->hidden(fn ($record) => in_array($record?->type, ['temporary', 'fixed_term'])),
                     ])
-                    ->visible(fn() => $contract !== null)// ✅
-                    ->visible(fn() => $employee !== null), // ✅
+                    ->visible(fn () => $contract !== null && $employee !== null),
             ]);
     }
 
@@ -92,10 +97,14 @@ class EmployeeContractWidget extends Widget implements HasActions, HasSchemas
             ->icon('heroicon-m-arrow-down-tray')
             ->color('gray')
             ->size('sm')
-            ->visible(fn() => $this->getContract() !== null) // ✅
+            ->visible(fn () => $this->getContract() !== null)
             ->url(function () {
                 $contract = $this->getContract();
-                if (! $contract) return '#';
+
+                if (! $contract) {
+                    return '#';
+                }
+
                 return route('contracts.pdf.single', $contract);
             })
             ->openUrlInNewTab();
