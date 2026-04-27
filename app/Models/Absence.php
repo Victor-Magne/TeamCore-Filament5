@@ -15,10 +15,15 @@ class Absence extends Model
 
     protected $fillable = [
         'employee_id',
+        'attendance_log_id',
+        'parent_absence_id',
         'leave_and_absence_id',
         'absence_date',
         'hours_deducted',
         'deduction_type',
+        'type',
+        'status',
+        'justification',
         'reason',
     ];
 

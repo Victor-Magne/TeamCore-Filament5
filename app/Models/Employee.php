@@ -18,7 +18,7 @@ class Employee extends Model
     protected $fillable = [
         'city_id',
         'unit_id',
-        'designation_id',
+        'designation_id', // Mantido para criação inicial via formulário/factory
         'first_name',
         'last_name',
         'email',
@@ -32,6 +32,7 @@ class Employee extends Model
         'date_hired',
         'date_dismissed',
         'vacation_balance',
+        'consecutive_delays',
     ];
 
     protected $casts = [
@@ -60,6 +61,26 @@ class Employee extends Model
         return $this->belongsTo(Unit::class, 'unit_id');
     }
 
+    /**
+     * Obtém o contrato ativo do funcionário.
+     */
+    public function activeContract(): HasOne
+    {
+        return $this->hasOne(Contract::class)->where('status', 'active');
+    }
+
+    /**
+     * O cargo (Designation) agora é derivado do contrato ativo.
+     */
+    public function getDesignationAttribute(): ?Designation
+    {
+        return $this->activeContract?->designation;
+    }
+
+    /**
+     * Mantemos o relacionamento para compatibilidade, mas ele deve ser evitado
+     * em favor da derivação do contrato ativo.
+     */
     public function designation(): BelongsTo
     {
         return $this->belongsTo(Designation::class);

@@ -33,18 +33,17 @@ trait HasHierarchicalQuery
                 $q->where('employee_id', $meuEmployee->id);
             }
 
-            // 2. REGRA SUBORDINADOS: Vê registos de quem pertence à sua unidade ou unidades descendentes
+            // 2. REGRA SUBORDINADOS: Vê registos de quem pertence à unidade onde é manager
             if ($user->can('Scope:View:Subordinates')) {
-                $minhaUnit = $meuEmployee->unit;
+                // Procurar unidades onde o funcionário atual é manager
+                $unidadesOndeSouManager = \App\Models\Unit::where('manager_id', $meuEmployee->id)->pluck('id')->toArray();
 
-                if ($minhaUnit) {
-                    $unitIds = array_merge([$minhaUnit->id], $minhaUnit->getAllDescendantIds());
-
+                if (!empty($unidadesOndeSouManager)) {
                     if ($model instanceof \App\Models\Employee) {
-                        $q->orWhereIn('unit_id', $unitIds);
+                        $q->orWhereIn('unit_id', $unidadesOndeSouManager);
                     } else {
-                        $q->orWhereHas('employee', function (Builder $empQuery) use ($unitIds) {
-                            $empQuery->whereIn('unit_id', $unitIds);
+                        $q->orWhereHas('employee', function (Builder $empQuery) use ($unidadesOndeSouManager) {
+                            $empQuery->whereIn('unit_id', $unidadesOndeSouManager);
                         });
                     }
                 }

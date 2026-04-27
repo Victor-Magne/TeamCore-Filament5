@@ -138,6 +138,7 @@ describe('AttendanceLogObserver', function () {
             'absence_date' => $date->toDateString(),
             'hours_deducted' => 480,
             'deduction_type' => 'unjustified_absence',
+            'type' => 'falta',
             'reason' => 'Falta integral',
         ]);
 

@@ -38,9 +38,14 @@ class GeneratePayrollService
             ->first();
 
         if (! $contract) {
-            // Se não houver contrato, usar salário base da designação
-            $baseSalary = (float) ($employee->designation?->base_salary ?? 0);
-            $dailyWorkHours = self::DEFAULT_DAILY_WORK_HOURS;
+            // Se não houver contrato ativo, tentamos pegar o mais recente encerrado para ter uma base
+            $lastContract = $employee->contracts()
+                ->orderByDesc('start_date')
+                ->first();
+
+            $baseSalary = (float) ($lastContract?->salary ?? $employee->designation?->base_salary ?? 0);
+            $dailyWorkMinutes = $lastContract?->daily_work_minutes ?? 480;
+            $dailyWorkHours = $dailyWorkMinutes / 60;
         } else {
             $baseSalary = (float) $contract->salary;
             // Converter minutos para horas (contrato pode armazenar em minutos)

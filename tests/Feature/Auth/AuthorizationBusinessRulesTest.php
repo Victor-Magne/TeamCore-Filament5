@@ -37,6 +37,9 @@ test('hierarchical employee policy allows subordinate access but blocks unrelate
     $subordinateEmployee = Employee::factory()->create(['unit_id' => $childUnit->id]);
     $outsiderEmployee = Employee::factory()->create(['unit_id' => $otherUnit->id]);
 
+    // Define manager
+    $childUnit->update(['manager_id' => $managerEmployee->id]);
+
     $managerUser = User::where('employee_id', $managerEmployee->id)->firstOrFail();
 
     grant($managerUser, [
@@ -57,6 +60,9 @@ test('hierarchical vacation policy respects subordinate scope', function () {
     $managerEmployee = Employee::factory()->create(['unit_id' => $parentUnit->id]);
     $subordinateEmployee = Employee::factory()->create(['unit_id' => $childUnit->id]);
     $outsiderEmployee = Employee::factory()->create(['unit_id' => $otherUnit->id]);
+
+    // Define manager
+    $childUnit->update(['manager_id' => $managerEmployee->id]);
 
     $subordinateVacation = Vacation::factory()->for($subordinateEmployee)->create();
     $outsiderVacation = Vacation::factory()->for($outsiderEmployee)->create();

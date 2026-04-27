@@ -24,7 +24,6 @@ class EmployeeFactory extends Factory
         return [
             'city_id' => City::factory(),
             'unit_id' => Unit::factory(),
-            'designation_id' => Designation::factory(),
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
             'email' => $this->faker->unique()->safeEmail(),

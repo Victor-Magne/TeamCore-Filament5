@@ -30,8 +30,6 @@ class EmployeeObserver
             'email_verified_at' => now(),
         ]);
 
-        $this->syncUserRoles($user, $employee);
-
         if ($creator) {
             Notification::make()
                 ->title('Utilizador criado')
@@ -42,14 +40,25 @@ class EmployeeObserver
         }
 
         // 2. Criar Contrato Inicial
+        $designationId = $employee->designation_id;
+
+        // Fallback para quando vem de uma factory que pode não ter carregado a relação
+        if (!$designationId) {
+             $designationId = $employee->getRawOriginal('designation_id');
+        }
+
+        $designation = \App\Models\Designation::find($designationId);
+
         Contract::create([
             'employee_id' => $employee->id,
-            'designation_id' => $employee->designation_id,
+            'designation_id' => $designationId,
             'type' => 'fixed_term', // Default
-            'salary' => $employee->designation?->base_salary ?? 0,
+            'salary' => $designation?->base_salary ?? 0,
             'status' => 'active',
             'start_date' => $employee->date_hired ?? now(),
             'daily_work_minutes' => 480, // Default 8h
+            'expected_start_time' => '09:00:00',
+            'lunch_duration_minutes' => 60,
         ]);
 
         if ($creator) {
@@ -86,17 +95,13 @@ class EmployeeObserver
      */
     public function updated(Employee $employee): void
     {
-        if ($employee->wasChanged(['designation_id', 'email', 'first_name', 'last_name'])) {
+        if ($employee->wasChanged(['email', 'first_name', 'last_name'])) {
             $user = $employee->user;
             if ($user) {
                 $user->update([
                     'name' => $employee->full_name,
                     'email' => $employee->email,
                 ]);
-
-                if ($employee->wasChanged('designation_id')) {
-                    $this->syncUserRoles($user, $employee);
-                }
             }
         }
     }

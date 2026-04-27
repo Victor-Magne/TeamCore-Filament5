@@ -25,19 +25,24 @@ class AbsencesTable
                     ->searchable()
                     ->sortable(),
 
-                TextColumn::make('deduction_type')
-                    ->label('Tipo de Dedução')
+                TextColumn::make('type')
+                    ->label('Tipo')
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'unjustified_absence' => 'Falta Injustificada',
-                        'partial_absence' => 'Falta Parcial',
-                        'other' => 'Outra',
-                        default => $state,
-                    })
+                    ->formatStateUsing(fn (string $state): string => ucfirst($state))
                     ->color(fn (string $state): string => match ($state) {
-                        'unjustified_absence' => 'danger',
-                        'partial_absence' => 'warning',
-                        'other' => 'gray',
+                        'falta' => 'danger',
+                        'atraso' => 'warning',
+                        default => 'gray',
+                    }),
+
+                TextColumn::make('status')
+                    ->label('Estado')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => ucfirst($state))
+                    ->color(fn (string $state): string => match ($state) {
+                        'justificado' => 'success',
+                        'pendente' => 'warning',
+                        'rejeitado' => 'danger',
                         default => 'gray',
                     }),
 
@@ -69,7 +74,7 @@ class AbsencesTable
                 TrashedFilter::make(),
             ])
             ->recordActions([
-                // Sem EditAction - é apenas visualização
+                \Filament\Tables\Actions\EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

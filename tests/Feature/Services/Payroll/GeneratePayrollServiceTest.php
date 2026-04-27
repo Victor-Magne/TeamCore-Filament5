@@ -11,6 +11,13 @@ uses(RefreshDatabase::class);
 
 it('contract is created and found correctly', function () {
     $designation = Designation::factory()->create();
+    $employee = Employee::factory()->create();
+
+    // Como o EmployeeObserver tenta pegar o designation_id que viria do formulário
+    // mas na factory ele não existe mais, vamos criar o contrato manualmente para os testes
+    // ou garantir que o Employee tenha um contrato.
+    // Na verdade, o EmployeeObserver ainda usa $employee->designation_id na criação do contrato.
+    // Vamos passar explicitamente.
     $employee = Employee::factory()->create(['designation_id' => $designation->id]);
 
     // O observer do Employee cria um contrato automaticamente

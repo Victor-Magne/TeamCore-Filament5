@@ -94,6 +94,17 @@ class ContractForm
                         ->default(480)
                         ->required()
                         ->helperText('Padrao: 480 minutos (8 horas)'),
+
+                    \Filament\Forms\Components\TimePicker::make('expected_start_time')
+                        ->label('Horário de Entrada')
+                        ->default('09:00')
+                        ->required(),
+
+                    TextInput::make('lunch_duration_minutes')
+                        ->label('Duração do Almoço (minutos)')
+                        ->numeric()
+                        ->default(60)
+                        ->required(),
                 ])->columns(2),
         ]);
     }

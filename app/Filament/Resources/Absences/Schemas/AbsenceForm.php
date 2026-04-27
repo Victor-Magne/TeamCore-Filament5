@@ -48,12 +48,33 @@ class AbsenceForm
                         ->label('Horas Descontadas (minutos)')
                         ->numeric()
                         ->disabled(),
+
+                    Select::make('type')
+                        ->label('Tipo')
+                        ->options([
+                            'atraso' => 'Atraso',
+                            'falta' => 'Falta',
+                        ])
+                        ->disabled(),
+
+                    Select::make('status')
+                        ->label('Estado')
+                        ->options([
+                            'pendente' => 'Pendente',
+                            'justificado' => 'Justificado',
+                            'rejeitado' => 'Rejeitado',
+                        ])
+                        ->required(),
                 ])->columns(2),
 
-            Section::make('Observações')
+            Section::make('Justificação e Observações')
                 ->schema([
+                    Textarea::make('justification')
+                        ->label('Justificação do Funcionário')
+                        ->placeholder('Escreva aqui a justificação...'),
+
                     Textarea::make('reason')
-                        ->label('Motivo da Ausência')
+                        ->label('Motivo/Notas Internas')
                         ->disabled()
                         ->columnSpanFull(),
                 ]),

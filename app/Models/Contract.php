@@ -17,6 +17,8 @@ class Contract extends Model
         'designation_id',
         'type',
         'salary',
+        'expected_start_time',
+        'lunch_duration_minutes',
         'daily_work_minutes',
         'status',
         'start_date',
@@ -27,6 +29,8 @@ class Contract extends Model
         'start_date' => 'date',
         'end_date' => 'date',
         'salary' => 'decimal:2',
+        'lunch_duration_minutes' => 'integer',
+        'daily_work_minutes' => 'integer',
     ];
 
     public function employee(): BelongsTo

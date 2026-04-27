@@ -41,6 +41,7 @@ class EmployeesTable
                     ->sortable(),
                 TextColumn::make('designation.name')
                     ->label('Cargo')
+                    ->default('Sem Cargo')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('date_hired')

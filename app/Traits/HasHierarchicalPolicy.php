@@ -32,15 +32,11 @@ trait HasHierarchicalPolicy
         }
 
         if ($user->can('Scope:View:Subordinates')) {
-            $myUnit = $myEmployee->unit;
             $targetUnit = $ownerEmployee->unit;
 
-            if ($myUnit && $targetUnit) {
-                if ($myUnit->id === $targetUnit->id) {
-                    return true;
-                }
-
-                if (in_array($targetUnit->id, $myUnit->getAllDescendantIds(), true)) {
+            if ($targetUnit) {
+                // Verifica se o utilizador atual é o manager da unidade do funcionário alvo
+                if ($targetUnit->manager_id === $myEmployee->id) {
                     return true;
                 }
             }
