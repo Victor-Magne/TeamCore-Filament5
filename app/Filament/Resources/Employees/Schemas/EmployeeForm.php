@@ -8,13 +8,11 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Carbon\Carbon;
 // AJUSTE AQUI: No Filament 5, componentes de Layout usam o namespace Schema
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 
 class EmployeeForm
@@ -65,12 +63,12 @@ class EmployeeForm
                         Tab::make('Documentação e Morada')
                             ->icon('heroicon-m-identification')
                             ->schema([
-                                Section::make('Numero de Telemóvel')
+                                Section::make('Número de Telemóvel')
                                     ->schema([
                                         TextInput::make('phone_number')
                                             ->label('Telemóvel')
                                             ->tel()
-                                            ->prefix(fn(Get $get) => '+' . (City::find($get('city_id'))?->state?->country?->phonecode ?? ''))
+                                            ->prefix(fn (Get $get) => '+'.(City::find($get('city_id'))?->state?->country?->phonecode ?? ''))
                                             ->required(),
                                     ]),
 

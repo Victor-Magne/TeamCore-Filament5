@@ -3,12 +3,14 @@
 namespace App\Policies;
 
 use App\Models\User;
+use App\Traits\HasHierarchicalPolicy;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 
 class UserPolicy
 {
     use HandlesAuthorization;
+    use HasHierarchicalPolicy;
 
     public function viewAny(AuthUser $authUser): bool
     {
@@ -17,7 +19,7 @@ class UserPolicy
 
     public function view(AuthUser $authUser, User $user): bool
     {
-        return $authUser->can('View:User');
+        return $this->canAccessWithPermission($authUser, 'View:User', $user);
     }
 
     public function create(AuthUser $authUser): bool
@@ -27,12 +29,12 @@ class UserPolicy
 
     public function update(AuthUser $authUser, User $user): bool
     {
-        return $authUser->can('Update:User');
+        return $this->canAccessWithPermission($authUser, 'Update:User', $user);
     }
 
     public function delete(AuthUser $authUser, User $user): bool
     {
-        return $authUser->can('Delete:User');
+        return $this->canAccessWithPermission($authUser, 'Delete:User', $user);
     }
 
     public function deleteAny(AuthUser $authUser): bool
@@ -42,12 +44,12 @@ class UserPolicy
 
     public function restore(AuthUser $authUser, User $user): bool
     {
-        return $authUser->can('Restore:User');
+        return $this->canAccessWithPermission($authUser, 'Restore:User', $user);
     }
 
     public function forceDelete(AuthUser $authUser, User $user): bool
     {
-        return $authUser->can('ForceDelete:User');
+        return $this->canAccessWithPermission($authUser, 'ForceDelete:User', $user);
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
@@ -62,7 +64,7 @@ class UserPolicy
 
     public function replicate(AuthUser $authUser, User $user): bool
     {
-        return $authUser->can('Replicate:User');
+        return $this->canAccessWithPermission($authUser, 'Replicate:User', $user);
     }
 
     public function reorder(AuthUser $authUser): bool

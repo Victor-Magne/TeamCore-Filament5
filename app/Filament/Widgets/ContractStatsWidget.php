@@ -59,7 +59,7 @@ class ContractStatsWidget extends StatsOverviewWidget
                 ->description('Vigentes e válidos')
                 ->descriptionIcon('heroicon-m-check-circle')
                 ->color('success'),
-            Stat::make('Taxa de Atividade', $activePercentage.'%')
+            Stat::make('Taxa de Actividade', $activePercentage.'%')
                 ->description('Percentagem de ativos')
                 ->descriptionIcon('heroicon-m-chart-pie')
                 ->color('info'),
