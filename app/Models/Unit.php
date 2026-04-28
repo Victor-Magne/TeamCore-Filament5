@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * Ficheiro do Modelo Unit.
+ *
+ * Este modelo define as Unidades Organizacionais da empresa (ex: Direcção,
+ * Departamentos, Secções). Suporta uma estrutura hierárquica (parent/child)
+ * e associa gestores responsáveis a cada unidade.
+ */
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,42 +23,81 @@ class Unit extends Model
 {
     use HasFactory, LogsActivity, SoftDeletes;
 
+    /**
+     * Nome da tabela associada.
+     *
+     * @var string
+     */
     protected $table = 'organizational_units';
 
+    /**
+     * Campos preenchíveis em massa.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
-        'name',
-        'type',
-        'description',
-        'parent_id',
-        'manager_id',
-        'is_main_direction',
+        'name',              // Nome da unidade (ex: Departamento Financeiro)
+        'type',              // Tipo de unidade (direction, department, section)
+        'description',       // Descrição das responsabilidades da unidade
+        'parent_id',         // ID da unidade pai (para hierarquia)
+        'manager_id',        // ID do funcionário que é o gestor directo
+        'is_main_direction', // Flag para indicar se é a direcção principal da empresa
     ];
 
+    /**
+     * Relacionamento: Unidade Pai.
+     *
+     * Permite subir na hierarquia organizacional.
+     */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Unit::class, 'parent_id');
     }
 
+    /**
+     * Relacionamento: Unidades Filhas (Sub-unidades).
+     *
+     * Permite obter todas as divisões que pertencem a esta unidade.
+     */
     public function children(): HasMany
     {
         return $this->hasMany(Unit::class, 'parent_id');
     }
 
+    /**
+     * Relacionamento: Gestor Principal.
+     *
+     * Liga ao funcionário que detém a responsabilidade máxima sobre a unidade.
+     */
     public function manager(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'manager_id');
     }
 
+    /**
+     * Relacionamento: Funcionários da Unidade.
+     *
+     * Obtém todos os funcionários alocados a esta unidade específica.
+     */
     public function employees(): HasMany
     {
         return $this->hasMany(Employee::class, 'unit_id');
     }
 
+    /**
+     * Relacionamento: Gestores (BelongsToMany).
+     *
+     * Caso a unidade tenha múltiplos gestores ou para manter histórico
+     * de gestão via tabela pivot 'unit_manager'.
+     */
     public function managers(): BelongsToMany
     {
         return $this->belongsToMany(Employee::class, 'unit_manager', 'unit_id', 'employee_id');
     }
 
+    /**
+     * Configuração do log de actividades.
+     */
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()

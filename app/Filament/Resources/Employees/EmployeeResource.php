@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * Ficheiro do Resource EmployeeResource.
+ *
+ * Este recurso é o pilar da gestão de funcionários no painel administrativo do Filament.
+ * Define como os funcionários são listados, criados e editados, integrando formulários
+ * complexos e tabelas com filtragem avançada.
+ */
+
 namespace App\Filament\Resources\Employees;
 
 use App\Filament\Resources\Employees\Pages\CreateEmployee;
@@ -19,36 +27,68 @@ use UnitEnum;
 
 class EmployeeResource extends Resource
 {
+    /**
+     * Modelo associado ao recurso.
+     */
     protected static ?string $model = Employee::class;
 
+    /**
+     * Ícone exibido no menu de navegação lateral.
+     */
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Identification;
 
+    /**
+     * Grupo de navegação no menu lateral para organização.
+     */
     protected static string|UnitEnum|null $navigationGroup = 'Recursos Humanos';
 
+    /**
+     * Atributo usado para representar o registo em pesquisas globais e títulos.
+     */
     protected static ?string $recordTitleAttribute = 'first_name';
 
+    /**
+     * Rótulo de navegação traduzido.
+     */
     public static function getNavigationLabel(): string
     {
         return __('Funcionários');
     }
 
+    /**
+     * Define a estrutura do formulário de criação e edição.
+     *
+     * Delega a configuração para a classe especializada EmployeeForm
+     * para manter este ficheiro limpo e organizado.
+     */
     public static function form(Schema $schema): Schema
     {
         return EmployeeForm::configure($schema);
     }
 
+    /**
+     * Define a estrutura da tabela de listagem.
+     *
+     * Delega a configuração para a classe especializada EmployeesTable.
+     */
     public static function table(Table $table): Table
     {
         return EmployeesTable::configure($table);
     }
 
+    /**
+     * Define gestores de relacionamentos (Relation Managers) para serem exibidos na página de edição.
+     */
     public static function getRelations(): array
     {
         return [
-            //
+            // Podem ser adicionados aqui relacionamentos como ContractsRelationManager, etc.
         ];
     }
 
+    /**
+     * Define as rotas e páginas associadas a este recurso.
+     */
     public static function getPages(): array
     {
         return [
@@ -58,6 +98,12 @@ class EmployeeResource extends Resource
         ];
     }
 
+    /**
+     * Personaliza a query do Eloquent usada para procurar registos por ID nas rotas.
+     *
+     * Neste caso, garante que registos eliminados (Soft Deleted) continuam
+     * acessíveis se referenciados directamente, prevenindo erros de 404 em histórico.
+     */
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
         return parent::getRecordRouteBindingEloquentQuery()

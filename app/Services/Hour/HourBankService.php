@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Ficheiro do Serviço HourBankService.
+ *
+ * Este serviço é o motor central de gestão do Banco de Horas.
+ * É responsável por recalcular os saldos mensais, processar ganhos (horas extra)
+ * e perdas (ausências), garantindo que as alterações se propagam correctamente
+ * para os meses futuros.
+ */
+
 namespace App\Services\Hour;
 
 use App\Models\Absence;
@@ -10,18 +19,34 @@ use Illuminate\Support\Facades\DB;
 
 class HourBankService
 {
+    /**
+     * Serviço auxiliar para cálculo técnico de horas extra.
+     */
     protected CalculateExtraHoursService $calculateService;
 
+    /**
+     * Cache em memória para evitar recursividade infinita ou cálculos duplicados
+     * durante o mesmo ciclo de execução.
+     *
+     * @var array<string, bool>
+     */
+    protected array $calculating = [];
+
+    /**
+     * Construtor com injecção de dependência.
+     */
     public function __construct(CalculateExtraHoursService $calculateService)
     {
         $this->calculateService = $calculateService;
     }
 
     /**
-     * Recalcula o banco de horas de um funcionário para um mês específico
+     * Inicia o recálculo do banco de horas para um funcionário e mês específico.
+     * Implementa um mecanismo de protecção contra reentrada.
+     *
+     * @param int $employeeId ID do funcionário
+     * @param string $monthYear Mês e ano no formato 'Y-m'
      */
-    protected array $calculating = [];
-
     public function recalculate(int $employeeId, string $monthYear): void
     {
         $key = "{$employeeId}-{$monthYear}";
@@ -37,6 +62,9 @@ class HourBankService
         }
     }
 
+    /**
+     * Executa a lógica efectiva de recálculo dentro de uma transacção.
+     */
     protected function performRecalculate(int $employeeId, string $monthYear): void
     {
         DB::transaction(function () use ($employeeId, $monthYear) {
@@ -44,7 +72,7 @@ class HourBankService
             $startDate = $month->copy()->startOfMonth();
             $endDate = $month->copy()->endOfMonth();
 
-            // 1. Calcular Horas Extras Ganhas (via AttendanceLog)
+            // 1. Calcular Horas Extras Ganhas e Défices via AttendanceLog
             $extraMinutesAdded = 0;
             $extraMinutesUsedFromLogs = 0;
             $logs = AttendanceLog::where('employee_id', $employeeId)
@@ -52,10 +80,12 @@ class HourBankService
                 ->get();
 
             foreach ($logs as $log) {
+                // Calcula horas que excedem o horário contratual
                 $extraMinutesAdded += $this->calculateService->handle($log);
 
-                // Só contar o défice do log se não houver um registo de Absence para este dia
-                // (Para evitar duplicar descontos de atraso/falta que já estão no absences)
+                // Só contar o défice do log (tempo a menos trabalhado) se não houver
+                // um registo formal de Absence (falta/atraso) para este dia.
+                // Isto evita que o funcionário seja penalizado duas vezes pelo mesmo tempo.
                 $hasAbsence = Absence::where('employee_id', $employeeId)
                     ->where('absence_date', $log->time_in->toDateString())
                     ->exists();
@@ -65,21 +95,19 @@ class HourBankService
                 }
             }
 
-            // 2. Calcular Horas Perdidas (via Absence)
+            // 2. Somar Horas Perdidas via registos formais de Absence (faltas injustificadas, etc.)
             $extraMinutesUsed = Absence::where('employee_id', $employeeId)
                 ->whereBetween('absence_date', [$startDate->toDateString(), $endDate->toDateString()])
                 ->sum('hours_deducted');
 
+            // Combina os descontos de assiduidade com os descontos formais
             $extraMinutesUsed += $extraMinutesUsedFromLogs;
 
-            // 3. Obter o saldo anterior
+            // 3. Recuperar o saldo final do mês anterior
             $previousBalance = $this->getPreviousBalance($employeeId, $monthYear);
 
-            // 4. Atualizar ou Criar o registo do HourBank
-            $hourBank = HourBank::where('employee_id', $employeeId)
-                ->where('month_year', $monthYear)
-                ->first();
-
+            // 4. Actualizar ou criar o registo de HourBank para este mês
+            // O balance é o resultado de: Saldo Anterior + Ganhos - Perdas
             $hourBank = HourBank::updateOrCreate(
                 [
                     'employee_id' => $employeeId,
@@ -93,13 +121,15 @@ class HourBankService
                 ]
             );
 
-            // 5. Propagar a alteração para os meses seguintes
+            // 5. Propagar as alterações em cascata para os meses subsequentes
+            // essencial se o recálculo for de um mês passado.
             $this->propagate($employeeId, $monthYear);
         });
     }
 
     /**
-     * Propaga o saldo final de um mês para o saldo inicial do mês seguinte
+     * Propaga o saldo final de um mês para o saldo inicial (previous_balance) do mês seguinte.
+     * Funciona de forma recursiva até não encontrar mais meses registados.
      */
     public function propagate(int $employeeId, string $monthYear): void
     {
@@ -107,33 +137,34 @@ class HourBankService
         $nextMonth = $currentMonth->copy()->addMonth();
         $nextMonthYear = $nextMonth->format('Y-m');
 
-        // Procurar o registo do mês seguinte
+        // Procura se já existe um registo para o mês seguinte
         $nextHourBank = HourBank::where('employee_id', $employeeId)
             ->where('month_year', $nextMonthYear)
             ->first();
 
-        // Se não existir, paramos a propagação (ou poderíamos criar se fosse necessário)
-        // No entanto, o sistema cria HourBanks conforme necessário via observers
+        // Se não existir, a cadeia de propagação termina
         if (! $nextHourBank) {
             return;
         }
 
-        // Obter o saldo final do mês atual (que será o inicial do próximo)
+        // Obtém o saldo final actualizado do mês actual
         $currentBalance = HourBank::where('employee_id', $employeeId)
             ->where('month_year', $monthYear)
             ->value('balance') ?? 0;
 
-        // Atualizar o próximo mês
+        // Actualiza o mês seguinte com o novo saldo transportado
         $nextHourBank->previous_balance = $currentBalance;
         $nextHourBank->balance = $currentBalance + $nextHourBank->extra_hours_added - $nextHourBank->extra_hours_used;
         $nextHourBank->save();
 
-        // Recursividade para continuar a propagação
+        // Chamada recursiva para continuar a propagação para o mês depois deste
         $this->propagate($employeeId, $nextMonthYear);
     }
 
     /**
-     * Obtém o saldo do mês anterior (procura o registo mais recente antes do mês atual)
+     * Obtém o saldo do último mês registado antes do mês de referência.
+     *
+     * @return int Saldo em minutos
      */
     private function getPreviousBalance(int $employeeId, string $currentMonthYear): int
     {

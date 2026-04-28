@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Ficheiro de Configuração do Formulário de Funcionários.
+ *
+ * Esta classe isola a lógica de construção do formulário do Resource Employee.
+ * Utiliza o sistema de Schemas do Filament 5 para organizar os campos em Tabs
+ * e Sections, garantindo uma interface de utilizador limpa para lidar com
+ * a grande quantidade de dados de um funcionário.
+ */
+
 namespace App\Filament\Resources\Employees\Schemas;
 
 use App\Models\City;
@@ -9,7 +18,6 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Carbon\Carbon;
-// AJUSTE AQUI: No Filament 5, componentes de Layout usam o namespace Schema
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -19,11 +27,18 @@ use Filament\Schemas\Schema;
 
 class EmployeeForm
 {
+    /**
+     * Configura os componentes do formulário de funcionário.
+     *
+     * @param Schema $schema O objecto de schema a ser configurado.
+     * @return Schema
+     */
     public static function configure(Schema $schema): Schema
     {
         return $schema
             ->components([
-                Tabs::make('Employee Management')
+                // Organização em Tabs para melhor experiência de utilizador (UX)
+                Tabs::make('Gestão de Funcionário')
                     ->tabs([
                         // --- TAB 1: IDENTIFICAÇÃO BÁSICA ---
                         Tab::make('Dados Pessoais')
@@ -43,11 +58,11 @@ class EmployeeForm
                                             ->label('Email Profissional')
                                             ->email()
                                             ->required()
-                                            ->unique(ignoreRecord: true)
-                                            ->rule(new ValidEmailDomain),
+                                            ->unique(ignoreRecord: true) // Evita erro de e-mail duplicado ao editar o próprio registo
+                                            ->rule(new ValidEmailDomain), // Validação customizada para garantir TLD válido (.pt, .com, etc)
                                         DatePicker::make('date_of_birth')
                                             ->label('Data de Nascimento')
-                                            ->maxDate(now()->subYears(18))
+                                            ->maxDate(now()->subYears(18)) // Só permite maiores de 18 anos
                                             ->required()
                                             ->native(false),
                                         Select::make('gender')
@@ -65,11 +80,12 @@ class EmployeeForm
                         Tab::make('Documentação e Morada')
                             ->icon('heroicon-m-identification')
                             ->schema([
-                                Section::make('Numero de Telemóvel')
+                                Section::make('Contacto Telefónico')
                                     ->schema([
                                         TextInput::make('phone_number')
                                             ->label('Telemóvel')
                                             ->tel()
+                                            // Dinamicamente obtém o indicativo do país baseado na cidade seleccionada
                                             ->prefix(fn(Get $get) => '+' . (City::find($get('city_id'))?->state?->country?->phonecode ?? ''))
                                             ->required(),
                                     ]),
@@ -79,8 +95,7 @@ class EmployeeForm
                                         TextInput::make('nif')
                                             ->label('NIF')
                                             ->required()
-                                            // ->numeric()
-                                            ->length(9),
+                                            ->length(9), // NIF em Portugal tem sempre 9 dígitos
                                         TextInput::make('nss')
                                             ->label('Nº Seg. Social')
                                             ->required(),
@@ -102,7 +117,7 @@ class EmployeeForm
                                             ->searchable()
                                             ->native(false)
                                             ->preload()
-                                            ->live()
+                                            ->live() // Permite que outros campos reajam à mudança deste
                                             ->required(),
                                     ])->columns(2),
                             ]),
@@ -127,11 +142,11 @@ class EmployeeForm
                                             ->required(),
                                         DateTimePicker::make('date_dismissed')
                                             ->label('Data de Demissão')
-                                            ->helperText('Deixe vazio se estiver ativo'),
+                                            ->helperText('Deixe vazio se o funcionário estiver activo na empresa'),
                                         TextInput::make('vacation_balance')
                                             ->label('Saldo de Férias')
                                             ->numeric()
-                                            ->default(22)
+                                            ->default(22) // Em Portugal, o mínimo legal são 22 dias úteis
                                             ->required(),
                                     ])->columns(2),
                             ]),

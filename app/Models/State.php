@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * Ficheiro do Modelo State.
+ *
+ * Este modelo representa os Distritos (Portugal) ou Estados/Regiões
+ * administrativas de um país. Serve como nível intermédio na hierarquia
+ * de localização geográfica.
+ */
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,20 +20,37 @@ class State extends Model
 {
     use HasFactory, LogsActivity, SoftDeletes;
 
-    protected $fillable = ['name', 'country_id'];
+    /**
+     * Campos preenchíveis.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',       // Nome do distrito ou estado
+        'country_id'  // ID do país ao qual pertence
+    ];
 
-    protected $casts = [];
-
+    /**
+     * Relacionamento: País.
+     */
     public function country()
     {
         return $this->belongsTo(Country::class);
     }
 
+    /**
+     * Relacionamento: Cidades.
+     *
+     * Lista todas as cidades que pertencem a este distrito/estado.
+     */
     public function cities()
     {
         return $this->hasMany(City::class);
     }
 
+    /**
+     * Configuração do log de actividades.
+     */
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()

@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * Ficheiro do Provedor de Serviços AppServiceProvider.
+ *
+ * Este é o provedor central da aplicação onde são registados os serviços singleton,
+ * configurados os parâmetros globais de ambiente (como codificação UTF-8)
+ * e activados os Observers para automatização de eventos nos modelos Eloquent.
+ */
+
 namespace App\Providers;
 
 use App\Models\Absence;
@@ -18,26 +26,30 @@ use Illuminate\Support\ServiceProvider;
 class AppServiceProvider extends ServiceProvider
 {
     /**
-     * Register any application services.
+     * Regista serviços no contentor de dependências da aplicação.
      */
     public function register(): void
     {
+        // Regista o serviço de Banco de Horas como Singleton para garantir
+        // consistência de estado durante o ciclo de vida do pedido.
         $this->app->singleton(HourBankService::class);
     }
 
     /**
-     * Bootstrap any application services.
+     * Inicializa os serviços de bootstrap da aplicação.
      */
     public function boot(): void
     {
-        // Configurar o charset UTF-8 para todo o PHP
+        // Força a codificação interna para UTF-8 para garantir que a acentuação
+        // em Português é tratada correctamente em todas as operações de string.
         if (extension_loaded('mbstring')) {
             mb_internal_encoding('UTF-8');
         }
 
-        // Garantir que json_encode funciona com UTF-8
+        // Garante que a serialização JSON e a saída padrão utilizam UTF-8.
         ini_set('default_charset', 'UTF-8');
 
+        // Activação dos Observers para automação de lógica de negócio em eventos da BD
         Contract::observe(ContractObserver::class);
         Employee::observe(EmployeeObserver::class);
         AttendanceLog::observe(AttendanceLogObserver::class);

@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Ficheiro do Serviço DeductHourBankService.
+ *
+ * Este serviço centraliza a lógica de punição por assiduidade.
+ * Gere a identificação de atrasos na entrada, saídas antecipadas e faltas injustificadas.
+ * Implementa também regras de tolerância (15 min) e a regra de conversão
+ * de 3 atrasos consecutivos numa falta total de um dia.
+ */
+
 namespace App\Services\Hour;
 
 use App\Models\Absence;
@@ -12,22 +21,24 @@ use Carbon\Carbon;
 class DeductHourBankService
 {
     /**
-     * Processa um AttendanceLog para verificar atrasos ou faltas
+     * Processa um registo de presença para verificar se houve incumprimento de horário.
+     *
+     * @param AttendanceLog $attendanceLog
      */
     public function processAttendance(AttendanceLog $attendanceLog): void
     {
         $employeeId = $attendanceLog->employee_id;
         $date = Carbon::parse($attendanceLog->time_in);
 
-        // 1. Verificar se deve ignorar (fim de semana, férias, licenças)
+        // 1. Verifica se deve ignorar a verificação (ex: Férias ou Fim de Semana)
         if ($this->shouldSkipDeduction($employeeId, $date)) {
-            // Se deve pular, garantir que não há Absence indevida para este dia
+            // Se o funcionário trabalhou num dia que deveria estar de folga,
+            // removemos qualquer falta automática que tenha sido gerada por erro.
             $this->removeAbsenceForDate($employeeId, $date->toDateString());
-
             return;
         }
 
-        // 2. Obter contrato ativo
+        // 2. Obter o contrato para saber o horário esperado
         $contract = $attendanceLog->employee->contracts()
             ->where('status', 'active')
             ->where('start_date', '<=', $date)
@@ -41,11 +52,12 @@ class DeductHourBankService
         $expectedStart = Carbon::parse($date->toDateString().' '.$contract->expected_start_time);
         $actualStart = Carbon::parse($attendanceLog->time_in);
 
+        // Calcula a diferença em minutos (positivo se chegou atrasado)
         $delayMinutes = $expectedStart->diffInMinutes($actualStart, false);
 
-        if ($delayMinutes > 15) {
+        if ($delayMinutes > 15) { // Tolerância de 15 minutos
             if ($delayMinutes <= 60) {
-                // Atraso: tempo exato
+                // Atraso Parcial (até 1 hora): desconta o tempo exacto de atraso
                 $this->createOrUpdateAbsence(
                     $employeeId,
                     $date,
@@ -54,10 +66,10 @@ class DeductHourBankService
                     sprintf('Atraso de %d minutos (Entrada: %s, Esperada: %s)', $delayMinutes, $actualStart->format('H:i'), $expectedStart->format('H:i'))
                 );
 
-                // Verificar regra de 3 atrasos consecutivos
+                // Verifica se este é o 3º atraso consecutivo para converter em falta
                 $this->checkConsecutiveDelays($employeeId);
             } else {
-                // Falta: dia completo
+                // Atraso Superior a 1 hora: Considerado falta injustificada de um dia inteiro
                 $this->createOrUpdateAbsence(
                     $employeeId,
                     $date,
@@ -66,22 +78,23 @@ class DeductHourBankService
                     sprintf('Falta por atraso superior a 1h (%d min)', $delayMinutes)
                 );
 
-                return; // Se já é falta total por atraso, não precisamos checar saída antecipada
+                return;
             }
         } else {
-            // Tolerância: Remover qualquer Absence de atraso/falta automática para este dia se existir
+            // Se chegou dentro da tolerância, removemos registos de atraso prévios para este dia
             $this->removeAbsenceForDate($employeeId, $date->toDateString());
         }
 
-        // 3. Verificar Saída Antecipada
+        // 3. Verificar Saída Antecipada (se a saída já tiver sido registada)
         if ($attendanceLog->time_out) {
+            // Hora esperada de saída = Início esperado + Horas Trabalho + Almoço
             $expectedEnd = $expectedStart->copy()->addMinutes($contract->daily_work_minutes + $contract->lunch_duration_minutes);
             $actualEnd = Carbon::parse($attendanceLog->time_out);
 
             $earlyDepartureMinutes = $actualEnd->diffInMinutes($expectedEnd, false);
 
             if ($earlyDepartureMinutes > 15) {
-                // Obter minutos já descontados (se houve atraso na entrada)
+                // Combina o atraso da manhã com a saída antecipada da tarde
                 $existingAbsence = Absence::where('employee_id', $employeeId)
                     ->whereDate('absence_date', $date)
                     ->first();
@@ -89,6 +102,7 @@ class DeductHourBankService
                 $totalMinutesToDeduct = max(0, $earlyDepartureMinutes) + ($existingAbsence?->hours_deducted ?? 0);
 
                 if ($totalMinutesToDeduct > 60) {
+                    // Acumulado de atrasos > 1h = Falta total
                     $this->createOrUpdateAbsence(
                         $employeeId,
                         $date,
@@ -97,6 +111,7 @@ class DeductHourBankService
                         sprintf('Falta por saída antecipada/atraso acumulado > 1h (%d min)', $totalMinutesToDeduct)
                     );
                 } else {
+                    // Acumulado parcial
                     $this->createOrUpdateAbsence(
                         $employeeId,
                         $date,
@@ -110,7 +125,7 @@ class DeductHourBankService
     }
 
     /**
-     * Regista uma falta total (quando não há AttendanceLog ou é explicitamente marcado)
+     * Regista uma falta total quando não há qualquer registo de ponto.
      */
     public function registerFullAbsence(int $employeeId, Carbon $date, string $reason = 'Falta injustificada'): void
     {
@@ -126,46 +141,48 @@ class DeductHourBankService
 
         $minutes = $contract?->daily_work_minutes ?? 480;
 
-        $this->createOrUpdateAbsence(
-            $employeeId,
-            $date,
-            $minutes,
-            'unjustified_absence',
-            $reason
-        );
+        $this->createOrUpdateAbsence($employeeId, $date, $minutes, 'unjustified_absence', $reason);
     }
 
+    /**
+     * Helper para persistir o registo de ausência na base de dados.
+     */
     private function createOrUpdateAbsence(int $employeeId, Carbon $date, int $minutes, string $type, string $reason): void
     {
         $absence = Absence::where('employee_id', $employeeId)
             ->whereDate('absence_date', $date)
             ->first();
 
+        $data = [
+            'employee_id' => $employeeId,
+            'absence_date' => $date->toDateString(),
+            'hours_deducted' => $minutes,
+            'deduction_type' => $type,
+            'reason' => $reason,
+        ];
+
         if ($absence) {
-            $absence->update([
-                'hours_deducted' => $minutes,
-                'deduction_type' => $type,
-                'reason' => $reason,
-            ]);
+            $absence->update($data);
         } else {
-            Absence::create([
-                'employee_id' => $employeeId,
-                'absence_date' => $date->toDateString(),
-                'hours_deducted' => $minutes,
-                'deduction_type' => $type,
-                'reason' => $reason,
-            ]);
+            Absence::create($data);
         }
     }
 
+    /**
+     * Remove registos de ausência indevidos para uma data específica.
+     */
     public function removeAbsenceForDate(int $employeeId, string $date): void
     {
         Absence::where('employee_id', $employeeId)
             ->whereDate('absence_date', $date)
-            ->whereNull('leave_and_absence_id') // Não remover se for uma licença manual
+            ->whereNull('leave_and_absence_id') // Não remove se for uma licença oficial inserida manualmente
             ->delete();
     }
 
+    /**
+     * Determina se uma data deve ser ignorada para efeitos de descontos.
+     * Ignora fins de semana, férias aprovadas e licenças médicas/outras.
+     */
     public function shouldSkipDeduction(int $employeeId, Carbon $date): bool
     {
         if ($date->isWeekend()) {
@@ -174,7 +191,7 @@ class DeductHourBankService
 
         $dateStr = $date->toDateString();
 
-        // Verificar licenças aprovadas que cubram esta data
+        // 1. Verificar Licenças/Baixas Médicas
         $leaveExists = LeaveAndAbsence::where('employee_id', $employeeId)
             ->where('status', 'approved')
             ->whereDate('start_date', '<=', $dateStr)
@@ -185,22 +202,20 @@ class DeductHourBankService
             return true;
         }
 
-        // Verificar férias aprovadas que cubram esta data
+        // 2. Verificar Férias
         $vacationExists = Vacation::where('employee_id', $employeeId)
             ->where('status', 'approved')
             ->where('start_date', '<=', $dateStr)
-            ->where('end_date', '>=', $dateStr)
+            ->whereDate('end_date', '>=', $dateStr)
             ->exists();
 
-        if ($vacationExists) {
-            return true;
-        }
-
-        return false;
+        return $vacationExists;
     }
 
     /**
-     * Verifica se o funcionário tem 3 atrasos consecutivos e converte em 1 falta
+     * Regra de Negócio: 3 Atrasos Consecutivos = 1 Falta.
+     * Se o funcionário tiver 3 atrasos parciais em dias úteis seguidos,
+     * o sistema converte o último atraso numa falta de dia inteiro e remove os outros dois.
      */
     private function checkConsecutiveDelays(int $employeeId): void
     {
@@ -214,7 +229,6 @@ class DeductHourBankService
             return;
         }
 
-        // Verificar se são dias consecutivos (úteis)
         $dates = $lastAbsences->pluck('absence_date')->map(fn ($d) => Carbon::parse($d));
 
         $isConsecutive = true;
@@ -222,7 +236,7 @@ class DeductHourBankService
             $current = $dates[$i];
             $prev = $dates[$i + 1];
 
-            // Diferença deve ser de 1 dia útil
+            // A diferença entre as datas deve ser de apenas 1 dia útil
             $diff = abs($current->diffInDaysFiltered(fn (Carbon $date) => $date->isWeekday(), $prev));
 
             if ($diff != 1) {
@@ -235,7 +249,6 @@ class DeductHourBankService
             $contract = Employee::find($employeeId)->contracts()->where('status', 'active')->first();
             $fullDayMinutes = $contract?->daily_work_minutes ?? 480;
 
-            // Atualizar o mais recente para dia inteiro
             $latest = $lastAbsences->first();
             $latest->update([
                 'hours_deducted' => $fullDayMinutes,
@@ -243,7 +256,7 @@ class DeductHourBankService
                 'reason' => $latest->reason.' (Convertido para falta por 3 atrasos consecutivos)',
             ]);
 
-            // Remover os outros dois
+            // Elimina os dois atrasos anteriores que deram origem à falta
             Absence::whereIn('id', $lastAbsences->slice(1)->pluck('id'))->delete();
         }
     }
