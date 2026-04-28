@@ -28,6 +28,11 @@ class EmployeeInfoWidget extends Widget implements HasSchemas
         return auth()->user()?->employee;
     }
 
+    public static function canView(): bool
+    {
+        return auth()->user()?->employee !== null;
+    }
+
     public function employeeInfolist(Schema $schema): Schema
     {
         return $schema
@@ -67,21 +72,25 @@ class EmployeeInfoWidget extends Widget implements HasSchemas
                                 TextEntry::make('date_hired')
                                     ->label('Data de Admissão')
                                     ->icon('heroicon-m-calendar')
-                                    ->date('d/m/Y')
-                                    ->default('N/A'),
+                                    ->formatStateUsing(function ($state) {
+                                        if (! $state) {
+                                            return 'N/A';
+                                        }
+                                        return $state->format('d/m/Y');
+                                    }),
 
-                                TextEntry::make('address')
-                                    ->label('Morada')
-                                    ->icon('heroicon-m-map-pin')
-                                    ->default('N/A')
-                                    ->formatStateUsing(function ($state, $record) {
-                                        return collect([
-                                            $state,
-                                            $record->zip_code,
-                                            $record->city?->name,
-                                        ])->filter()->join(', ') ?: 'N/A';
-                                    })
-                                    ->columnSpan(2),
+                    TextEntry::make('address')
+                        ->label('Morada')
+                        ->icon('heroicon-m-map-pin')
+                        ->default('N/A')
+                        ->formatStateUsing(function ($state, $record) {
+                            return collect([
+                                $state,
+                                $record?->address?->zip_code,
+                                $record?->address?->city?->name,
+                            ])->filter()->join(', ') ?: 'N/A';
+                        })
+                        ->columnSpan(2),
                             ]),
                     ]),
             ]);
