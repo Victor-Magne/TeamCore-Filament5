@@ -6,3 +6,7 @@ use Illuminate\Support\Facades\Artisan;
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+\Illuminate\Support\Facades\Schedule::command('app:check-daily-attendance')
+    ->dailyAt('00:01')
+    ->description('Verifica faltas para o dia anterior automaticamente');
