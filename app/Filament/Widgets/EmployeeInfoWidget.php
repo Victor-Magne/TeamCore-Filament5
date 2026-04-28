@@ -17,7 +17,7 @@ class EmployeeInfoWidget extends Widget implements HasSchemas
 {
     use InteractsWithSchemas;
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     protected static ?int $sort = -1;
 
@@ -76,21 +76,22 @@ class EmployeeInfoWidget extends Widget implements HasSchemas
                                         if (! $state) {
                                             return 'N/A';
                                         }
+
                                         return $state->format('d/m/Y');
                                     }),
 
-                    TextEntry::make('address')
-                        ->label('Morada')
-                        ->icon('heroicon-m-map-pin')
-                        ->default('N/A')
-                        ->formatStateUsing(function ($state, $record) {
-                            return collect([
-                                $state,
-                                $record?->address?->zip_code,
-                                $record?->address?->city?->name,
-                            ])->filter()->join(', ') ?: 'N/A';
-                        })
-                        ->columnSpan(2),
+                                TextEntry::make('address')
+                                    ->label('Morada')
+                                    ->icon('heroicon-m-map-pin')
+                                    ->default('N/A')
+                                    ->formatStateUsing(function ($state, $record) {
+                                        return collect([
+                                            $state,
+                                            $record?->zip_code,
+                                            $record?->city?->name,
+                                        ])->filter()->join(', ') ?: 'N/A';
+                                    })
+                                    ->columnSpan(2),
                             ]),
                     ]),
             ]);

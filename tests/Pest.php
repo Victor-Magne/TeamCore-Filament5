@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 /*
@@ -49,3 +51,11 @@ function something()
 {
     // ..
 }
+
+beforeEach(function () {
+    app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+    Role::findOrCreate('admin', 'web');
+    Role::findOrCreate('hr', 'web');
+    Role::findOrCreate('employee', 'web');
+});

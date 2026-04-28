@@ -34,13 +34,13 @@ describe('Vacation and Leave Management', function () {
         ]);
 
         expect($vacation)->not->toBeNull();
-        expect($vacation->days_taken)->toBe(6);
+        expect((int) $vacation->days_taken)->toBe(6);
         expect($vacation->status)->toBe('pending');
     });
 
     it('deducts vacation days when vacation is approved', function () {
         $initialBalance = $this->employee->vacation_balance;
-        
+
         $startDate = Carbon::now()->addDays(10);
         $endDate = $startDate->copy()->addDays(5);
 
@@ -77,7 +77,7 @@ describe('Vacation and Leave Management', function () {
     it('creates leave and absence request (sick leave)', function () {
         $leave = LeaveAndAbsence::create([
             'employee_id' => $this->employee->id,
-            'leave_type' => 'sick_leave',
+            'type' => 'sick_leave',
             'start_date' => Carbon::now(),
             'end_date' => Carbon::now()->addDays(2),
             'reason' => 'Medical condition',
@@ -85,14 +85,14 @@ describe('Vacation and Leave Management', function () {
         ]);
 
         expect($leave)->not->toBeNull();
-        expect($leave->leave_type)->toBe('sick_leave');
+        expect($leave->type)->toBe('sick_leave');
         expect($leave->status)->toBe('pending');
     });
 
     it('validates that employee cannot approve their own requests', function () {
         $leave = LeaveAndAbsence::create([
             'employee_id' => $this->employee->id,
-            'leave_type' => 'sick_leave',
+            'type' => 'sick_leave',
             'start_date' => Carbon::now(),
             'end_date' => Carbon::now()->addDays(2),
             'reason' => 'Medical condition',
@@ -102,7 +102,7 @@ describe('Vacation and Leave Management', function () {
         // Em uma Resource real, isto seria validado na Policy
         // Aqui apenas verificamos que a estrutura permite a validação
         $user = User::where('employee_id', $this->employee->id)->first();
-        
+
         // Idealmente isto falharia em uma Policy
         // Por enquanto apenas verificamos a estrutura
         expect($leave->employee_id)->toBe($this->employee->id);
@@ -137,7 +137,7 @@ describe('Vacation and Leave Management', function () {
 
     it('tracks vacation balance correctly', function () {
         $initialBalance = $this->employee->vacation_balance;
-        
+
         // Férias aprovadas
         Vacation::create([
             'employee_id' => $this->employee->id,
@@ -149,7 +149,7 @@ describe('Vacation and Leave Management', function () {
 
         $this->employee->refresh();
         // Nota: em implementação real, isto seria feito via Observer
-        
-        expect($this->employee->vacation_balance)->toBe($initialBalance);
+
+        expect($this->employee->vacation_balance)->toBe($initialBalance - 5);
     });
 });

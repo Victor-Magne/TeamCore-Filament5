@@ -5,13 +5,22 @@ use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
 describe('Employee Creation and Validation', function () {
     beforeEach(function () {
+        Role::findOrCreate('admin', 'web');
         // Criar um utilizador admin para criar funcionários
-        $this->admin = User::factory()->state(['employee_id' => null])->create();
+        $this->admin = User::create([
+            'name' => 'Admin User',
+            'email' => 'admin@example.test',
+            'password' => Hash::make('password'),
+            'employee_id' => null,
+            'must_change_password' => false,
+        ]);
         $this->admin->assignRole('admin');
 
         $this->designation = Designation::factory()->create(['base_salary' => 1000]);
@@ -25,15 +34,15 @@ describe('Employee Creation and Validation', function () {
             'test.test@domain',    // TLD com menos de 2 caracteres
         ];
 
-        foreach ($invalidEmails) {
+        foreach ($invalidEmails as $invalidEmail) {
             $employee = Employee::factory()->make([
-                'email' => $invalidEmails,
+                'email' => $invalidEmail,
                 'designation_id' => $this->designation->id,
             ]);
 
             // Verificar que a validação rejeita email inválido
             // Nota: isto depende da validação estar implementada na Resource
-            expect($employee->email)->toBe($invalidEmails);
+            expect($employee->email)->toBe($invalidEmail);
         }
     });
 

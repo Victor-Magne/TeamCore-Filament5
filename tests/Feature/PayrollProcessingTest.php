@@ -5,7 +5,6 @@ use App\Models\Designation;
 use App\Models\Employee;
 use App\Models\HourBank;
 use App\Models\Payroll;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -29,9 +28,10 @@ describe('Payroll Processing', function () {
         ]);
 
         // Criar banco de horas para o mês
-        HourBank::create([
+        HourBank::updateOrCreate([
             'employee_id' => $this->employee->id,
             'month_year' => now()->format('Y-m'),
+        ], [
             'balance' => 120, // 2 horas extras
             'extra_hours_added' => 120,
             'extra_hours_used' => 0,
@@ -46,20 +46,21 @@ describe('Payroll Processing', function () {
             'employee_id' => $this->employee->id,
             'month_year' => $monthYear,
             'base_salary' => $this->contract->salary,
-            'extra_hours_bonus' => 0,
+            'hourly_rate' => 6.25,
+            'extra_hours' => 0,
+            'extra_hours_amount' => 0,
             'deductions' => 0,
-            'gross_salary' => $this->contract->salary,
-            'net_salary' => $this->contract->salary,
-            'status' => 'generated',
+            'total_net' => $this->contract->salary,
+            'status' => 'pending',
         ]);
 
         expect($payroll)->not->toBeNull();
-        expect($payroll->gross_salary)->toBe(1000);
+        expect((float) $payroll->total_net)->toBe(1000.0);
     });
 
     it('calculates extra hours bonus correctly', function () {
         $monthYear = now()->format('Y-m');
-        
+
         // Obter banco de horas com 2 horas extras (120 minutos)
         $hourBank = HourBank::where('employee_id', $this->employee->id)
             ->where('month_year', $monthYear)
@@ -81,15 +82,16 @@ describe('Payroll Processing', function () {
             'employee_id' => $this->employee->id,
             'month_year' => $monthYear,
             'base_salary' => 1000,
-            'extra_hours_bonus' => 18.75,
+            'hourly_rate' => 6.25,
+            'extra_hours' => 120,
+            'extra_hours_amount' => 18.75,
             'deductions' => 0,
-            'gross_salary' => 1018.75,
-            'net_salary' => 1018.75,
-            'status' => 'generated',
+            'total_net' => 1018.75,
+            'status' => 'pending',
         ]);
 
-        expect($payroll->status)->toBe('generated');
-        expect($payroll->gross_salary)->toBe(1018.75);
+        expect($payroll->status)->toBe('pending');
+        expect((float) $payroll->total_net)->toBe(1018.75);
     });
 
     it('prevents duplicate payroll for same month', function () {
@@ -99,11 +101,12 @@ describe('Payroll Processing', function () {
             'employee_id' => $this->employee->id,
             'month_year' => $monthYear,
             'base_salary' => 1000,
-            'extra_hours_bonus' => 0,
+            'hourly_rate' => 6.25,
+            'extra_hours' => 0,
+            'extra_hours_amount' => 0,
             'deductions' => 0,
-            'gross_salary' => 1000,
-            'net_salary' => 1000,
-            'status' => 'generated',
+            'total_net' => 1000,
+            'status' => 'pending',
         ]);
 
         // Tentar criar novamente (em implementação real, isto seria impedido por unique constraint)
@@ -126,14 +129,15 @@ describe('Payroll Processing', function () {
             'employee_id' => $this->employee->id,
             'month_year' => $monthYear,
             'base_salary' => 1000,
-            'extra_hours_bonus' => 0,
+            'hourly_rate' => 6.25,
+            'extra_hours' => 0,
+            'extra_hours_amount' => 0,
             'deductions' => $deductions,
-            'gross_salary' => $grossSalary,
-            'net_salary' => $netSalary,
-            'status' => 'generated',
+            'total_net' => $netSalary,
+            'status' => 'pending',
         ]);
 
-        expect($payroll->net_salary)->toBe(900);
+        expect((float) $payroll->total_net)->toBe(900.0);
     });
 
     it('tracks payroll payment status', function () {
@@ -143,10 +147,11 @@ describe('Payroll Processing', function () {
             'employee_id' => $this->employee->id,
             'month_year' => $monthYear,
             'base_salary' => 1000,
-            'extra_hours_bonus' => 0,
+            'hourly_rate' => 6.25,
+            'extra_hours' => 0,
+            'extra_hours_amount' => 0,
             'deductions' => 0,
-            'gross_salary' => 1000,
-            'net_salary' => 1000,
+            'total_net' => 1000,
             'status' => 'pending',
         ]);
 
@@ -154,7 +159,7 @@ describe('Payroll Processing', function () {
 
         // Simular mudança para pago
         $payroll->update(['status' => 'paid']);
-        
+
         expect($payroll->status)->toBe('paid');
     });
 });

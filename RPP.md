@@ -596,7 +596,7 @@ Cada alteração (create, update, delete) é automaticamente registada na tabela
 
 
 
-Conclusão
+## Conclusão
 Dificuldades Encontradas e Soluções Adotadas
 Ao longo do desenvolvimento da Aplicação TeamCore, enfrentei desafios importantes que foram determinantes para o sucesso da aplicação.
 
