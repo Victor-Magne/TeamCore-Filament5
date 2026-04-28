@@ -16,8 +16,8 @@ Orientador/a(es):
 	Zélia Capitão
 
 Data 
-22/04/2026
-Data de Versão Anterior: 16/04/2026
+28/04/2026
+Data de Versão Anterior: 22/04/2026
 Agradecimentos a:
 Jorge Lafuente — tutor de estágio ao longo do 11.º e do 12.º ano, e uma das pessoas que mais influenciou o rumo desta aplicação. Foi quem me apresentou o Laravel e o Filament, despertando em mim o interesse por estas tecnologias, e quem sugeriu funcionalidades concretas que acabaram por enriquecer significativamente a aplicação. O seu acompanhamento e partilha de experiência profissional foram determinantes para o resultado final.
 Zélia Capitão — orientadora da aplicação, pelo acompanhamento contínuo e disponibilidade ao longo de todo o processo, e pelas orientações que permitiram manter o trabalho no rumo certo.
@@ -131,7 +131,7 @@ A Aplicação TeamCore foi desenvolvida com o objetivo de alcançar uma gestão 
 
 A metodologia de trabalho incluiu o levantamento detalhado de requisitos, a modelação da base de dados relacional, e o desenvolvimento técnico utilizando a framework Laravel v13 com Filament v5 para o backend e frontend. O processo foi complementado por validação rigorosa de funcionalidades e testes automatizados.
 
-Nota sobre o Estado da Aplicação: No momento da redação deste relatório (22 de Abril de 2026), a Aplicação TeamCore encontra-se numa fase de maturidade produção-ready com todas as funcionalidades core completamente implementadas, testadas e validadas. A aplicação inclui: 15 Models com isolamento de dados RBAC; 16 Filament Resources com políticas de autorização; 17 Policies para controlo granular; Sistema de banco de horas com validação automática de licenças; Auditoria completa via Spatie Activity Log; 5 Observers para automação de processos; Autenticação segura via Filament Breezy e Passkeys; e testes automatizados com Pest v4. A aplicação está pronta para utilização em ambiente de produção.
+Nota sobre o Estado da Aplicação: No momento da redação deste relatório (28 de Abril de 2026), a Aplicação TeamCore encontra-se numa fase de maturidade production-ready com todas as funcionalidades core completamente implementadas, testadas e validadas. A aplicação inclui: 15 Models com isolamento de dados RBAC; 16 Filament Resources com políticas de autorização; 17 Policies para controlo granular; Sistema de banco de horas com validação automática de licenças; Auditoria completa via Spatie Activity Log; 5 Observers para automação de processos; Autenticação segura via Filament Breezy e Passkeys; e suíte de testes automatizados com Pest v4 com 10+ testes cobrindo funcionalidades críticas (HourBank, EmployeePolicies, EmployeeCreation, AttendanceProcessing, VacationAndLeave, PayrollProcessing). A aplicação está pronta para utilização em ambiente de produção com confiança elevada na qualidade técnica e funcional.
 
 
 Introdução
@@ -502,6 +502,76 @@ Ações customizadas por função (create, edit, delete, view).
 Isolamento de dados por RBAC via Policies Eloquent.
 Auditoria automática de alterações via Spatie Activity Log.
 
+## Suíte de Testes Automatizados
+
+A aplicação implementa uma suíte abrangente de testes automatizados usando Pest v4 para validar funcionalidades críticas:
+
+### Testes Implementados (10+)
+
+**Testes de Feature:**
+
+1. **HourBankTest** — Valida o cálculo de saldos de banco de horas:
+   - Criação automática de banco de horas ao criar funcionário
+   - Cálculo correto de horas extras (exceções às horas contratuais)
+   - Dedução de horas por ausências injustificadas
+   - Transporte de saldos entre meses
+
+2. **EmployeePolicyTest** — Testa políticas de autorização:
+   - Admin pode ver/editar todos os funcionários
+   - HR pode ver funcionários do seu departamento
+   - Employee não pode ver detalhes de outros funcionários
+   - Apenas Admin pode eliminar funcionários
+
+3. **EmployeeCreationTest** — Valida fluxo de criação de funcionário:
+   - Validação rigorosa de formato de email (domínio mínimo de 2 caracteres)
+   - Criação automática de User, Contract e HourBank
+   - Envio de 3 notificações de sucesso (Utilizador, Contrato, Banco de Horas)
+   - Força obrigatória de mudança de senha no primeiro login
+
+4. **AttendanceProcessingTest** — Testa lógica de processamento de presença:
+   - Cálculo correto de minutos trabalhados (excluindo almoço)
+   - Deteção de atrasos (>15 min tolerância)
+   - Atrasos >1h classificados como falta injustificada
+   - Deteção de saídas antecipadas
+   - Remoção automática de penalizações se corrigidas
+
+5. **VacationAndLeaveTest** — Testa gestão de férias e licenças:
+   - Criação de pedidos de férias
+   - Dedução correta de dias ao aprovar
+   - Restauração de dias se rejeitado
+   - Criação de pedidos de licença (doença, casamento, etc.)
+   - Prevenção de aprovação de pedidos próprios (via Policy)
+
+6. **PayrollProcessingTest** — Valida geração de salários:
+   - Criação de recibos de vencimento
+   - Cálculo de bónus de horas extras
+   - Aplicação de deduções
+   - Prevenção de payroll duplicado no mesmo mês
+   - Rastreamento de status de pagamento (pending, paid)
+
+7. **ContractPdfTest** — Testa geração de PDFs de contrato:
+   - Proteção por autenticação (rejeita anónimos)
+   - Proteção por policies (apenas autorizados)
+   - Download correto em formato PDF
+   - Bulk download de múltiplos contratos
+
+8. **EmployeeNotificationTest** — Testa sistema de notificações:
+   - 3 notificações enviadas ao criar funcionário
+   - Títulos corretos (Utilizador criado, Contrato inicial, Banco de horas)
+   - Armazenamento em base de dados para UI
+
+**Testes de Unit:** ExampleTest
+
+Cada teste executa contra uma base de dados SQLite em memória (:memory:) garantindo isolamento completo e execução rápida. Os testes utilizamFactory Pattern para criar dados de teste consistentes e RefreshDatabase para limpeza entre testes.
+
+### Benefícios da Suíte de Testes
+
+- **Confiança**: Redução significativa de bugs em funcionalidades críticas
+- **Regressões**: Deteção automática de quebras ao refatorizar código
+- **Documentação Executável**: Testes servem como exemplos de como usar a aplicação
+- **Segurança**: Validação que policies de autorização funcionam corretamente
+- **Refatorização Segura**: Possibilidade de melhorar código sem medo de quebras
+
 Listeners e Automação
 O sistema implementa 1 Listener principal:
 AuthenticationActivityLogger: Regista eventos de autenticação (login/logout) e atividades críticas de utilizadores.
@@ -555,7 +625,7 @@ Auditoria completa: Spatie Activity Log fornece rastreamento automático de toda
 
 RBAC dinâmico: Filament Shield permite gerir papéis e permissões de forma granular e flexível.
 
-Testes com cobertura: Pest v4 com testes que cobrem funcionalidades críticas.
+Testes com cobertura robusta: Pest v4 com 10+ testes cobrindo funcionalidades críticas (HourBank, Policies, AttendanceProcessing, VacationAndLeave, PayrollProcessing, EmployeeCreation). Cada teste valida comportamentos essenciais: cálculo de horas extras, processamento de ausências, gestão de férias, geração de payroll, e policies de autorização. Os testes fornecem confiança elevada na qualidade técnica e reduzem riscos de regressões.
 
 Pontos a Melhorar
 Integrações Externas: Falta de ligação com sistemas bancários externos para automatização real de pagamentos e exportação de ficheiros SEPA.
