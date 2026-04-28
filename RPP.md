@@ -131,7 +131,7 @@ A Aplicação TeamCore foi desenvolvida com o objetivo de alcançar uma gestão 
 
 A metodologia de trabalho incluiu o levantamento detalhado de requisitos, a modelação da base de dados relacional, e o desenvolvimento técnico utilizando a framework Laravel v13 com Filament v5 para o backend e frontend. O processo foi complementado por validação rigorosa de funcionalidades e testes automatizados.
 
-Nota sobre o Estado da Aplicação: No momento da redação deste relatório (22 de Abril de 2026), a Aplicação TeamCore encontra-se numa fase de maturidade produção-ready com todas as funcionalidades core completamente implementadas, testadas e validadas. A aplicação inclui: 15 Models com isolamento de dados RBAC; 16 Filament Resources com políticas de autorização; 17 Policies para controlo granular; Sistema de banco de horas com validação automática de licenças; Auditoria completa via Spatie Activity Log; 4 Observers para automação de processos; Autenticação segura via Filament Breezy e Passkeys; e testes automatizados com Pest v4. A aplicação está pronta para utilização em ambiente de produção.
+Nota sobre o Estado da Aplicação: No momento da redação deste relatório (22 de Abril de 2026), a Aplicação TeamCore encontra-se numa fase de maturidade produção-ready com todas as funcionalidades core completamente implementadas, testadas e validadas. A aplicação inclui: 15 Models com isolamento de dados RBAC; 16 Filament Resources com políticas de autorização; 17 Policies para controlo granular; Sistema de banco de horas com validação automática de licenças; Auditoria completa via Spatie Activity Log; 5 Observers para automação de processos; Autenticação segura via Filament Breezy e Passkeys; e testes automatizados com Pest v4. A aplicação está pronta para utilização em ambiente de produção.
 
 
 Introdução
@@ -166,7 +166,7 @@ Garantir a qualidade técnica: Assegurar a aplicação através de testes automa
 
 Abordagem e Metodologia
 O desenvolvimento foi realizado em ciclos iterativos, adotando:
-Tecnologias modernas: Laravel v13 como framework backend, Filament v5 como interface administrativa unificada, PHP v8.3+ e MySQL como base de dados relacional.
+Tecnologias modernas: Laravel v13 como framework backend, Filament v5 como interface administrativa unificada, PHP v8.3 e MySQL como base de dados relacional.
 Testes automatizados: Desenvolvimento orientado a testes utilizando framework Pest/PHPUnit para validação contínua de funcionalidades.
 Validação com profissionais: Consulta com profissionais de RH durante o desenvolvimento para validar requisitos e funcionalidades essenciais.
 Boas práticas de engenharia: Isolamento de dados ao nível do modelo através de Policies Eloquent, arquitetura em camadas clara, padrões de código consistentes.
@@ -502,19 +502,16 @@ Ações customizadas por função (create, edit, delete, view).
 Isolamento de dados por RBAC via Policies Eloquent.
 Auditoria automática de alterações via Spatie Activity Log.
 
-Listeners
+Listeners e Automação
 O sistema implementa 1 Listener principal:
-AuthenticationActivityLogger: Regista eventos de autenticação (login/logout) e actividades críticas de utilizadores.
-Automação com Observers
-O sistema utiliza Observer Pattern para automatizar operações:
+AuthenticationActivityLogger: Regista eventos de autenticação (login/logout) e atividades críticas de utilizadores.
 
+O sistema utiliza Observer Pattern para automatizar operações (5 Observers):
 EmployeeObserver: Cria automaticamente o utilizador, contrato inicial e banco de horas ao registar um novo funcionário.
-
-ContractObserver: Quando um novo contrato é criado/atualizado, sincroniza automaticamente a designation_id do Employee com base no contrato. Isto garante que a função do funcionário é sempre consistente com o contrato ativo.
-
-AttendanceLogObserver: Automatiza cálculos e validações nos registos de presença.
-
-AbsenceObserver: Monitoriza a criação, atualização e eliminação de ausências, despoletando o recálculo automático do saldo do Banco de Horas para o mês correspondente, garantindo que o saldo esteja sempre sincronizado.
+ContractObserver: Quando um novo contrato é criado/atualizado, sincroniza automaticamente a designation_id do Employee com base no contrato ativo.
+AttendanceLogObserver: Automatiza cálculos de tempos e delega verificações de atrasos/faltas para o DeductHourBankService.
+AbsenceObserver: Monitoriza a criação, atualização e eliminação de ausências, despoletando o recálculo automático do saldo do Banco de Horas para o período correspondente.
+LeaveAndAbsenceObserver: Gere a remoção de ausências automáticas ou criação de deduções por licenças não pagas aquando da aprovação de um pedido.
 
 Activity Logging com Spatie
 Todos os modelos críticos utilizam a trait LogsActivity do Spatie para rastreamento automático:
@@ -565,7 +562,7 @@ Integrações Externas: Falta de ligação com sistemas bancários externos para
 
 Testes de carga: Não foi validado com volumes grandes de dados (milhares de funcionários, múltiplos utilizadores simultâneos).
 
-Documentação Técnica: Apesar de boas práticas, faltam comentários explicativos detalhados em algoritmos complexos de cálculo de horas e payroll.
+Documentação Técnica: Centralizada agora na pasta `/docs` com manuais técnicos e de utilizador exaustivos para cada secção.
 
 Edge cases em operações críticas: Refinar a gestão de transações em fluxos encadeados (ex: criação de funcionário) para garantir atomicidade absoluta em cenários de falha de base de dados.
 
