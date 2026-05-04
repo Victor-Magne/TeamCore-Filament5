@@ -139,9 +139,13 @@ class EmployeeForm
                                             ->searchable(),
                                         DatePicker::make('date_hired')
                                             ->label('Data de Admissão')
+                                            ->maxDate(Carbon::now()) // Não permite datas futuras
+                                            ->native(false)
                                             ->required(),
-                                        DateTimePicker::make('date_dismissed')
+                                        DatePicker::make('date_dismissed')
                                             ->label('Data de Demissão')
+                                            ->minDate(fn(Get $get) => $get('date_hired')) // Não permite demissão antes da admissão
+                                            ->native(false)
                                             ->helperText('Deixe vazio se o funcionário estiver activo na empresa'),
                                         TextInput::make('vacation_balance')
                                             ->label('Saldo de Férias')

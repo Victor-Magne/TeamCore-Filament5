@@ -20,6 +20,7 @@ class ListAbsences extends ListRecords
                     \Filament\Forms\Components\DatePicker::make('date')
                         ->label('Data para Verificação')
                         ->default(now()->subDay())
+                        ->native(false)
                         ->required(),
                 ])
                 ->action(function (array $data): void {
