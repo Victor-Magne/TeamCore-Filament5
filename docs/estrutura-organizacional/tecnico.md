@@ -12,13 +12,29 @@ As unidades organizacionais definem a estrutura da empresa (Direções, Departam
   - `parent_id`: Chave estrangeira para a unidade pai (auto-relacionamento), permitindo uma hierarquia infinita.
   - `manager_id`: Funcionário responsável pela unidade.
   - `is_main_direction`: Booleano para identificar a unidade de topo.
+- **Métodos Auxiliares:**
+  - `getAllDescendantIds()`: Obtém recursivamente todos os IDs das sub-unidades.
+  - `isGeneralDirection()`: Verifica se é a unidade de topo da organização.
 - **Relacionamentos:**
   - `parent`: Unidade de nível superior.
   - `children`: Unidades subordinadas.
   - `manager`: Relacionamento com `Employee`.
+  - `managers`: Relacionamento muitos-para-muitos (via `unit_manager`) para suporte a múltiplos gestores.
   - `employees`: Funcionários alocados a esta unidade.
 
-## 2. Cargos (`Designation`)
+## 2. Visibilidade Hierárquica e Atribuição Composta
+A visibilidade de dados na aplicação é gerida centralmente através de Traits que aplicam filtros automáticos às queries e verificações de acesso.
+
+### Lógica de Query (`HasHierarchicalQuery`)
+Implementada em `app/Traits/HasHierarchicalQuery.php`, esta trait altera o `getEloquentQuery` para:
+- **Direção Geral**: Se um utilizador gere a Unidade marcada como `is_main_direction`, vê todos os registos.
+- **Gestão Recursiva**: Managers vêem os seus próprios dados e os de todos os funcionários alocados às unidades que gerem, incluindo todas as sub-unidades (descendentes).
+- **Atribuição Composta**: Um funcionário pode gerir múltiplas unidades através da relação direta (`manager_id` na `Unit`) ou da tabela pivot `unit_manager`. O sistema unifica estas permissões.
+
+### Lógica de Policy (`HasHierarchicalPolicy`)
+Localizada em `app/Traits/HasHierarchicalPolicy.php`, garante que o acesso direto a registos (via ID) respeita a mesma hierarquia organizacional.
+
+## 3. Cargos (`Designation`)
 Define os títulos profissionais e os salários base associados.
 
 - **Modelo:** `app/Models/Designation.php`

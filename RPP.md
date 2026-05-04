@@ -274,7 +274,7 @@ EMPLOYEE — Colaborador, acesso limitado a dados pessoais e pedidos próprios.
 Implementação em 3 Camadas:
 Middleware de Rotas — Bloqueio de acesso inicial (usando role checks via Shield).
 Filament Policies — 17 policies implementadas para controlo granular (UserPolicy, EmployeePolicy, ContractPolicy, etc.).
-Eloquent Scopes — Isolamento de dados ao nível da query (ex: Employees só veem seus dados, HR veem do seu departamento).
+Eloquent Scopes — Isolamento de dados ao nível da query com visibilidade hierárquica recursiva e suporte a atribuição composta (ex: Colaboradores vêem apenas os seus dados, enquanto Gestores vêem os seus dados e os de todos os subordinados nas unidades que gerem e respetivas sub-unidades em cascata).
 
 Recursos Filament com Controlo de Acesso (16 total):
 Gestão de Sistema: Users, Roles, Units (Admin)
@@ -286,7 +286,7 @@ Gestão de Banco de Horas: HourBanks, Absences
 Gestão de Salários: Payrolls
 
 Proteções de Segurança:
-Isolamento de dados: Employee só vê dados pessoais, HR vê do seu departamento
+Isolamento de dados: Visibilidade hierárquica recursiva baseada na gestão de unidades (unidades filhas e descendentes).
 Auto-aprovação bloqueada: Utilizador não pode aprovar seus próprios pedidos (via Policies)
 Soft deletes: Preservação de histórico em todos os modelos críticos
 Activity logging: Rastreio completo via Spatie Activity Log (automatic com LogsActivity trait).
