@@ -96,6 +96,33 @@ class Unit extends Model
     }
 
     /**
+     * Obtém todos os IDs das unidades descendentes de forma recursiva.
+     *
+     * Útil para filtros de visibilidade hierárquica.
+     *
+     * @return array<int>
+     */
+    public function getAllDescendantIds(): array
+    {
+        $ids = [];
+
+        foreach ($this->children as $child) {
+            $ids[] = $child->id;
+            $ids = array_merge($ids, $child->getAllDescendantIds());
+        }
+
+        return $ids;
+    }
+
+    /**
+     * Verifica se esta unidade é a Direcção Geral.
+     */
+    public function isGeneralDirection(): bool
+    {
+        return (bool) $this->is_main_direction;
+    }
+
+    /**
      * Configuração do log de actividades.
      */
     public function getActivitylogOptions(): LogOptions
