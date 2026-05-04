@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * Ficheiro do Observer AttendanceLogObserver.
+ *
+ * Este observer monitoriza as alterações nos registos de presença (AttendanceLog).
+ * Quando um registo é criado, actualizado ou eliminado, despoleta o recálculo
+ * automático do saldo do Banco de Horas e o processamento de ausências/atrasos.
+ */
+
 namespace App\Observers;
 
 use App\Models\AttendanceLog;
@@ -9,10 +17,15 @@ use Carbon\Carbon;
 
 class AttendanceLogObserver
 {
+    /** Serviço de gestão do banco de horas. */
     protected HourBankService $hourBankService;
 
+    /** Serviço de deduções de assiduidade. */
     protected DeductHourBankService $deductService;
 
+    /**
+     * Construtor com injecção de dependências.
+     */
     public function __construct(HourBankService $hourBankService, DeductHourBankService $deductService)
     {
         $this->hourBankService = $hourBankService;
@@ -20,7 +33,9 @@ class AttendanceLogObserver
     }
 
     /**
-     * Handle the AttendanceLog "created" event.
+     * Manipula o evento "created" do Modelo AttendanceLog.
+     *
+     * @param  AttendanceLog  $attendanceLog  O registo de presença criado.
      */
     public function created(AttendanceLog $attendanceLog): void
     {
@@ -35,13 +50,16 @@ class AttendanceLogObserver
     }
 
     /**
-     * Handle the AttendanceLog "updated" event.
+     * Manipula o evento "updated" do Modelo AttendanceLog.
+     *
+     * @param  AttendanceLog  $attendanceLog  O registo de presença actualizado.
      */
     public function updated(AttendanceLog $attendanceLog): void
     {
+        // Só reprocessa se campos críticos de tempo foram alterados
         if ($attendanceLog->isDirty(['time_in', 'time_out', 'total_minutes'])) {
 
-            // Se mudou o mês, recalcular o mês original
+            // Se mudou o mês da entrada, recalcular o mês original para corrigir saldos
             if ($attendanceLog->isDirty('time_in')) {
                 $originalTimeIn = $attendanceLog->getOriginal('time_in');
                 if ($originalTimeIn) {
@@ -52,10 +70,10 @@ class AttendanceLogObserver
                 }
             }
 
-            // Reprocessar ausências/atrasos
+            // Reprocessar as ausências/atrasos para a data do registo
             $this->deductService->processAttendance($attendanceLog);
 
-            // Recalcular o mês atual
+            // Recalcular o mês actual do registo
             $this->hourBankService->recalculate(
                 $attendanceLog->employee_id,
                 $attendanceLog->time_in->format('Y-m')
@@ -64,13 +82,16 @@ class AttendanceLogObserver
     }
 
     /**
-     * Handle the AttendanceLog "deleted" event.
+     * Manipula o evento "deleted" do Modelo AttendanceLog.
+     *
+     * @param  AttendanceLog  $attendanceLog  O registo de presença eliminado.
      */
     public function deleted(AttendanceLog $attendanceLog): void
     {
-        // Remover Absence automática se o ponto for apagado
+        // Remover Absence automática se o ponto for apagado, para não penalizar indevidamente
         $this->deductService->removeAbsenceForDate($attendanceLog->employee_id, $attendanceLog->time_in->toDateString());
 
+        // Recalcula o mês após a remoção do registo
         $this->hourBankService->recalculate(
             $attendanceLog->employee_id,
             $attendanceLog->time_in->format('Y-m')

@@ -70,10 +70,12 @@ class EmployeeResource extends Resource
      * Define a estrutura da tabela de listagem.
      *
      * Delega a configuração para a classe especializada EmployeesTable.
+     * Inclui carregamento antecipado (Eager Loading) de relações para performance.
      */
     public static function table(Table $table): Table
     {
-        return EmployeesTable::configure($table);
+        return EmployeesTable::configure($table)
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['unit', 'designation']));
     }
 
     /**

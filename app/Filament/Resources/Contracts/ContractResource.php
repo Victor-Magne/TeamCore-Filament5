@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class ContractResource extends Resource
@@ -40,7 +41,8 @@ class ContractResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return ContractsTable::configure($table);
+        return ContractsTable::configure($table)
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['employee', 'designation']));
     }
 
     public static function getPages(): array

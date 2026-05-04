@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Employees\Tables;
 
+use App\Models\Employee;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -31,10 +32,12 @@ class EmployeesTable
                 TextColumn::make('email')
                     ->label('Email')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('phone_number')
                     ->label('Telemóvel')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('unit.name')
                     ->label('Departamento')
                     ->searchable()
@@ -42,11 +45,15 @@ class EmployeesTable
                 TextColumn::make('designation.name')
                     ->label('Cargo')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->badge()
+                    ->color('info'),
                 TextColumn::make('date_hired')
                     ->label('Data Admissão')
                     ->date()
-                    ->sortable(),
+                    ->sortable()
+                    ->description(fn (Employee $record): string => $record->date_dismissed ? 'Inactivo' : 'Activo')
+                    ->color(fn (Employee $record): string => $record->date_dismissed ? 'danger' : 'success'),
                 TextColumn::make('date_of_birth')
                     ->label('Data Nascimento')
                     ->date()
