@@ -37,9 +37,7 @@ describe('DeductHourBankService', function () {
         expect($absence->deduction_type)->toBe('unjustified_absence');
 
         // Verificar se o banco de horas foi atualizado
-        $hourBank = HourBank::where('employee_id', $employee->id)
-            ->where('month_year', $absenceDate->format('Y-m'))
-            ->first();
+        $hourBank = HourBank::where('employee_id', $employee->id)->first();
 
         expect($hourBank)->not->toBeNull();
         expect($hourBank->balance)->toBe(-480);

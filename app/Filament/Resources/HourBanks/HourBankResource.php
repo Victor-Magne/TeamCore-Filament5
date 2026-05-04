@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\HourBanks;
 
+use App\Filament\Resources\HourBanks\RelationManagers;
 use App\Filament\Resources\HourBanks\Pages\CreateHourBank;
 use App\Filament\Resources\HourBanks\Pages\EditHourBank;
 use App\Filament\Resources\HourBanks\Pages\ListHourBanks;
@@ -47,7 +48,7 @@ class HourBankResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\MovementsRelationManager::class,
         ];
     }
 

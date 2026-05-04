@@ -17,17 +17,12 @@ class HourBanksTable
             ->columns([
                 TextColumn::make('employee.first_name')
                     ->label('Funcionário')
-                    ->searchable()
-                    ->sortable(),
-
-                TextColumn::make('month_year')
-                    ->label('Mês/Ano')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->formatStateUsing(fn ($record) => "{$record->employee->first_name} {$record->employee->last_name}")
+                    ->searchable(['first_name', 'last_name'])
                     ->sortable(),
 
                 TextColumn::make('balance')
-                    ->label('Saldo Total')
+                    ->label('Saldo Acumulado')
                     ->formatStateUsing(function (?int $state) {
                         if ($state === null) {
                             return '-';
@@ -39,56 +34,39 @@ class HourBanksTable
                         return "{$sign}{$hours}h {$minutes}m";
                     })
                     ->color(fn (?int $state) => $state === null ? 'gray' : ($state >= 0 ? 'success' : 'danger'))
+                    ->weight('bold')
                     ->sortable(),
 
                 TextColumn::make('extra_hours_added')
-                    ->label('Horas Extras Adicionadas')
+                    ->label('Total de Ganhos')
                     ->formatStateUsing(function (?int $state) {
                         if ($state === null || $state === 0) {
-                            return '-';
+                            return '0h 00m';
                         }
                         $hours = intdiv($state, 60);
                         $minutes = $state % 60;
 
                         return "{$hours}h {$minutes}m";
                     })
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
 
                 TextColumn::make('extra_hours_used')
-                    ->label('Horas Descontadas')
+                    ->label('Total de Descontos')
                     ->formatStateUsing(function (?int $state) {
                         if ($state === null || $state === 0) {
-                            return '-';
+                            return '0h 00m';
                         }
                         $hours = intdiv($state, 60);
                         $minutes = $state % 60;
 
                         return "{$hours}h {$minutes}m";
                     })
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
 
-                TextColumn::make('previous_balance')
-                    ->label('Saldo Anterior')
-                    ->formatStateUsing(function (?int $state) {
-                        if ($state === null || $state === 0) {
-                            return '-';
-                        }
-                        $hours = intdiv(abs($state), 60);
-                        $minutes = abs($state) % 60;
-                        $sign = $state < 0 ? '-' : '';
-
-                        return "{$sign}{$hours}h {$minutes}m";
-                    })
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                TextColumn::make('created_at')
-                    ->label('Data de Criação')
+                TextColumn::make('updated_at')
+                    ->label('Última Actualização')
                     ->dateTime('d/m/Y H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
             ])
             ->filters([
                 TrashedFilter::make(),

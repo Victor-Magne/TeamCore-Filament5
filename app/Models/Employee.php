@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
+use Illuminate\Support\Carbon;
 
 class Employee extends Model
 {
@@ -152,11 +153,11 @@ class Employee extends Model
     /**
      * Relacionamento: Banco de Horas.
      *
-     * Registos mensais do saldo de horas acumuladas/em dívida.
+     * Registo acumulado do saldo de horas.
      */
-    public function hourBanks(): HasMany
+    public function hourBank(): HasOne
     {
-        return $this->hasMany(HourBank::class);
+        return $this->hasOne(HourBank::class);
     }
 
     /**
@@ -180,32 +181,34 @@ class Employee extends Model
     }
 
     /**
-     * Obtém o registo do banco de horas para o mês actual.
-     *
-     * Útil para exibir o saldo parcial do mês em curso.
-     *
-     * @return HourBank|null
-     */
-    public function getCurrentHourBankBalance(): ?HourBank
-    {
-        $monthYear = now()->format('Y-m');
-
-        return $this->hourBanks()->where('month_year', $monthYear)->first();
-    }
-
-    /**
      * Obtém o saldo acumulado total do funcionário.
-     *
-     * Baseia-se no registo mais recente do banco de horas, que por lógica
-     * de negócio deve conter o saldo transportado e actualizado.
      *
      * @return int Saldo em minutos (pode ser negativo).
      */
     public function getTotalHourBankBalance(): int
     {
-        return $this->hourBanks()
-            ->orderByDesc('month_year')
-            ->first()?->balance ?? 0;
+        return $this->hourBank?->balance ?? 0;
+    }
+
+    /**
+     * Obtém os ganhos e perdas de um mês específico.
+     *
+     * @param string $monthYear Formato 'Y-m'
+     */
+    public function getMonthlyHourBankStats(string $monthYear): array
+    {
+        $month = Carbon::createFromFormat('Y-m', $monthYear);
+        $start = $month->copy()->startOfMonth();
+        $end = $month->copy()->endOfMonth();
+
+        $movements = HourBankMovement::where('employee_id', $this->id)
+            ->whereBetween('date', [$start, $end])
+            ->get();
+
+        return [
+            'added' => $movements->where('type', 'addition')->sum('amount'),
+            'used' => abs($movements->where('type', 'deduction')->sum('amount')),
+        ];
     }
 
     /**

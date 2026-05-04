@@ -4,8 +4,8 @@
  * Ficheiro do Observer AttendanceLogObserver.
  *
  * Este observer monitoriza as alterações nos registos de presença (AttendanceLog).
- * Quando um registo é criado, actualizado ou eliminado, despoleta o recálculo
- * automático do saldo do Banco de Horas e o processamento de ausências/atrasos.
+ * Quando um registo é criado, actualizado ou eliminado, despoleta a sincronização
+ * incremental do Banco de Horas e o processamento de ausências/atrasos.
  */
 
 namespace App\Observers;
@@ -42,11 +42,8 @@ class AttendanceLogObserver
         // Processa atrasos e faltas baseados no ponto
         $this->deductService->processAttendance($attendanceLog);
 
-        // Recalcular banco de horas para este mês
-        $this->hourBankService->recalculate(
-            $attendanceLog->employee_id,
-            $attendanceLog->time_in->format('Y-m')
-        );
+        // Sincronizar movimento incremental
+        $this->hourBankService->syncLog($attendanceLog);
     }
 
     /**
@@ -59,25 +56,17 @@ class AttendanceLogObserver
         // Só reprocessa se campos críticos de tempo foram alterados
         if ($attendanceLog->isDirty(['time_in', 'time_out', 'total_minutes'])) {
 
-            // Se mudou o mês da entrada, recalcular o mês original para corrigir saldos
+            // Se mudou a data da entrada, garantir sincronização
             if ($attendanceLog->isDirty('time_in')) {
-                $originalTimeIn = $attendanceLog->getOriginal('time_in');
-                if ($originalTimeIn) {
-                    $this->hourBankService->recalculate(
-                        $attendanceLog->employee_id,
-                        Carbon::parse($originalTimeIn)->format('Y-m')
-                    );
-                }
+                // O syncLog trata a actualização do movimento baseado no ID do log,
+                // mudando apenas os campos no HourBankMovement e ajustando o HourBank principal.
             }
 
             // Reprocessar as ausências/atrasos para a data do registo
             $this->deductService->processAttendance($attendanceLog);
 
-            // Recalcular o mês actual do registo
-            $this->hourBankService->recalculate(
-                $attendanceLog->employee_id,
-                $attendanceLog->time_in->format('Y-m')
-            );
+            // Sincronizar o movimento incremental
+            $this->hourBankService->syncLog($attendanceLog);
         }
     }
 
@@ -91,10 +80,7 @@ class AttendanceLogObserver
         // Remover Absence automática se o ponto for apagado, para não penalizar indevidamente
         $this->deductService->removeAbsenceForDate($attendanceLog->employee_id, $attendanceLog->time_in->toDateString());
 
-        // Recalcula o mês após a remoção do registo
-        $this->hourBankService->recalculate(
-            $attendanceLog->employee_id,
-            $attendanceLog->time_in->format('Y-m')
-        );
+        // Remover o movimento do banco de horas
+        $this->hourBankService->removeMovement(AttendanceLog::class, $attendanceLog->id);
     }
 }

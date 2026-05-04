@@ -3,10 +3,9 @@
 /**
  * Ficheiro do Modelo HourBank.
  *
- * Este modelo gere o Banco de Horas dos funcionários numa base mensal.
- * Armazena o saldo acumulado (positivo ou negativo), as horas extra ganhas
- * e as horas utilizadas (compensações), permitindo o transporte de saldos
- * entre meses.
+ * Este modelo gere o Banco de Horas dos funcionários de forma acumulada (total).
+ * Armazena o saldo total, o total de horas ganhas e o total de horas utilizadas
+ * ao longo de toda a relação contratual do funcionário.
  */
 
 namespace App\Models;
@@ -37,11 +36,9 @@ class HourBank extends Model
      */
     protected $fillable = [
         'employee_id',       // ID do funcionário
-        'month_year',        // Mês e ano de referência (formato YYYY-MM)
-        'balance',           // Saldo final do mês em minutos
-        'extra_hours_added', // Minutos de horas extra acumulados no mês
-        'extra_hours_used',  // Minutos de horas extra utilizados/compensados no mês
-        'previous_balance',  // Saldo transportado do mês anterior
+        'balance',           // Saldo actual acumulado em minutos
+        'extra_hours_added', // Total acumulado de minutos ganhos
+        'extra_hours_used',  // Total acumulado de minutos utilizados/compensados
     ];
 
     /**
@@ -53,7 +50,6 @@ class HourBank extends Model
         'balance' => 'integer',
         'extra_hours_added' => 'integer',
         'extra_hours_used' => 'integer',
-        'previous_balance' => 'integer',
     ];
 
     /**
@@ -65,21 +61,19 @@ class HourBank extends Model
     }
 
     /**
-     * Relacionamento: Ausências.
+     * Relacionamento: Movimentos.
      *
-     * Liga às ausências (faltas/atrasos) registadas para este funcionário,
-     * que afectam directamente o cálculo do saldo do banco de horas.
+     * Histórico detalhado de todas as alterações ao saldo.
      */
-    public function absences(): HasMany
+    public function movements(): HasMany
     {
-        return $this->hasMany(Absence::class, 'employee_id', 'employee_id');
+        return $this->hasMany(HourBankMovement::class, 'employee_id', 'employee_id');
     }
 
     /**
      * Acessor para formatar o saldo de forma legível.
      *
      * Converte os minutos totais em formato "(-)Xh Ym".
-     * Lida correctamente com saldos negativos adicionando o sinal de menos.
      *
      * @return string
      */
@@ -101,6 +95,19 @@ class HourBank extends Model
     {
         $hours = intdiv($this->extra_hours_added, 60);
         $minutes = $this->extra_hours_added % 60;
+
+        return "{$hours}h {$minutes}m";
+    }
+
+    /**
+     * Acessor para formatar as horas extra utilizadas.
+     *
+     * @return string
+     */
+    public function getFormattedExtraHoursUsedAttribute(): string
+    {
+        $hours = intdiv($this->extra_hours_used, 60);
+        $minutes = $this->extra_hours_used % 60;
 
         return "{$hours}h {$minutes}m";
     }

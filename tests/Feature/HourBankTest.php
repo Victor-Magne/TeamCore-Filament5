@@ -18,7 +18,7 @@ describe('HourBank', function () {
         // Criar um funcionário
         $this->employee = Employee::factory()->create(['designation_id' => $this->designation->id]);
 
-        // Criar um contrato ativo
+        // Criar um contrato ativo com data de início no passado para garantir que é encontrado
         $this->contract = Contract::factory()->create([
             'employee_id' => $this->employee->id,
             'designation_id' => $this->designation->id,
@@ -26,92 +26,89 @@ describe('HourBank', function () {
             'daily_work_minutes' => 480, // 8 horas
             'lunch_duration_minutes' => 60,
             'expected_start_time' => '09:00',
+            'start_date' => now()->subDays(10),
         ]);
 
-        // Criar ou recuperar o banco de horas
-        $this->hourBank = HourBank::firstOrCreate(
-            [
-                'employee_id' => $this->employee->id,
-                'month_year' => now()->format('Y-m'),
-            ],
-            [
-                'balance' => 0,
-                'extra_hours_added' => 0,
-                'extra_hours_used' => 0,
-                'previous_balance' => 0,
-            ]
-        );
+        $this->hourBankService = app(\App\Services\Hour\HourBankService::class);
     });
 
     it('creates hour bank when employee is created', function () {
         $newEmployee = Employee::factory()->create(['designation_id' => $this->designation->id]);
 
-        $hourBank = HourBank::where('employee_id', $newEmployee->id)
-            ->where('month_year', now()->format('Y-m'))
-            ->first();
+        $hourBank = HourBank::where('employee_id', $newEmployee->id)->first();
 
         expect($hourBank)->not->toBeNull();
         expect($hourBank->balance)->toBe(0);
     });
 
     it('calculates extra hours when employee works beyond contract hours', function () {
-        // Registar uma jornada de 9 horas (1h extra)
+        // Registar uma jornada de 10 horas (9:00 - 19:00 = 10h. 10h - 1h almoço = 9h efetivas = 1h extra)
         $now = Carbon::now();
         $attendance = AttendanceLog::create([
             'employee_id' => $this->employee->id,
             'time_in' => $now->copy()->setTime(9, 0),
             'lunch_break_start' => $now->copy()->setTime(12, 0),
             'lunch_break_end' => $now->copy()->setTime(13, 0),
-            'time_out' => $now->copy()->setTime(18, 0), // 9 horas totais = 8h + 1h extra
+            'time_out' => $now->copy()->setTime(19, 0),
         ]);
 
-        // Verificar que o banco de horas foi atualizado
-        $hourBank = HourBank::where('employee_id', $this->employee->id)
-            ->where('month_year', $now->format('Y-m'))
-            ->first();
+        $this->hourBankService->syncLog($attendance);
 
-        expect($hourBank->extra_hours_added)->toBe(0);
+        // Verificar que o banco de horas foi atualizado
+        $hourBank = HourBank::where('employee_id', $this->employee->id)->first();
+
+        expect($hourBank->extra_hours_added)->toBe(60);
+        expect($hourBank->balance)->toBe(60);
     });
 
     it('deducts hours for unjustified absence', function () {
         $now = Carbon::now();
 
-        // Registar uma falta: ausência de meio dia de trabalho
-        AttendanceLog::create([
+        // Registar uma falta: saída antecipada que gera déficit > 1h
+        $attendance = AttendanceLog::create([
             'employee_id' => $this->employee->id,
             'time_in' => $now->copy()->setTime(9, 0),
             'lunch_break_start' => $now->copy()->setTime(12, 0),
             'lunch_break_end' => $now->copy()->setTime(13, 0),
-            'time_out' => $now->copy()->setTime(13, 15), // Saída muito antecipada
+            'time_out' => $now->copy()->setTime(13, 15),
         ]);
+
+        $this->hourBankService->syncLog($attendance);
 
         // Verificar que o banco de horas foi penalizado
-        $hourBank = HourBank::where('employee_id', $this->employee->id)
-            ->where('month_year', $now->format('Y-m'))
-            ->first();
+        $hourBank = HourBank::where('employee_id', $this->employee->id)->first();
 
-        // Uma saída antecipada deve gerar uma ausência parcial
         expect($hourBank->extra_hours_used)->toBeGreaterThan(0);
+        expect($hourBank->balance)->toBeLessThan(0);
     });
 
-    it('maintains balance across months', function () {
-        // Criar um registo no mês passado
-        $lastMonth = Carbon::now()->subMonth();
-        HourBank::create([
+    it('accumulates balance across multiple logs', function () {
+        $date1 = Carbon::now()->subDay();
+        $date2 = Carbon::now();
+
+        // Log 1: 1 hora extra (9:00 - 19:00)
+        $log1 = AttendanceLog::create([
             'employee_id' => $this->employee->id,
-            'month_year' => $lastMonth->format('Y-m'),
-            'balance' => 120, // 2 horas positivas
-            'extra_hours_added' => 120,
-            'extra_hours_used' => 0,
-            'previous_balance' => 0,
+            'time_in' => $date1->copy()->setTime(9, 0),
+            'lunch_break_start' => $date1->copy()->setTime(12, 0),
+            'lunch_break_end' => $date1->copy()->setTime(13, 0),
+            'time_out' => $date1->copy()->setTime(19, 0),
         ]);
+        $this->hourBankService->syncLog($log1);
 
-        // Verificar que o saldo do mês atual carrega o anterior
-        $currentMonth = now()->format('Y-m');
-        $currentHourBank = HourBank::where('employee_id', $this->employee->id)
-            ->where('month_year', $currentMonth)
-            ->first();
+        // Log 2: 30 minutos extra (9:00 - 18:30)
+        $log2 = AttendanceLog::create([
+            'employee_id' => $this->employee->id,
+            'time_in' => $date2->copy()->setTime(9, 0),
+            'lunch_break_start' => $date2->copy()->setTime(12, 0),
+            'lunch_break_end' => $date2->copy()->setTime(13, 0),
+            'time_out' => $date2->copy()->setTime(18, 30),
+        ]);
+        $this->hourBankService->syncLog($log2);
 
-        expect($currentHourBank->previous_balance)->toBe(0);
+        $hourBank = HourBank::where('employee_id', $this->employee->id)->first();
+
+        expect($hourBank->extra_hours_added)->toBe(90);
+        expect($hourBank->balance)->toBe(90);
     });
 });

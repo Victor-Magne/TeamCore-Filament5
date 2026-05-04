@@ -4,15 +4,15 @@
  * Ficheiro do Serviço GeneratePayrollService.
  *
  * Este serviço é responsável pelo motor de cálculo salarial.
- * Transforma os dados contratuais e os saldos do banco de horas num registo
+ * Transforma os dados contratuais e os movimentos do banco de horas num registo
  * de processamento salarial (Payroll), aplicando fórmulas para o valor da hora,
- * suplementos de horas extra e deduções por ausências.
+ * suplementos de horas extra e deduções por ausências para o mês específico.
  */
 
 namespace App\Services\Payroll;
 
 use App\Models\Employee;
-use App\Models\HourBank;
+use App\Models\HourBankMovement;
 use App\Models\Payroll;
 use Illuminate\Support\Carbon;
 
@@ -29,8 +29,8 @@ class GeneratePayrollService
      *
      * Fórmulas Utilizadas:
      * 1. Valor da Hora: Salário Bruto / (Horas Diárias x 22 dias)
-     * 2. Adicional de Horas Extra: (Valor Hora x 1.5) x Horas Extra Acumuladas
-     * 3. Deduções: Valor Hora x Horas em Dívida (Faltas/Atrasos)
+     * 2. Adicional de Horas Extra: (Valor Hora x 1.5) x Horas Extra Ganhas no Mês
+     * 3. Deduções: Valor Hora x Horas Perdidas no Mês
      *
      * @param Employee $employee O funcionário a processar
      * @param string $monthYear Mês de referência no formato 'Y-m'
@@ -57,13 +57,20 @@ class GeneratePayrollService
         $workingDaysPerMonth = self::DEFAULT_WORKING_DAYS_PER_MONTH;
         $hourlyRate = $baseSalary / ($dailyWorkHours * $workingDaysPerMonth);
 
-        // 3. Carregar o banco de horas do período para obter ganhos e perdas de tempo
-        $hourBank = HourBank::where('employee_id', $employee->id)
-            ->where('month_year', $monthYear)
-            ->first();
+        // 3. Obter ganhos e perdas de tempo filtrados pelo mês de referência
+        $month = Carbon::createFromFormat('Y-m', $monthYear);
+        $startDate = $month->copy()->startOfMonth();
+        $endDate = $month->copy()->endOfMonth();
 
-        $extraHoursMinutes = $hourBank?->extra_hours_added ?? 0;
-        $usedHoursMinutes = $hourBank?->extra_hours_used ?? 0;
+        $extraHoursMinutes = HourBankMovement::where('employee_id', $employee->id)
+            ->where('type', 'addition')
+            ->whereBetween('date', [$startDate, $endDate])
+            ->sum('amount');
+
+        $usedHoursMinutes = abs(HourBankMovement::where('employee_id', $employee->id)
+            ->where('type', 'deduction')
+            ->whereBetween('date', [$startDate, $endDate])
+            ->sum('amount'));
 
         // 4. Calcular valor monetário das horas extras (com acréscimo de 50% - factor 1.5)
         $extraHoursAmount = ($hourlyRate * 1.5) * ($extraHoursMinutes / 60);
