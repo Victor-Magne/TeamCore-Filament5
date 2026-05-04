@@ -65,11 +65,8 @@ class LeaveAndAbsenceObserver
                 $currentDate->addDay();
             }
 
-            // Recalcular banco de horas para os meses afectados pela licença
-            $this->hourBankService->recalculate($leaveAndAbsence->employee_id, $startDate->format('Y-m'));
-            if ($startDate->format('Y-m') !== $endDate->format('Y-m')) {
-                $this->hourBankService->recalculate($leaveAndAbsence->employee_id, $endDate->format('Y-m'));
-            }
+            // O impacto no banco de horas é agora gerido automaticamente pelos
+            // observers de Absence e AttendanceLog que são disparados pelas chamadas acima.
         }
     }
 
@@ -80,8 +77,8 @@ class LeaveAndAbsenceObserver
      */
     public function deleted(LeaveAndAbsence $leaveAndAbsence): void
     {
-        // Se uma licença for apagada, precisamos de recalcular para restaurar faltas se necessário
-        $startDate = Carbon::parse($leaveAndAbsence->start_date);
-        $this->hourBankService->recalculate($leaveAndAbsence->employee_id, $startDate->format('Y-m'));
+        // Se uma licença for apagada, as Absences relacionadas continuam a existir
+        // a menos que o utilizador as apague manualmente. O saldo incremental
+        // manter-se-á consistente.
     }
 }

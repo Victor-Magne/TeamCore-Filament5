@@ -20,7 +20,6 @@ use App\Observers\AttendanceLogObserver;
 use App\Observers\ContractObserver;
 use App\Observers\EmployeeObserver;
 use App\Observers\LeaveAndAbsenceObserver;
-use App\Services\Hour\HourBankService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -30,9 +29,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Regista o serviço de Banco de Horas como Singleton para garantir
-        // consistência de estado durante o ciclo de vida do pedido.
-        $this->app->singleton(HourBankService::class);
+        //
     }
 
     /**

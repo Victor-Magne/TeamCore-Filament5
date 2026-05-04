@@ -81,15 +81,15 @@ class EmployeeOnboardingService
                     ->sendToDatabase($creator);
             }
 
-            // 3. Inicializar o Banco de Horas
-            HourBank::create([
-                'employee_id' => $employee->id,
-                'month_year' => now()->format('Y-m'),
-                'balance' => 0,
-                'extra_hours_added' => 0,
-                'extra_hours_used' => 0,
-                'previous_balance' => 0,
-            ]);
+            // 3. Inicializar o Banco de Horas (Registo Único Acumulado)
+            HourBank::firstOrCreate(
+                ['employee_id' => $employee->id],
+                [
+                    'balance' => 0,
+                    'extra_hours_added' => 0,
+                    'extra_hours_used' => 0,
+                ]
+            );
 
             if ($creator) {
                 Notification::make()

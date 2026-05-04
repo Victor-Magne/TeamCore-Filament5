@@ -118,6 +118,7 @@ class AttendanceLog extends Model
         static::saving(function (self $model) {
             $model->total_minutes = $model->calculateTotalMinutes();
         });
+
     }
 
     /**
