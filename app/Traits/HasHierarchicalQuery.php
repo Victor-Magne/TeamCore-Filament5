@@ -2,14 +2,28 @@
 
 namespace App\Traits;
 
+use App\Models\Employee;
 use Illuminate\Database\Eloquent\Builder;
 
 trait HasHierarchicalQuery
 {
+    /**
+     * Personaliza a query do Eloquent para aplicar visibilidade hierárquica.
+     *
+     * Regras:
+     * - Super Admin vê tudo.
+     * - Manager da Direção Geral vê tudo.
+     * - Managers de outras unidades vêem a si mesmos e todos os funcionários das unidades geridas (e sub-unidades).
+     * - Colaboradores base vêem apenas a si mesmos.
+     */
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
         $user = auth()->user();
+
+        if (! $user) {
+            return $query;
+        }
 
         // 0. REGRA SUPER ADMIN: Super admin vê todos os registos
         if ($user->hasRole('super_admin')) {
@@ -22,47 +36,42 @@ trait HasHierarchicalQuery
             return $query->whereRaw('1 = 0');
         }
 
-        $minhaUnitId = $meuEmployee->unit_id;
+        // Obtém todas as unidades geridas por este funcionário (diretamente ou via pivot)
+        $managedUnits = $meuEmployee->getAllManagedUnits();
 
-        return $query->where(function (Builder $q) use ($user, $meuEmployee, $minhaUnitId) {
+        // 1. REGRA DIREÇÃO GERAL: Se gere a direção geral, vê tudo
+        $isGeneralManager = $managedUnits->contains(fn ($u) => $u->isGeneralDirection());
+        if ($isGeneralManager) {
+            return $query;
+        }
 
-            // 1. REGRA UNIVERSAL: Vê os próprios registos
-            $q->where('employee_id', $meuEmployee->id);
-
-            // 2. DIRETOR: Vê os Chefes de Departamento (que estão nas unidades "filhas" da sua direção)
-            if ($user->can('scope_view_dept_heads')) {
-                $q->orWhereHas('employee', function (Builder $empQuery) use ($minhaUnitId) {
-                    $empQuery->whereHas('unit', function (Builder $unitQuery) use ($minhaUnitId) {
-                        // A unidade do funcionário alvo tem de ter como 'pai' a unidade atual
-                        $unitQuery->where('parent_id', $minhaUnitId)
-                            ->where('type', 'department');
-                    })->whereHas('user.roles', function (Builder $roleQuery) {
-                        $roleQuery->where('name', 'chefe_departamento');
-                    });
-                });
+        return $query->where(function (Builder $q) use ($meuEmployee, $managedUnits) {
+            // 2. REGRA UNIVERSAL: Vê os próprios registos
+            // No recurso de Employee, a coluna é 'id'. Nos outros, é 'employee_id'.
+            if ($q->getModel() instanceof Employee) {
+                $q->where('id', $meuEmployee->id);
+            } else {
+                $q->where('employee_id', $meuEmployee->id);
             }
 
-            // 3. CHEFE DE DEPARTAMENTO: Vê os Chefes de Secção (nas unidades "filhas" do departamento)
-            if ($user->can('scope_view_section_chiefs')) {
-                $q->orWhereHas('employee', function (Builder $empQuery) use ($minhaUnitId) {
-                    $empQuery->whereHas('unit', function (Builder $unitQuery) use ($minhaUnitId) {
-                        // A secção do funcionário alvo tem de ter como 'pai' o departamento atual
-                        $unitQuery->where('parent_id', $minhaUnitId)
-                            ->where('type', 'section');
-                    })->whereHas('user.roles', function (Builder $roleQuery) {
-                        $roleQuery->where('name', 'chefe_seccao');
-                    });
-                });
-            }
+            // 3. REGRA DE GESTÃO HIERÁRQUICA:
+            if ($managedUnits->isNotEmpty()) {
+                $allAccessibleUnitIds = [];
 
-            // 4. CHEFE DE SECÇÃO: Vê os Colaboradores da SUA secção (mesma unidade)
-            if ($user->can('scope_view_base_employees')) {
-                $q->orWhereHas('employee', function (Builder $empQuery) use ($minhaUnitId) {
-                    $empQuery->where('unit_id', $minhaUnitId) // Mesmo ID de unidade
-                        ->whereDoesntHave('user.roles', function (Builder $roleQuery) {
-                            $roleQuery->whereIn('name', ['diretor_geral', 'chefe_departamento', 'chefe_seccao']);
-                        });
-                });
+                foreach ($managedUnits as $unit) {
+                    $allAccessibleUnitIds[] = $unit->id;
+                    $allAccessibleUnitIds = array_merge($allAccessibleUnitIds, $unit->getAllDescendantIds());
+                }
+
+                $allAccessibleUnitIds = array_unique($allAccessibleUnitIds);
+
+                if ($q->getModel() instanceof Employee) {
+                    $q->orWhereIn('unit_id', $allAccessibleUnitIds);
+                } else {
+                    $q->orWhereHas('employee', function (Builder $empQuery) use ($allAccessibleUnitIds) {
+                        $empQuery->whereIn('unit_id', $allAccessibleUnitIds);
+                    });
+                }
             }
         });
     }

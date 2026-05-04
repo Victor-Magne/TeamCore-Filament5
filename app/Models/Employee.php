@@ -181,6 +181,30 @@ class Employee extends Model
     }
 
     /**
+     * Relacionamento: Unidades que este funcionário gere.
+     */
+    public function managedUnits(): HasMany
+    {
+        return $this->hasMany(Unit::class, 'manager_id');
+    }
+
+    /**
+     * Relacionamento: Unidades que este funcionário gere (via pivot).
+     */
+    public function managedUnitsViaPivot(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Unit::class, 'unit_manager', 'employee_id', 'unit_id');
+    }
+
+    /**
+     * Obtém todas as unidades geridas pelo funcionário (diretas e via pivot).
+     */
+    public function getAllManagedUnits(): \Illuminate\Support\Collection
+    {
+        return $this->managedUnits->merge($this->managedUnitsViaPivot)->unique('id');
+    }
+
+    /**
      * Obtém o saldo acumulado total do funcionário.
      *
      * @return int Saldo em minutos (pode ser negativo).

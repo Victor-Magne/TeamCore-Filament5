@@ -21,7 +21,7 @@ trait HasHierarchicalPolicy
      * Implementa regras de visibilidade em cascata:
      * - Admin vê tudo.
      * - Utilizador vê os seus próprios dados.
-     * - Gestores vêem os seus subordinados directos consoante o tipo de unidade.
+     * - Gestores vêem os seus subordinados recursivamente (unidades filhas).
      *
      * @param User $user O utilizador autenticado.
      * @param mixed $model O objecto que se pretende aceder (deve ter relação com Employee).
@@ -37,6 +37,11 @@ trait HasHierarchicalPolicy
         $meuEmployee = $user->employee;
         $donoDoModel = $model->employee ?? null;
 
+        // Caso especial: se o modelo for o próprio Employee, o dono é o próprio modelo
+        if ($model instanceof \App\Models\Employee) {
+            $donoDoModel = $model;
+        }
+
         // Se o utilizador não for um funcionário ou o modelo não pertencer a ninguém, o acesso é negado.
         if (! $meuEmployee || ! $donoDoModel) {
             return false;
@@ -47,44 +52,33 @@ trait HasHierarchicalPolicy
             return true;
         }
 
-        $userAlvo = $donoDoModel->user;
-        $minhaUnit = $meuEmployee->unit; // Unidade do utilizador logado
-        $unitDoAlvo = $donoDoModel->unit; // Unidade do funcionário dono do registo
+        // Obtém todas as unidades geridas por este funcionário (diretamente ou via pivot)
+        $managedUnits = $meuEmployee->getAllManagedUnits();
 
-        // Segurança caso as unidades não estejam definidas na BD.
-        if (! $minhaUnit || ! $unitDoAlvo) {
-            return false;
+        // 2. REGRA DIREÇÃO GERAL: Se gere a direção geral, vê tudo
+        $isGeneralManager = $managedUnits->contains(fn ($u) => $u->isGeneralDirection());
+        if ($isGeneralManager) {
+            return true;
         }
 
-        // 2. REGRA DE DIRETOR: Pode ver Chefes de Departamento que estejam em unidades filhas da sua.
-        if ($user->can('scope_view_dept_heads')) {
-            if (
-                $unitDoAlvo->parent_id === $minhaUnit->id &&
-                $unitDoAlvo->type === 'department' &&
-                $userAlvo && $userAlvo->hasRole('chefe_departamento')
-            ) {
-                return true;
+        // 3. REGRA DE GESTÃO HIERÁRQUICA:
+        if ($managedUnits->isNotEmpty()) {
+            $unitDoAlvoId = $donoDoModel->unit_id;
+
+            if (! $unitDoAlvoId) {
+                return false;
             }
-        }
 
-        // 3. REGRA DE CHEFE DE DEPARTAMENTO: Pode ver Chefes de Secção em unidades filhas.
-        if ($user->can('scope_view_section_chiefs')) {
-            if (
-                $unitDoAlvo->parent_id === $minhaUnit->id &&
-                $unitDoAlvo->type === 'section' &&
-                $userAlvo && $userAlvo->hasRole('chefe_seccao')
-            ) {
-                return true;
-            }
-        }
+            foreach ($managedUnits as $unit) {
+                // Se o alvo está na unidade que o utilizador gere
+                if ($unitDoAlvoId === $unit->id) {
+                    return true;
+                }
 
-        // 4. REGRA DE CHEFE DE SECÇÃO: Pode ver Colaboradores Base que pertençam à sua própria secção.
-        if ($user->can('scope_view_base_employees')) {
-            if (
-                $unitDoAlvo->id === $minhaUnit->id &&
-                $userAlvo && ! $userAlvo->hasAnyRole(['diretor_geral', 'chefe_departamento', 'chefe_seccao'])
-            ) {
-                return true;
+                // Ou se o alvo está em alguma unidade descendente
+                if (in_array($unitDoAlvoId, $unit->getAllDescendantIds())) {
+                    return true;
+                }
             }
         }
 
