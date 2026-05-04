@@ -64,7 +64,7 @@ it('calculates extra hours with 1.5 multiplier correctly', function () {
 
     HourBank::factory()->create([
         'employee_id' => $employee->id,
-        'month_year' => '2026-05',
+        'month_year' => '2026-08',
         'extra_hours_added' => 240,
         'extra_hours_used' => 0,
         'balance' => 240,
@@ -72,7 +72,7 @@ it('calculates extra hours with 1.5 multiplier correctly', function () {
     ]);
 
     $service = new GeneratePayrollService;
-    $payroll = $service->handle($employee, '2026-05');
+    $payroll = $service->handle($employee, '2026-08');
 
     expect((float) $payroll->extra_hours_amount)->toBe(75.0);
     expect((float) $payroll->total_net)->toBe(2275.0);
