@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * Ficheiro do Serviço CalculateExtraHoursService.
+ *
+ * Este serviço contém a lógica matemática para determinar se um registo
+ * de presença (AttendanceLog) resultou em horas extraordinárias ou num défice
+ * de tempo, comparando o tempo total trabalhado com a jornada diária contratual.
+ */
+
 namespace App\Services\Hour;
 
 use App\Models\AttendanceLog;
@@ -7,35 +15,37 @@ use App\Models\AttendanceLog;
 class CalculateExtraHoursService
 {
     /**
-     * Calcula horas extras de um AttendanceLog (apenas cálculo, sem persistência no banco de horas)
+     * Calcula as horas extras de um AttendanceLog.
      *
-     * @param  AttendanceLog  $attendanceLog  O registo de ponto
-     * @return int Minutos de horas extras (0 se nenhum)
+     * @param  AttendanceLog  $attendanceLog  O registo de ponto.
+     * @return int Minutos de horas extras (0 se não existirem).
      */
     public function handle(AttendanceLog $attendanceLog): int
     {
-        // Obtém o contrato ativo na data do ponto
+        // Obtém o contrato activo na data do ponto para saber a carga horária esperada
         $contract = $attendanceLog->employee->contracts()
             ->where('status', 'active')
             ->where('start_date', '<=', $attendanceLog->time_in)
             ->orderByDesc('start_date')
             ->first();
 
+        // Valor por defeito: 8 horas (480 minutos)
         $dailyWorkMinutes = $contract?->daily_work_minutes ?? 480;
 
-        // Se trabalhou menos que a jornada, não há horas extras
+        // Se trabalhou menos ou o mesmo que a jornada, não há horas extras
         if (! $attendanceLog->total_minutes || $attendanceLog->total_minutes <= $dailyWorkMinutes) {
             return 0;
         }
 
-        // Calcular horas extras
+        // Retorna o excesso de minutos trabalhados
         return $attendanceLog->total_minutes - $dailyWorkMinutes;
     }
 
     /**
-     * Calcula o défice de minutos de um AttendanceLog
+     * Calcula o défice de minutos de um AttendanceLog (tempo não trabalhado).
      *
-     * @return int Minutos de défice (positivo) ou 0
+     * @param  AttendanceLog  $attendanceLog  O registo de ponto.
+     * @return int Minutos de défice (positivo se existir tempo em falta) ou 0.
      */
     public function calculateDeficit(AttendanceLog $attendanceLog): int
     {
@@ -47,10 +57,12 @@ class CalculateExtraHoursService
 
         $dailyWorkMinutes = $contract?->daily_work_minutes ?? 480;
 
+        // Se trabalhou mais ou o mesmo que a jornada, não há défice
         if (! $attendanceLog->total_minutes || $attendanceLog->total_minutes >= $dailyWorkMinutes) {
             return 0;
         }
 
+        // Retorna a diferença em falta
         return $dailyWorkMinutes - $attendanceLog->total_minutes;
     }
 }
