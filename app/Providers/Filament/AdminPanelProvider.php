@@ -87,6 +87,8 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
                 CheckAdminPanelAccess::class,
+                \App\Http\Middleware\CheckMustChangePassword::class,
+                \App\Http\Middleware\CheckTwoFactorEnforced::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
