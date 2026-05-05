@@ -52,7 +52,7 @@ class AppPanelProvider extends PanelProvider
                         hasAvatars: true,
                         slug: 'my-profile'
                     )
-                    ->enableTwoFactorAuthentication(),
+                    ->withoutMyProfileComponents(['update_password', 'two_factor_authentication']),
                 FilamentUnsavedChangesModalPlugin::make(),
             ])
             ->discoverResources(in: app_path('Filament/App/Resources'), for: 'App\Filament\App\Resources')
@@ -75,6 +75,8 @@ class AppPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
                 CheckAppPanelAccess::class,
+                \App\Http\Middleware\CheckMustChangePassword::class,
+                \App\Http\Middleware\CheckTwoFactorEnforced::class,
             ])
             ->authMiddleware([
                 Authenticate::class,

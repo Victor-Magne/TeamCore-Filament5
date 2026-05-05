@@ -31,6 +31,7 @@ use Spatie\Permission\Traits\HasRoles;
     'password',             // Senha (armazenada de forma segura)
     'employee_id',          // Ligação ao registo de Funcionário correspondente
     'must_change_password', // Flag para forçar a troca de senha no primeiro login
+    'two_factor_enabled',   // Flag para forçar 2FA
 ])]
 #[Hidden([
     'password',             // Nunca expor a senha em serializações (JSON/Arrays)
@@ -52,6 +53,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',             // Garante que a senha é encriptada automaticamente ao guardar
             'must_change_password' => 'boolean', // Converte 0/1 da DB para true/false
+            'two_factor_enabled' => 'boolean',   // Converte 0/1 da DB para true/false
         ];
     }
 
