@@ -26,8 +26,7 @@ class UsersTable
                 TextColumn::make('employee.first_name')
                     ->label('Funcionário Associado')
                     ->searchable()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
                 TextColumn::make('roles.name')
                     ->label('Roles')
                     ->badge()
@@ -35,12 +34,12 @@ class UsersTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('email_verified_at')
                     ->label('Email Verificado')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('must_change_password')
                     ->label('Alterar Password')
                     ->boolean()
-                    ->color(fn(bool $state): string => $state ? 'danger' : 'success')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->color(fn(bool $state): string => $state ? 'success' : 'danger'),
             ])
             ->recordActions([
                 EditAction::make(),
