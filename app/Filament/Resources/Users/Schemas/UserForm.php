@@ -98,6 +98,11 @@ class UserForm
                         ->default(true)
                         ->helperText('Recomenda-se ativar esta opção para novos utilizadores.'),
 
+                    Toggle::make('two_factor_enabled')
+                        ->label('Exigir Autenticação de Dois Factores (2FA)')
+                        ->default(false)
+                        ->helperText('Se ativado, o utilizador será obrigado a configurar e usar 2FA.'),
+
                     Toggle::make('is_active') // Substitui 'is_active' pelo nome correto da tua coluna na base de dados
                         ->label('Conta Ativa')
                         ->default(true),
