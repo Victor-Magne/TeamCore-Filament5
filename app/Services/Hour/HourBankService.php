@@ -150,6 +150,7 @@ class HourBankService
 
     /**
      * Ajusta os totais no registo principal do HourBank.
+     * Trata o montante como incremental, permitindo a aplicação ou reversão de movimentos.
      */
     protected function adjustHourBank(int $employeeId, int $amount, string $type): void
     {
@@ -157,12 +158,15 @@ class HourBankService
 
         $hourBank->balance += $amount;
 
-        // Ganhos e perdas acumulados são tratados separadamente para estatísticas
+        // Ganhos e perdas acumulados são tratados separadamente para estatísticas.
+        // Se o amount for positivo e o tipo 'addition', aumenta o total ganho.
+        // Se o amount for negativo e o tipo 'addition', reverte um ganho (ex: alteração de log).
         if ($type === 'addition') {
             $hourBank->extra_hours_added += $amount;
         } elseif ($type === 'deduction') {
-            // No caso de dedução, o amount é negativo, então subtraímos para somar ao contador de perdas
-            $hourBank->extra_hours_used += abs($amount);
+            // Se o amount for negativo (normal numa dedução), aumenta o total usado (usamos subtracção).
+            // Se o amount for positivo (reversão de dedução), diminui o total usado.
+            $hourBank->extra_hours_used -= $amount;
         }
 
         $hourBank->save();

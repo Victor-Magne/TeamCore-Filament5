@@ -170,13 +170,18 @@ class DeductHourBankService
 
     /**
      * Remove registos de ausência indevidos para uma data específica.
+     * Utiliza o método delete() na instância para garantir o disparo de observers.
      */
     public function removeAbsenceForDate(int $employeeId, string $date): void
     {
-        Absence::where('employee_id', $employeeId)
+        $absences = Absence::where('employee_id', $employeeId)
             ->whereDate('absence_date', $date)
             ->whereNull('leave_and_absence_id') // Não remove se for uma licença oficial inserida manualmente
-            ->delete();
+            ->get();
+
+        foreach ($absences as $absence) {
+            $absence->delete();
+        }
     }
 
     /**
@@ -256,8 +261,11 @@ class DeductHourBankService
                 'reason' => $latest->reason.' (Convertido para falta por 3 atrasos consecutivos)',
             ]);
 
-            // Elimina os dois atrasos anteriores que deram origem à falta
-            Absence::whereIn('id', $lastAbsences->slice(1)->pluck('id'))->delete();
+            // Elimina os dois atrasos anteriores que deram origem à falta.
+            // Percorre a colecção para disparar o AbsenceObserver para cada um.
+            foreach ($lastAbsences->slice(1) as $oldAbsence) {
+                $oldAbsence->delete();
+            }
         }
     }
 }
