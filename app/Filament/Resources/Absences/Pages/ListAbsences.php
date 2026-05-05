@@ -16,6 +16,7 @@ class ListAbsences extends ListRecords
                 ->label('Verificar Presenças')
                 ->icon('heroicon-o-check-circle')
                 ->color('warning')
+                ->authorize(fn (): bool => auth()->user()?->can('Action:CheckAttendance') ?? false)
                 ->form([
                     \Filament\Forms\Components\DatePicker::make('date')
                         ->label('Data para Verificação')

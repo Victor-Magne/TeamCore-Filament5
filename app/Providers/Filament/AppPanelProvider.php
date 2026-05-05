@@ -55,7 +55,7 @@ class AppPanelProvider extends PanelProvider
                     ->withoutMyProfileComponents(['update_password', 'two_factor_authentication']),
                 FilamentUnsavedChangesModalPlugin::make(),
             ])
-            ->discoverResources(in: app_path('Filament/App/Resources'), for: 'App\Filament\App\Resources')
+            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/App/Pages'), for: 'App\Filament\App\Pages')
             ->pages([
                 EmployeeDashboard::class,

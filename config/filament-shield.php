@@ -257,6 +257,9 @@ return [
         // Conflito de Interesses
         'Approve:OwnVacation',
         'Approve:OwnLeaveAndAbsence',
+
+        // Ações Customizadas
+        'Action:CheckAttendance',      // Verificar Presenças
     ],
 
     /*

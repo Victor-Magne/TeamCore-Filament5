@@ -25,7 +25,6 @@
             </div>
         @else
             <div class="flex flex-col items-center justify-center gap-y-1 py-4 text-center">
-                <x-heroicon-o-document-minus class="h-7 w-7 text-gray-400" />
                 <p class="text-sm text-gray-500 dark:text-gray-400">Nenhum contrato ativo encontrado.</p>
             </div>
         @endif
