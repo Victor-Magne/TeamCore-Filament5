@@ -213,6 +213,30 @@ class Employee extends Model
     }
 
     /**
+     * Obtém os IDs de todos os funcionários subordinados (incluindo sub-unidades).
+     *
+     * @return array<int>
+     */
+    public function getAllSubordinateEmployeeIds(): array
+    {
+        $managedUnits = $this->getAllManagedUnits();
+
+        if ($managedUnits->isEmpty()) {
+            return [];
+        }
+
+        $allAccessibleUnitIds = [];
+        foreach ($managedUnits as $unit) {
+            $allAccessibleUnitIds[] = $unit->id;
+            $allAccessibleUnitIds = array_merge($allAccessibleUnitIds, $unit->getAllDescendantIds());
+        }
+
+        $allAccessibleUnitIds = array_unique($allAccessibleUnitIds);
+
+        return self::whereIn('unit_id', $allAccessibleUnitIds)->pluck('id')->toArray();
+    }
+
+    /**
      * Obtém o saldo acumulado total do funcionário.
      *
      * @return int Saldo em minutos (pode ser negativo).
