@@ -28,20 +28,11 @@ class LeaveAndAbsenceResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'id';
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Licenças e Justificativas');
-    }
+    protected static ?string $modelLabel = 'Licença e Afastamento';
 
-    public static function getModelLabel(): string
-    {
-        return __('Licença/ Justificativa');
-    }
+    protected static ?string $navigationLabel = 'Licenças e Afastamentos';
 
-    public static function getPluralModelLabel(): string
-    {
-        return __('Licenças e Justificativas');
-    }
+    protected static ?string $pluralModelLabel = 'Licenças e Afastamentos';
 
     public static function form(Schema $schema): Schema
     {

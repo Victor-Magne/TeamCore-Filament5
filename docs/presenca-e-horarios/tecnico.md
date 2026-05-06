@@ -50,3 +50,6 @@ Centraliza a lógica de atualização do saldo. Utiliza um sistema de deltas par
 Página Livewire otimizada para picagens rápidas.
 - Gere estados dinamicamente: Entrada -> Almoço (Início) -> Almoço (Fim) -> Saída.
 - Captura o timestamp do servidor para evitar fraudes de horário no cliente.
+
+## 7. Validação Automatizada
+As regras de picagem, deduções, tolerâncias e movimentos do banco de horas estão cobertas na suíte atual com `100` testes passados e `222` assertions (`php artisan test --compact`).

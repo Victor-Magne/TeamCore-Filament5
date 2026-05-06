@@ -2,16 +2,16 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Employee;
 use App\Models\LeaveAndAbsence;
 use App\Models\Vacation;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Textarea;
+use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
-use Illuminate\Support\Facades\Auth;
-use Filament\Tables\Actions\Action;
-use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class TeamPendingRequestsWidget extends BaseWidget
@@ -25,7 +25,7 @@ class TeamPendingRequestsWidget extends BaseWidget
         $user = Auth::user();
         $meuEmployee = $user?->employee;
 
-        if (!$meuEmployee) {
+        if (! $meuEmployee) {
             return $table->query(Vacation::whereRaw('1=0'));
         }
 
@@ -50,31 +50,40 @@ class TeamPendingRequestsWidget extends BaseWidget
             ->where('vacations.status', 'pending')
             ->whereNull('vacations.deleted_at');
 
-        // Subquery 2: Leaves
-        $leaveQuery = DB::table('leaves_and_absences')
-            ->join('employees', 'leaves_and_absences.employee_id', '=', 'employees.id')
+        $leaveQuery = LeaveAndAbsence::query()
             ->select([
-                'leaves_and_absences.id',
-                'leaves_and_absences.employee_id',
-                'leaves_and_absences.start_date',
-                'leaves_and_absences.end_date',
-                'leaves_and_absences.status',
-                'employees.first_name',
-                'employees.last_name',
-                DB::raw("leaves_and_absences.type as request_type"),
+                'id',
+                'employee_id',
+                'start_date',
+                'end_date',
+                'status',
+                DB::raw('type as request_type'),
                 DB::raw("'App\\\\Models\\\\LeaveAndAbsence' as model_type"),
-                DB::raw("CONCAT('Leave_', leaves_and_absences.id) as row_key")
+                DB::raw("CONCAT('App\\\\\\\\Models\\\\\\\\LeaveAndAbsence', ':', id) as row_key"),
             ])
-            ->whereIn('leaves_and_absences.employee_id', $employeeIds)
-            ->where('leaves_and_absences.status', 'pending')
-            ->whereNull('leaves_and_absences.deleted_at');
+            ->whereIn('employee_id', $employeeIds)
+            ->where('status', 'pending');
 
-        $unionQuery = $vacationQuery->union($leaveQuery);
+        // We use one of the models as the base for the query builder but override the whole query with a union
+        $vacationQuery = Vacation::query()
+            ->select([
+                'id',
+                'employee_id',
+                'start_date',
+                'end_date',
+                'status',
+                DB::raw("'Férias' as request_type"),
+                DB::raw("'App\\\\Models\\\\Vacation' as model_type"),
+                DB::raw("CONCAT('App\\\\\\\\Models\\\\\\\\Vacation', ':', id) as row_key"),
+            ])
+            ->whereIn('employee_id', $employeeIds)
+            ->where('status', 'pending');
 
-        // We use DB::table to avoid Eloquent global scopes (like SoftDeletes)
-        // that would incorrectly prefix columns in the outer query.
-        $query = DB::table(DB::raw("({$unionQuery->toSql()}) as combined_requests"))
-            ->mergeBindings($unionQuery);
+        // Wrap the union in a subquery to allow pagination and sorting
+        $query = Vacation::query()
+            ->withoutGlobalScopes()
+            ->select('*')
+            ->fromSub($vacationQuery->union($leaveQuery), 'combined_requests');
 
         return $table
             ->query($query)
@@ -114,8 +123,17 @@ class TeamPendingRequestsWidget extends BaseWidget
                     ->color('success')
                     ->icon('heroicon-m-check')
                     ->requiresConfirmation()
-                    ->action(function ($record) {
-                        $actualRecord = ($record->model_type)::find($record->id);
+                    ->action(function (Model $record) {
+                        $actualRecord = $this->resolveActionableRecord($record);
+                        if (! $actualRecord) {
+                            Notification::make()
+                                ->title('Pedido inválido ou não autorizado')
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+
                         $actualRecord->update(['status' => 'approved']);
 
                         Notification::make()
@@ -128,12 +146,21 @@ class TeamPendingRequestsWidget extends BaseWidget
                     ->color('danger')
                     ->icon('heroicon-m-x-mark')
                     ->form([
-                        Tables\Components\Textarea::make('rejection_reason')
+                        Textarea::make('rejection_reason')
                             ->label('Motivo da Rejeição')
                             ->required(),
                     ])
-                    ->action(function ($record, array $data) {
-                        $actualRecord = ($record->model_type)::find($record->id);
+                    ->action(function (Model $record, array $data) {
+                        $actualRecord = $this->resolveActionableRecord($record);
+                        if (! $actualRecord) {
+                            Notification::make()
+                                ->title('Pedido inválido ou não autorizado')
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+
                         $actualRecord->update([
                             'status' => 'rejected',
                             'rejection_reason' => $data['rejection_reason'],
@@ -145,5 +172,46 @@ class TeamPendingRequestsWidget extends BaseWidget
                             ->send();
                     }),
             ]);
+    }
+
+    public function getTableRecordKey(Model|array $record): string
+    {
+        if (is_array($record)) {
+            if (filled($record['row_key'] ?? null)) {
+                return (string) $record['row_key'];
+            }
+
+            return parent::getTableRecordKey($record);
+        }
+
+        if (filled($record->row_key ?? null)) {
+            return (string) $record->row_key;
+        }
+
+        return parent::getTableRecordKey($record);
+    }
+
+    private function resolveActionableRecord(Model $record): ?Model
+    {
+        $employee = Auth::user()?->employee;
+        if (! $employee) {
+            return null;
+        }
+
+        $modelClass = (string) ($record->model_type ?? '');
+        if (! in_array($modelClass, [Vacation::class, LeaveAndAbsence::class], true)) {
+            return null;
+        }
+
+        $managedEmployeeIds = $employee->getAllSubordinateEmployeeIds();
+        if (! in_array((int) $record->employee_id, $managedEmployeeIds, true)) {
+            return null;
+        }
+
+        return $modelClass::query()
+            ->whereKey($record->id)
+            ->where('employee_id', $record->employee_id)
+            ->where('status', 'pending')
+            ->first();
     }
 }

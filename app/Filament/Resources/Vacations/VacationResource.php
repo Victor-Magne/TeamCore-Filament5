@@ -28,10 +28,9 @@ class VacationResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'id';
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Férias');
-    }
+    protected static ?string $navigationLabel = 'Férias';
+    protected static ?string $modelLabel = 'Férias';
+    protected static ?string $pluralModelLabel = 'Férias';
 
     public static function form(Schema $schema): Schema
     {

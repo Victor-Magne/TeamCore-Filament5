@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Designation;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Designation>
@@ -17,8 +18,14 @@ class DesignationFactory extends Factory
      */
     public function definition(): array
     {
+        $designationName = $this->faker->jobTitle().' '.strtoupper(Str::random(6));
+
+        while (Designation::query()->where('name', $designationName)->exists()) {
+            $designationName = $this->faker->jobTitle().' '.strtoupper(Str::random(6));
+        }
+
         return [
-            'name' => $this->faker->jobTitle(),
+            'name' => $designationName,
             'level' => $this->faker->randomElement(['junior', 'pleno', 'senior', 'specialist', 'lead']),
             'base_salary' => $this->faker->numberBetween(100000, 500000) / 100,
         ];
@@ -30,7 +37,7 @@ class DesignationFactory extends Factory
     public function manager(): static
     {
         return $this->state(fn (array $attributes) => [
-            'level' => $this->faker->numberBetween(4, 5),
+            'level' => $this->faker->randomElement(['specialist', 'lead']),
             'base_salary' => $this->faker->numberBetween(300000, 600000) / 100,
         ]);
     }
@@ -41,7 +48,7 @@ class DesignationFactory extends Factory
     public function operational(): static
     {
         return $this->state(fn (array $attributes) => [
-            'level' => $this->faker->numberBetween(1, 2),
+            'level' => $this->faker->randomElement(['junior', 'pleno']),
             'base_salary' => $this->faker->numberBetween(100000, 200000) / 100,
         ]);
     }

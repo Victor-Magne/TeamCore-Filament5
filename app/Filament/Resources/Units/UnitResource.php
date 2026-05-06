@@ -29,10 +29,9 @@ class UnitResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Unidades');
-    }
+    protected static ?string $navigationLabel = 'Unidades';
+    protected static ?string $modelLabel = 'Unidade';
+    protected static ?string $pluralModelLabel = 'Unidades';
 
     public static function form(Schema $schema): Schema
     {

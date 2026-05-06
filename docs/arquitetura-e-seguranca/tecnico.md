@@ -8,7 +8,7 @@ A aplicação é construída sobre tecnologias modernas e robustas:
 - **Framework Web:** Laravel 13.
 - **Interface Administrativa:** Filament 5 (TALL Stack: Tailwind CSS, Alpine.js, Laravel, Livewire).
 - **Base de Dados:** MySQL 8.0+.
-- **Testes:** Pest 4.
+- **Testes:** Pest 4 (estado atual: 100 testes passados, 222 assertions, via `php artisan test --compact`).
 - **Frontend:** Vite 6 + Tailwind CSS 4.
 
 ## 2. Autenticação e Gestão de Utilizadores

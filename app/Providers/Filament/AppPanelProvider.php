@@ -5,7 +5,10 @@ namespace App\Providers\Filament;
 use App\Filament\App\Pages\EmployeeDashboard;
 use App\Filament\Pages\AttendanceCheckIn;
 use App\Http\Middleware\CheckAppPanelAccess;
+use App\Http\Middleware\CheckMustChangePassword;
+use App\Http\Middleware\CheckTwoFactorEnforced;
 use AzGasim\FilamentUnsavedChangesModal\FilamentUnsavedChangesModalPlugin;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -19,6 +22,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
+
 class AppPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -31,17 +35,17 @@ class AppPanelProvider extends PanelProvider
             ->unsavedChangesAlerts()
             ->spa()
             ->colors([
-            50 => '#fef7ed',
-            100 => '#fdeed5',
-            200 => '#fbdcaa',
-            300 => '#f6c376',
-            400 => '#f0a247',
-            500 => '#e67f1a', // Your main brand color
-            600 => '#d06513',
-            700 => '#a84c11',
-            800 => '#853e13',
-            900 => '#6d3514',
-            950 => '#3e1b07',
+                50 => '#fef7ed',
+                100 => '#fdeed5',
+                200 => '#fbdcaa',
+                300 => '#f6c376',
+                400 => '#f0a247',
+                500 => '#e67f1a', // Your main brand color
+                600 => '#d06513',
+                700 => '#a84c11',
+                800 => '#853e13',
+                900 => '#6d3514',
+                950 => '#3e1b07',
             ])
             ->brandLogo(asset('images/Teamcorelogo.svg'))
             ->plugins([
@@ -53,6 +57,7 @@ class AppPanelProvider extends PanelProvider
                         slug: 'my-profile'
                     )
                     ->withoutMyProfileComponents(['update_password', 'two_factor_authentication']),
+                FilamentShieldPlugin::make(),
                 FilamentUnsavedChangesModalPlugin::make(),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
@@ -75,8 +80,8 @@ class AppPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
                 CheckAppPanelAccess::class,
-                \App\Http\Middleware\CheckMustChangePassword::class,
-                \App\Http\Middleware\CheckTwoFactorEnforced::class,
+                CheckMustChangePassword::class,
+                CheckTwoFactorEnforced::class,
             ])
             ->authMiddleware([
                 Authenticate::class,

@@ -25,10 +25,9 @@ class DesignationResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Cargos');
-    }
+  protected static ?string $navigationLabel = 'Cargos';
+  protected static ?string $modelLabel = 'Cargo';
+  protected static ?string $pluralModelLabel = 'Cargos';
 
     public static function form(Schema $schema): Schema
     {

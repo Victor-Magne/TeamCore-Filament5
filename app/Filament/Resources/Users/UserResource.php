@@ -25,9 +25,13 @@ class UserResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    public static function getNavigationLabel(): string
+    protected static ?string $navigationLabel = 'Usuários';
+    protected static ?string $modelLabel = 'Usuário';
+    protected static ?string $pluralModelLabel = 'Usuários';
+
+    public static function getNavigationBadge(): ?string
     {
-        return __('Usuários');
+        return (string) User::count();
     }
 
     public static function form(Schema $schema): Schema

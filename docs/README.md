@@ -8,6 +8,10 @@ Esta documentação está dividida por temas, cada um contendo uma visão técni
 
 ## 📂 Estrutura da Documentação
 
+### 📘 Manuais Consolidados
+*   **[Manual Técnico Consolidado](./manual_tecnico.md):** Arquitetura end-to-end, operação, manutenção, troubleshooting e governança técnica.
+*   **[Manual de Utilizador Consolidado](./manual_utilizador.md):** Guia funcional por perfil (`Admin`, `HR`, `Employee`) com fluxos operacionais.
+
 ### 🛡️ [Arquitetura e Segurança](./arquitetura-e-seguranca/)
 *   **[Documentação Técnica](./arquitetura-e-seguranca/tecnico.md):** Stack tecnológica, RBAC (Shield), auditoria e padrões de código.
 *   **[Manual do Utilizador](./arquitetura-e-seguranca/manual-utilizador.md):** Níveis de acesso, segurança de conta e boas práticas.

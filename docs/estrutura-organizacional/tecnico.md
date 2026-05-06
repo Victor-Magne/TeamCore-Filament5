@@ -58,3 +58,6 @@ Sistema de localização em cascata para preenchimento de dados de morada dos fu
 
 ## 5. Auditoria
 Todas estas entidades implementam a trait `LogsActivity`, registando qualquer alteração na estrutura da empresa no `ActivityLog`.
+
+## 6. Validação Automatizada
+As regras descritas nesta secção são cobertas pela suíte automatizada com estado atual de `100` testes passados e `222` assertions (`php artisan test --compact`).

@@ -27,10 +27,9 @@ class CityResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Cidades');
-    }
+    protected static ?string $navigationLabel = 'Cidades';
+    protected static ?string $modelLabel = 'Cidade';
+    protected static ?string $pluralModelLabel = 'Cidades';
 
     public static function form(Schema $schema): Schema
     {

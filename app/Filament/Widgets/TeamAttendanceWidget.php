@@ -6,8 +6,8 @@ use App\Models\Employee;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class TeamAttendanceWidget extends BaseWidget
 {
@@ -20,7 +20,7 @@ class TeamAttendanceWidget extends BaseWidget
         $user = Auth::user();
         $meuEmployee = $user?->employee;
 
-        if (!$meuEmployee) {
+        if (! $meuEmployee) {
             return $table->query(Employee::whereRaw('1=0'));
         }
 
@@ -30,7 +30,7 @@ class TeamAttendanceWidget extends BaseWidget
             ->query(
                 Employee::whereIn('id', $employeeIds)
                     ->with(['attendanceLogs' => function ($query) {
-                        $query->whereDate('date', Carbon::today());
+                        $query->whereDate('time_in', Carbon::today());
                     }, 'unit'])
             )
             ->columns([
@@ -43,12 +43,22 @@ class TeamAttendanceWidget extends BaseWidget
                     ->label('Estado Atual')
                     ->getStateUsing(function (Employee $record) {
                         $log = $record->attendanceLogs->first();
-                        if (!$log) return 'Não Iniciou';
+                        if (! $log) {
+                            return 'Não Iniciou';
+                        }
 
-                        if ($log->time_out) return 'Saída';
-                        if ($log->lunch_end) return 'Trabalho (Pós-Almoço)';
-                        if ($log->lunch_start) return 'Em Pausa';
-                        if ($log->time_in) return 'Trabalho (Manhã)';
+                        if ($log->time_out) {
+                            return 'Saída';
+                        }
+                        if ($log->lunch_end) {
+                            return 'Trabalho (Pós-Almoço)';
+                        }
+                        if ($log->lunch_start) {
+                            return 'Em Pausa';
+                        }
+                        if ($log->time_in) {
+                            return 'Trabalho (Manhã)';
+                        }
 
                         return 'Desconhecido';
                     })

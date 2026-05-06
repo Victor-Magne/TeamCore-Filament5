@@ -29,10 +29,9 @@ class ContractResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'employee.first_name';
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Contratos');
-    }
+    protected static ?string $navigationLabel = 'Contratos';
+    protected static ?string $modelLabel = 'Contrato';
+    protected static ?string $pluralModelLabel = 'Contratos';
 
     public static function form(Schema $schema): Schema
     {

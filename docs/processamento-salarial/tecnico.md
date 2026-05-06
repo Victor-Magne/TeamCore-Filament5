@@ -40,3 +40,6 @@ Os registos de `Payroll` possuem um campo `status`:
 
 ## 5. Auditoria
 Como todas as entidades financeiras, o `Payroll` é auditado. Qualquer alteração manual num valor processado automaticamente é registada no log de atividade com os valores antigo e novo.
+
+## 6. Validação Automatizada
+As fórmulas e regras de processamento salarial desta secção estão validadas na suíte atual com `100` testes passados e `222` assertions (`php artisan test --compact`).

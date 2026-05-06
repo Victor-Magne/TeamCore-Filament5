@@ -25,10 +25,9 @@ class CountryResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Países');
-    }
+    protected static ?string $navigationLabel = 'Países';
+    protected static ?string $modelLabel = 'País';
+    protected static ?string $pluralModelLabel = 'Países';
 
     public static function form(Schema $schema): Schema
     {

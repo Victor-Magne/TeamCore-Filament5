@@ -55,10 +55,9 @@ class AttendanceLogResource extends Resource
     /**
      * Nome traduzido para o menu.
      */
-    public static function getNavigationLabel(): string
-    {
-        return __('Registos de Presença');
-    }
+    protected static ?string $navigationLabel = 'Registos de Assiduidade';
+    protected static ?string $modelLabel = 'Registo de Assiduidade';
+    protected static ?string $pluralModelLabel = 'Registos de Assiduidade';
 
     /**
      * Configuração do formulário de edição/criação.
@@ -74,7 +73,7 @@ class AttendanceLogResource extends Resource
     public static function table(Table $table): Table
     {
         return AttendanceLogsTable::configure($table)
-            ->modifyQueryUsing(fn (Builder $query) => $query->with(['employee']));
+            ->modifyQueryUsing(fn(Builder $query) => $query->with(['employee']));
     }
 
     /**
