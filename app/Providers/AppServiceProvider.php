@@ -15,11 +15,13 @@ use App\Models\AttendanceLog;
 use App\Models\Contract;
 use App\Models\Employee;
 use App\Models\LeaveAndAbsence;
+use App\Models\Vacation;
 use App\Observers\AbsenceObserver;
 use App\Observers\AttendanceLogObserver;
 use App\Observers\ContractObserver;
 use App\Observers\EmployeeObserver;
 use App\Observers\LeaveAndAbsenceObserver;
+use App\Observers\VacationObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -52,5 +54,6 @@ class AppServiceProvider extends ServiceProvider
         AttendanceLog::observe(AttendanceLogObserver::class);
         Absence::observe(AbsenceObserver::class);
         LeaveAndAbsence::observe(LeaveAndAbsenceObserver::class);
+        Vacation::observe(VacationObserver::class);
     }
 }

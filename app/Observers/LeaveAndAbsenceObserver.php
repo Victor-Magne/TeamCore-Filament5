@@ -40,6 +40,18 @@ class LeaveAndAbsenceObserver
      */
     public function saved(LeaveAndAbsence $leaveAndAbsence): void
     {
+        // Enviar notificação se o estado mudou para aprovado ou rejeitado
+        if ($leaveAndAbsence->wasChanged('status') && in_array($leaveAndAbsence->status, ['approved', 'rejected'])) {
+            $employee = $leaveAndAbsence->employee;
+            if ($employee && $employee->user) {
+                $employee->user->notify(new \App\Notifications\RequestStatusNotification(
+                    type: 'Licença/Justificativa',
+                    status: $leaveAndAbsence->status,
+                    reason: $leaveAndAbsence->rejection_reason
+                ));
+            }
+        }
+
         // Só processamos impacto no banco de horas se a licença estiver aprovada
         if ($leaveAndAbsence->status === 'approved') {
             $startDate = Carbon::parse($leaveAndAbsence->start_date);
