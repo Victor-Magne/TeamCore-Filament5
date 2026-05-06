@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Country;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Country>
@@ -17,9 +18,15 @@ class CountryFactory extends Factory
      */
     public function definition(): array
     {
+        $countryCode = strtoupper(Str::random(2));
+
+        while (Country::query()->where('code', $countryCode)->exists()) {
+            $countryCode = strtoupper(Str::random(2));
+        }
+
         return [
             'name' => $this->faker->country(),
-            'code' => $this->faker->countryCode(),
+            'code' => $countryCode,
             'phonecode' => $this->faker->numberBetween(1, 999),
         ];
     }

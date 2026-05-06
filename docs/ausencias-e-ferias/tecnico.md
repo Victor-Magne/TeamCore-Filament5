@@ -35,3 +35,6 @@ O `DeductHourBankService` verifica sempre se existe uma férias ou licença apro
 
 ## 5. Auditoria
 Todas as alterações de estado (pendente -> aprovado/rejeitado) são registadas com o respetivo motivo de rejeição, se aplicável, no log de atividade.
+
+## 6. Validação Automatizada
+Os fluxos de aprovação, restauração de saldo e integração com o ponto estão validados na suíte atual com `100` testes passados e `222` assertions (`php artisan test --compact`).

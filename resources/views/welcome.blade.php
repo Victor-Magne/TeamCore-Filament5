@@ -318,7 +318,7 @@
                         <!-- Stats -->
                         <div class="anim-fade-up delay-400 grid grid-cols-3 gap-8 pt-10" style="border-top:1px solid var(--border)">
                             <div class="anim-count-up delay-500">
-                                <div class="text-4xl font-black" style="color:var(--primary)">15</div>
+                                <div class="text-4xl font-black" style="color:var(--primary)">16</div>
                                 <div class="text-sm font-semibold uppercase tracking-wider" style="color:var(--muted)">Modelos</div>
                             </div>
                             <div class="anim-count-up delay-600">

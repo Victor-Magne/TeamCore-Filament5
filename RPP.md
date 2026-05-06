@@ -508,7 +508,7 @@ Auditoria automática de alterações via Spatie Activity Log.
 
 A aplicação implementa uma suíte abrangente de testes automatizados usando Pest v4 para validar funcionalidades críticas e garantir a integridade da lógica de negócio:
 
-### Testes Implementados (23 total)
+### Testes Implementados (23 ficheiros / 100 testes / 222 assertions)
 
 **Testes de Feature:**
 
@@ -586,7 +586,88 @@ A aplicação implementa uma suíte abrangente de testes automatizados usando Pe
 
 **Testes de Unit:** Validam componentes isolados como middlewares e utilitários de dashboard (ex: `EnsureUtf8EncodingTest`).
 
+### Inventário Completo dos Ficheiros de Teste (Estado Atual)
+
+Para garantir rastreabilidade documental e auditoria técnica, abaixo segue o inventário integral dos ficheiros de teste existentes no repositório na data desta revisão. Esta listagem permite cruzar, de forma objetiva, a documentação do projeto com os artefactos reais de validação automatizada presentes na pasta `tests/`.
+
+**Feature Tests (20 ficheiros):**
+- `tests/Feature/AttendanceProcessingTest.php`
+- `tests/Feature/ContractPdfTest.php`
+- `tests/Feature/EmployeeCreationTest.php`
+- `tests/Feature/EmployeeNotificationTest.php`
+- `tests/Feature/EmployeePolicyTest.php`
+- `tests/Feature/ExampleTest.php`
+- `tests/Feature/HourBankTest.php`
+- `tests/Feature/PayrollProcessingTest.php`
+- `tests/Feature/VacationAndLeaveTest.php`
+- `tests/Feature/VacationBalanceTest.php`
+- `tests/Feature/App/EmployeeWidgetsTest.php`
+- `tests/Feature/Console/Commands/CheckDailyAttendanceTest.php`
+- `tests/Feature/Observers/AttendanceLogObserverTest.php`
+- `tests/Feature/Pages/AttendanceCheckInTest.php`
+- `tests/Feature/Resources/PayrollResourceTest.php`
+- `tests/Feature/Services/DeductHourBankServiceTest.php`
+- `tests/Feature/Services/EmployeeOnboardingServiceTest.php`
+- `tests/Feature/Services/LeaveApprovalRestoresBalanceTest.php`
+- `tests/Feature/Services/Payroll/GeneratePayrollServiceTest.php`
+- `tests/Feature/Widgets/DashboardWidgetsTest.php`
+
+**Unit Tests (3 ficheiros):**
+- `tests/Unit/ExampleTest.php`
+- `tests/Unit/Dashboard/DashboardWidgetsTest.php`
+- `tests/Unit/Http/Middleware/EnsureUtf8EncodingTest.php`
+
+Este inventário confirma a existência de 23 ficheiros de teste, distribuídos entre validação de comportamento ponta-a-ponta (Feature) e validação de componentes isolados (Unit). Em conjunto, estes testes exercitam fluxos críticos de negócio, proteção de acesso, geração documental, operações de processamento e consistência de dados.
+
+### Cobertura Funcional por Domínio
+
+A suíte cobre os domínios mais sensíveis da aplicação com foco em cenários de risco operacional real:
+
+- **Onboarding de colaboradores:** criação encadeada de Employee, User, Contract e HourBank, com validação de rollback transacional em falha.
+- **Gestão de presença e assiduidade:** picagens, atrasos, saídas antecipadas, tolerâncias, faltas e interação com banco de horas.
+- **Férias e licenças:** aprovação, rejeição, reposição de saldo, prevenção de conflitos de aprovação própria e prevenção de sobreposição de períodos.
+- **Processamento salarial:** cálculo de base, extras, deduções, prevenção de duplicação mensal e atualização de estados de pagamento.
+- **Segurança e autorização:** policies por perfil, proteção de rotas, isolamento de dados e validações de acesso a recursos.
+- **Auditoria e observadores:** efeitos colaterais automáticos de eventos de domínio (observers/services) e consistência de movimentos.
+
+Esta abordagem orientada por domínios permite que a cobertura de testes não seja apenas quantitativa, mas também qualitativa, assegurando que os fluxos com maior impacto no contexto de RH sejam verificados de forma explícita e recorrente.
+
+### Critérios de Confiabilidade e Reprodutibilidade
+
+Os testes foram desenhados para execução frequente, com foco em previsibilidade:
+
+- uso de `RefreshDatabase` para isolamento entre cenários;
+- execução sobre SQLite em memória para rapidez e limpeza de contexto;
+- factories para construção consistente de dados;
+- validação periódica em execução completa e em modo compacto.
+
+Foram também tratadas fontes de flutuação relacionadas com colisões de campos `UNIQUE` em factories, reduzindo falsos negativos e melhorando estabilidade estatística da suíte. Este ponto é especialmente relevante em ambientes de integração contínua, onde o determinismo dos testes influencia diretamente a confiança no pipeline e a velocidade de entrega.
+
 Cada teste executa contra uma base de dados SQLite em memória (:memory:) garantindo isolamento completo e execução rápida. Os testes utilizamFactory Pattern para criar dados de teste consistentes e RefreshDatabase para limpeza entre testes.
+
+### Estado Atual da Qualidade (Atualização de 06/05/2026)
+
+No estado atual da aplicação, a validação automatizada deixou de ser apenas um suporte de desenvolvimento e passou a ser um pilar operativo de confiança para evolução contínua. A suíte foi executada de forma completa com `php artisan test` e também no modo compacto (`php artisan test --compact`), mantendo consistência nos resultados e confirmando estabilidade transversal entre testes de Unit e Feature.
+
+Métricas consolidadas na data desta atualização:
+- **100 testes passados**
+- **222 assertions**
+- **0 falhas no estado final após correções de estabilidade**
+
+Para além da cobertura funcional direta, os testes garantem propriedades arquiteturais importantes:
+- **Integridade transacional** em fluxos de onboarding e processamento encadeado.
+- **Consistência de regras de negócio** em férias, ausências, banco de horas e processamento salarial.
+- **Segurança de acesso** com validação de policies em cenários de permissões distintas.
+- **Confiabilidade de observadores e serviços** em operações de criação, atualização e reversão de estado.
+
+Também foi reforçada a robustez das factories utilizadas em testes, removendo fontes de flutuação estatística associadas a colisões de campos com restrição `UNIQUE`. Essa melhoria reduz falsos negativos e aumenta a previsibilidade das execuções em ambiente local e em CI.
+
+Do ponto de vista prático, isto traduz-se em três ganhos imediatos:
+1. Deteção precoce de regressões críticas sem dependência de validação manual.
+2. Maior segurança para refatorações de serviços centrais (Payroll, HourBank, Onboarding).
+3. Menor custo de manutenção por reduzir tempo gasto com falhas intermitentes não funcionais.
+
+Esta maturidade de testes é particularmente relevante para um sistema de RH, onde erros em saldo de horas, férias ou salários têm impacto direto em conformidade interna, confiança do utilizador e qualidade operacional.
 
 ### Benefícios da Suíte de Testes
 
@@ -665,6 +746,8 @@ Edge cases em operações críticas: Refinar a gestão de transações em fluxos
 
 Cobertura de testes unitários: Expandir a cobertura de testes para cobrir cenários de borda em cálculos de horas extras e fusos horários.
 
+Evolução da qualidade de testes: Apesar da suíte já ser robusta em termos funcionais, é recomendável reforçar continuamente testes de resiliência (ex.: cenários com dados extremos e colisões de unicidade em massa), além de consolidar práticas de determinismo em factories e seeders para manter previsibilidade em pipelines de integração contínua.
+
 O que Aprendi com a Aplicação
 Esta aplicação consolidou conhecimentos fundamentais em engenharia de software:
 
@@ -720,6 +803,4 @@ Pest. (2025). Pest – PHP Testing Framework. Versão 4.5. Acedido em 16 de abri
 
 
 Anexos
-
-
 

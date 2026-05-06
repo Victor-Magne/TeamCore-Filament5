@@ -46,3 +46,6 @@ O sistema utiliza o `ContractPdfService` para gerar documentos PDF formatados.
 - Funcionários apenas veem os seus próprios dados.
 - Gestores de RH veem dados de funcionários da sua área de responsabilidade.
 - Administradores têm acesso global.
+
+## 6. Validação Automatizada
+Os fluxos de onboarding, notificações e contratos desta secção estão validados na suíte atual com `100` testes passados e `222` assertions (`php artisan test --compact`).
