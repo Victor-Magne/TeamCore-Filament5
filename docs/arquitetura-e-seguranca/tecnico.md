@@ -9,7 +9,7 @@ A aplicação é construída sobre tecnologias modernas e robustas:
 - **Interface Administrativa:** Filament 5 (TALL Stack: Tailwind CSS, Alpine.js, Laravel, Livewire).
 - **Base de Dados:** MySQL 8.0+.
 - **Testes:** Pest 4.
-- **Frontend:** Vite 3 + Tailwind CSS 4.
+- **Frontend:** Vite 6 + Tailwind CSS 4.
 
 ## 2. Autenticação e Gestão de Utilizadores
 A autenticação é gerida pelo **Filament Breezy**, que oferece:
@@ -58,7 +58,14 @@ A aplicação utiliza o padrão **Observer** para manter a integridade dos dados
 - `ContractObserver`: Sincroniza o cargo do funcionário com o contrato ativo.
 - `AttendanceLogObserver`: Processa deduções no banco de horas com base nas picagens.
 
-## 6. Segurança Adicional
+## 6. Middlewares Customizados
+A aplicação implementa middlewares específicos para reforçar a segurança e integridade:
+- `CheckAdminPanelAccess` / `CheckAppPanelAccess`: Validam o acesso aos painéis com base em permissões do Shield.
+- `CheckMustChangePassword`: Intercepta utilizadores com a flag `must_change_password` ativa e redireciona para a página de alteração forçada.
+- `CheckTwoFactorEnforced`: Garante que utilizadores com 2FA obrigatório completem a configuração.
+- `EnsureUtf8Encoding`: Garante a codificação correta de caracteres em todas as respostas.
+
+## 7. Segurança Adicional
 - **Proteção CSRF:** Ativa em todos os formulários.
 - **Prevenção de SQL Injection:** Garantida pelo uso do Eloquent ORM e Query Builder.
 - **Sanitização de Dados:** Validação rigorosa em todos os formulários de entrada.

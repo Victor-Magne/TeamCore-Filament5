@@ -21,7 +21,7 @@ O seu banco de horas reflete o equilíbrio entre o tempo que trabalhou e o tempo
 *   **Saldo Positivo (Verde):** Significa que tem horas acumuladas (horas extras).
 *   **Saldo Negativo (Vermelho):** Significa que deve horas à empresa devido a atrasos ou faltas.
 
-O saldo transita de um mês para o seguinte automaticamente.
+O saldo é cumulativo e evolui continuamente à medida que realiza picagens ou o sistema regista ausências. Pode consultar o seu saldo atual e o histórico de movimentos detalhado no seu painel.
 
 ## 3. Regras de Atrasos e Faltas
 O sistema é rigoroso para garantir a equidade:
