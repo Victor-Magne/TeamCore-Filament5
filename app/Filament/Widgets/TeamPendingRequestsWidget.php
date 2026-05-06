@@ -31,10 +31,24 @@ class TeamPendingRequestsWidget extends BaseWidget
 
         $employeeIds = $meuEmployee->getAllSubordinateEmployeeIds();
 
-        // Using a polymorphic/combined approach for Vacations and Leaves
-        // Since they have similar structures, we can use a custom query or union.
-        // But for Filament Tables to work best with different models, separate widgets or a shared interface is better.
-        // However, let's try a Union or a custom list.
+        // Subquery 1: Vacations
+        $vacationQuery = DB::table('vacations')
+            ->join('employees', 'vacations.employee_id', '=', 'employees.id')
+            ->select([
+                'vacations.id',
+                'vacations.employee_id',
+                'vacations.start_date',
+                'vacations.end_date',
+                'vacations.status',
+                'employees.first_name',
+                'employees.last_name',
+                DB::raw("'Férias' as request_type"),
+                DB::raw("'App\\\\Models\\\\Vacation' as model_type"),
+                DB::raw("CONCAT('Vacation_', vacations.id) as row_key")
+            ])
+            ->whereIn('vacations.employee_id', $employeeIds)
+            ->where('vacations.status', 'pending')
+            ->whereNull('vacations.deleted_at');
 
         $leaveQuery = LeaveAndAbsence::query()
             ->select([
@@ -73,9 +87,11 @@ class TeamPendingRequestsWidget extends BaseWidget
 
         return $table
             ->query($query)
+            ->recordIdentifier('row_key')
             ->columns([
-                Tables\Columns\TextColumn::make('employee.full_name')
-                    ->label('Colaborador'),
+                Tables\Columns\TextColumn::make('full_name')
+                    ->label('Colaborador')
+                    ->getStateUsing(fn ($record) => "{$record->first_name} {$record->last_name}"),
                 Tables\Columns\TextColumn::make('request_type')
                     ->label('Tipo')
                     ->badge()
