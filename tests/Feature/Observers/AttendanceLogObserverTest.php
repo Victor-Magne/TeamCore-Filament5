@@ -42,9 +42,7 @@ describe('AttendanceLogObserver - Automatic Absence Detection', function () {
         expect($absence->deduction_type)->toBe('partial_absence');
 
         // Verificar que o HourBank foi atualizado
-        $hourBank = HourBank::where('employee_id', $employee->id)
-            ->where('month_year', $absenceDate->format('Y-m'))
-            ->first();
+        $hourBank = HourBank::where('employee_id', $employee->id)->first();
 
         expect($hourBank)->not->toBeNull();
         // Nota: o total_minutes é nulo aqui, então calculateDeficit pode atuar no HourBank recalculate

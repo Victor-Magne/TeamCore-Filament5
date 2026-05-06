@@ -30,12 +30,10 @@ describe('Payroll Processing', function () {
         // Criar banco de horas para o mês
         HourBank::updateOrCreate([
             'employee_id' => $this->employee->id,
-            'month_year' => now()->format('Y-m'),
         ], [
             'balance' => 120, // 2 horas extras
             'extra_hours_added' => 120,
             'extra_hours_used' => 0,
-            'previous_balance' => 0,
         ]);
     });
 
@@ -63,7 +61,6 @@ describe('Payroll Processing', function () {
 
         // Obter banco de horas com 2 horas extras (120 minutos)
         $hourBank = HourBank::where('employee_id', $this->employee->id)
-            ->where('month_year', $monthYear)
             ->first();
 
         // Assumir que cada hora extra vale 150% do salário/hora

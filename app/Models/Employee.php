@@ -161,6 +161,14 @@ class Employee extends Model
     }
 
     /**
+     * Compatibilidade retroativa para código legado que espera coleção.
+     */
+    public function hourBanks(): HasMany
+    {
+        return $this->hasMany(HourBank::class);
+    }
+
+    /**
      * Relacionamento: Ausências (Auditadas).
      *
      * Registos de faltas ou atrasos que resultaram em descontos no banco de horas.

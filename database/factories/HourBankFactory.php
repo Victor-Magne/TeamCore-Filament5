@@ -20,11 +20,9 @@ class HourBankFactory extends Factory
     {
         return [
             'employee_id' => Employee::factory(),
-            'month_year' => now()->format('Y-m'),
             'balance' => $this->faker->numberBetween(-100, 100),
             'extra_hours_added' => $this->faker->numberBetween(0, 50),
             'extra_hours_used' => $this->faker->numberBetween(0, 50),
-            'previous_balance' => $this->faker->numberBetween(-50, 50),
         ];
     }
 
@@ -35,7 +33,6 @@ class HourBankFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'balance' => $this->faker->numberBetween(10, 100),
-            'previous_balance' => $this->faker->numberBetween(0, 50),
         ]);
     }
 
@@ -55,8 +52,6 @@ class HourBankFactory extends Factory
      */
     public function forMonth(string $monthYear): static
     {
-        return $this->state(fn (array $attributes) => [
-            'month_year' => $monthYear,
-        ]);
+        return $this->state(fn (array $attributes) => []);
     }
 }

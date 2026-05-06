@@ -2,7 +2,7 @@
 
 use App\Models\Designation;
 use App\Models\Employee;
-use App\Models\HourBank;
+use App\Models\HourBankMovement;
 use App\Models\Payroll;
 use App\Services\Payroll\GeneratePayrollService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -62,13 +62,12 @@ it('calculates extra hours with 1.5 multiplier correctly', function () {
     $designation = Designation::factory()->create(['base_salary' => 2200.00]);
     $employee = Employee::factory()->create(['designation_id' => $designation->id]);
 
-    HourBank::factory()->create([
+    HourBankMovement::create([
         'employee_id' => $employee->id,
-        'month_year' => '2026-08',
-        'extra_hours_added' => 240,
-        'extra_hours_used' => 0,
-        'balance' => 240,
-        'previous_balance' => 0,
+        'amount' => 240,
+        'type' => 'addition',
+        'description' => 'Extra hours',
+        'date' => '2026-08-15',
     ]);
 
     $service = new GeneratePayrollService;
@@ -82,13 +81,12 @@ it('applies deductions for used hours', function () {
     $designation = Designation::factory()->create(['base_salary' => 2200.00]);
     $employee = Employee::factory()->create(['designation_id' => $designation->id]);
 
-    HourBank::factory()->create([
+    HourBankMovement::create([
         'employee_id' => $employee->id,
-        'month_year' => '2026-06',
-        'extra_hours_added' => 0,
-        'extra_hours_used' => 120,
-        'balance' => -120,
-        'previous_balance' => 0,
+        'amount' => -120,
+        'type' => 'deduction',
+        'description' => 'Used hours',
+        'date' => '2026-06-15',
     ]);
 
     $service = new GeneratePayrollService;
@@ -102,13 +100,20 @@ it('combines extras and deductions in payroll', function () {
     $designation = Designation::factory()->create(['base_salary' => 2200.00]);
     $employee = Employee::factory()->create(['designation_id' => $designation->id]);
 
-    HourBank::factory()->create([
+    HourBankMovement::create([
         'employee_id' => $employee->id,
-        'month_year' => '2026-07',
-        'extra_hours_added' => 240,
-        'extra_hours_used' => 120,
-        'balance' => 120,
-        'previous_balance' => 0,
+        'amount' => 240,
+        'type' => 'addition',
+        'description' => 'Extra hours',
+        'date' => '2026-07-10',
+    ]);
+
+    HourBankMovement::create([
+        'employee_id' => $employee->id,
+        'amount' => -120,
+        'type' => 'deduction',
+        'description' => 'Used hours',
+        'date' => '2026-07-20',
     ]);
 
     $service = new GeneratePayrollService;

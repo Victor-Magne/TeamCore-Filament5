@@ -3,7 +3,8 @@
 namespace App\Filament\Resources\Payrolls\Schemas;
 
 use App\Models\Contract;
-use App\Models\HourBank;
+use App\Models\HourBankMovement;
+use Illuminate\Support\Carbon;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
@@ -98,11 +99,21 @@ class PayrollForm
                                 $dailyWorkMinutes = (int) ($contract->daily_work_minutes ?? (8 * 60));
                                 $hourlyRate = $baseSalary / (($dailyWorkMinutes / 60) * 22);
                                 
-                                $hourBank = HourBank::where('employee_id', $employeeId)
-                                    ->where('month_year', $monthYear)
-                                    ->first();
-                                
-                                $balance = (int) ($hourBank?->balance ?? 0);
+                                $month = Carbon::createFromFormat('Y-m', $monthYear);
+                                $startDate = $month->copy()->startOfMonth();
+                                $endDate = $month->copy()->endOfMonth();
+
+                                $extraHoursMinutes = (int) HourBankMovement::where('employee_id', $employeeId)
+                                    ->where('type', 'addition')
+                                    ->whereBetween('date', [$startDate, $endDate])
+                                    ->sum('amount');
+
+                                $usedHoursMinutes = abs((int) HourBankMovement::where('employee_id', $employeeId)
+                                    ->where('type', 'deduction')
+                                    ->whereBetween('date', [$startDate, $endDate])
+                                    ->sum('amount'));
+
+                                $balance = $extraHoursMinutes - $usedHoursMinutes;
                                 
                                 if ($balance > 0) {
                                     $extraHoursAmount = ($hourlyRate * 1.5) * ($balance / 60);
@@ -178,13 +189,21 @@ class PayrollForm
         $set('base_salary', round($baseSalary, 2));
         $set('hourly_rate', round($hourlyRate, 2));
 
-        // Carregar banco de horas
-        $hourBank = HourBank::where('employee_id', $employeeId)
-            ->where('month_year', $monthYear)
-            ->first();
+        $month = Carbon::createFromFormat('Y-m', $monthYear);
+        $startDate = $month->copy()->startOfMonth();
+        $endDate = $month->copy()->endOfMonth();
 
-        // Usar 'balance' que é o saldo TOTAL já consolidado
-        $balance = (int) ($hourBank?->balance ?? 0);
+        $extraHoursMinutes = (int) HourBankMovement::where('employee_id', $employeeId)
+            ->where('type', 'addition')
+            ->whereBetween('date', [$startDate, $endDate])
+            ->sum('amount');
+
+        $usedHoursMinutes = abs((int) HourBankMovement::where('employee_id', $employeeId)
+            ->where('type', 'deduction')
+            ->whereBetween('date', [$startDate, $endDate])
+            ->sum('amount'));
+
+        $balance = $extraHoursMinutes - $usedHoursMinutes;
         $set('extra_hours', $balance);
 
         // Calcular impacto financeiro:
