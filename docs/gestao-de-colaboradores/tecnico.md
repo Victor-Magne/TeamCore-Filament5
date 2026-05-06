@@ -27,10 +27,10 @@ Define as condições laborais específicas de um funcionário num período de t
 ## 3. Automações (Observers)
 
 ### `EmployeeObserver`
-Ao criar um registo de `Employee`, o sistema executa automaticamente:
+Ao criar um registo de `Employee`, o sistema delega a lógica atómica para o `EmployeeOnboardingService`, que executa:
 1.  **Criação de Utilizador:** Gera um `User` com o e-mail do funcionário, papel `employee` e obriga à troca de palavra-passe no primeiro acesso.
 2.  **Criação de Contrato Inicial:** Gera um contrato por defeito (fixed_term) com o salário base da designação escolhida.
-3.  **Criação de Banco de Horas:** Inicializa o `HourBank` para o mês atual com saldo zero.
+3.  **Criação de Banco de Horas:** Inicializa o `HourBank` cumulativo para o funcionário com saldo zero.
 
 ### `ContractObserver`
 Sempre que um contrato é criado ou atualizado, o sistema sincroniza o campo `designation_id` no modelo `Employee`. Isto garante que o cargo atual do funcionário reflete sempre o seu contrato ativo.

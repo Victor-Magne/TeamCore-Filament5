@@ -23,8 +23,8 @@ Gere ausências justificadas (doença, parentalidade, casamento, etc.).
 - **Observer (`LeaveAndAbsenceObserver`):**
   - Quando uma licença é aprovada:
     - Se **não for paga**, o sistema cria automaticamente registos de `Absence` para os dias correspondentes, descontando-os do banco de horas.
-    - Se **for paga**, o sistema remove qualquer `Absence` automática (atrasos ou faltas) que tenha sido gerada pelo sistema de ponto para esses dias.
-    - Despoleta o recalculo do banco de horas para os meses afetados.
+    - Se **for paga**, o sistema remove qualquer `Absence` automática (atrasos ou faltas) que tenha sido gerada pelo sistema de ponto para esses dias via eliminação de instâncias (para gatilhar o `AbsenceObserver`).
+    - Despoleta o recalculo incremental do banco de horas.
 
 ## 3. Fluxo de Aprovação e Conflitos
 - **Aprovação:** O campo `approved_by` é preenchido automaticamente com o ID do utilizador autenticado no momento da aprovação.

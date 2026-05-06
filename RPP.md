@@ -16,8 +16,8 @@ Orientador/a(es):
 	Zélia Capitão
 
 Data 
-28/04/2026
-Data de Versão Anterior: 22/04/2026
+15/05/2026
+Data de Versão Anterior: 28/04/2026
 Agradecimentos a:
 Jorge Lafuente — tutor de estágio ao longo do 11.º e do 12.º ano, e uma das pessoas que mais influenciou o rumo desta aplicação. Foi quem me apresentou o Laravel e o Filament, despertando em mim o interesse por estas tecnologias, e quem sugeriu funcionalidades concretas que acabaram por enriquecer significativamente a aplicação. O seu acompanhamento e partilha de experiência profissional foram determinantes para o resultado final.
 Zélia Capitão — orientadora da aplicação, pelo acompanhamento contínuo e disponibilidade ao longo de todo o processo, e pelas orientações que permitiram manter o trabalho no rumo certo.
@@ -86,6 +86,7 @@ Figura 13: Resource ContractResource com Ação de Download PDF de Contrato	25
 Figura 14: Resource ActivityLogResource - Visualização de Histórico de Auditoria com Filtros	26
 Figura 15: Página de Check-in Simplificado com botões de ação dinâmica e histórico diário	16
 Figura 16: Dashboard do Funcionário com widgets de resumo e ações rápidas	13
+Figura 17: Interface do HourBank com Movements Relation Manager detalhando cada transação	17
 
 
 
@@ -131,7 +132,7 @@ A Aplicação TeamCore foi desenvolvida com o objetivo de alcançar uma gestão 
 
 A metodologia de trabalho incluiu o levantamento detalhado de requisitos, a modelação da base de dados relacional, e o desenvolvimento técnico utilizando a framework Laravel v13 com Filament v5 para o backend e frontend. O processo foi complementado por validação rigorosa de funcionalidades e testes automatizados.
 
-Nota sobre o Estado da Aplicação: No momento da redação deste relatório (28 de Abril de 2026), a Aplicação TeamCore encontra-se numa fase de maturidade production-ready com todas as funcionalidades core completamente implementadas, testadas e validadas. A aplicação inclui: 15 Models com isolamento de dados RBAC; 16 Filament Resources com políticas de autorização; 17 Policies para controlo granular; Sistema de banco de horas com validação automática de licenças; Auditoria completa via Spatie Activity Log; 5 Observers para automação de processos; Autenticação segura via Filament Breezy e Passkeys; e suíte de testes automatizados com Pest v4 com 10+ testes cobrindo funcionalidades críticas (HourBank, EmployeePolicies, EmployeeCreation, AttendanceProcessing, VacationAndLeave, PayrollProcessing). A aplicação está pronta para utilização em ambiente de produção com confiança elevada na qualidade técnica e funcional.
+Nota sobre o Estado da Aplicação: No momento da redação deste relatório (15 de Maio de 2026), a Aplicação TeamCore encontra-se numa fase de maturidade production-ready com todas as funcionalidades core completamente implementadas, testadas e validadas. A aplicação inclui: 16 Models com isolamento de dados RBAC; 16 Filament Resources com políticas de autorização; 17 Policies para controlo granular; Sistema de banco de horas cumulativo com rastreio de movimentos e validação automática de licenças; Auditoria completa via Spatie Activity Log; 5 Observers e 1 Listener para automação de processos; Autenticação segura via Filament Breezy e Passkeys; e suíte de testes automatizados com Pest v4 com 20+ testes (23 no total) cobrindo funcionalidades críticas (HourBank, EmployeePolicies, EmployeeCreation, AttendanceProcessing, VacationAndLeave, PayrollProcessing, DeductHourBankService). A aplicação está pronta para utilização em ambiente de produção com confiança elevada na qualidade técnica e funcional.
 
 
 Introdução
@@ -215,12 +216,13 @@ Utilizadores (User): Credenciais de acesso, papeis e permissões (com autentica�
 Contratos (Contract): Informações de vínculo laboral (permanent, fixed_term, unfixed_term, service_provision, internship), remuneração e status (active, terminated, on_hold).
 Unidades Organizacionais (Unit): Estrutura hierárquica da empresa (direction, department, section) com gestor responsável.
 Cargos (Designation): Definição de funções profissionais com níveis (junior, pleno, senior, specialist, lead) e salários base.
-Banco de Horas (HourBank): Controlo mensal de horas acumuladas/deficitárias por funcionário.
+Banco de Horas (HourBank): Controlo cumulativo de horas com suporte a movimentos históricos.
+Movimentos do Banco de Horas (HourBankMovement): Registo polimórfico de cada alteração ao saldo (ganhos e descontos).
 Registos de Presença (AttendanceLog): Registos diários de entrada/saída/pausas com cálculo automático de minutos totais.
 Ausências (Absence): Auditoria de descontos de horas com tipos (unjustified_absence, partial_absence, other).
 Férias (Vacation): Gestão de férias anuais com saldo por ano, status de aprovação e dias tomados.
 Licenças e Ausências (LeaveAndAbsence): Gestão de licenças justificadas (sick_leave, parental, marriage, bereavement, justified_absence, unjustified) com aprovação workflow.
-Payroll: Processamento salarial automático com base em contratos e banco de horas.
+Payroll: Processamento salarial automático com base em contratos e movimentos do banco de horas.
 Localização: País, Estado e Cidade para preenchimento de dados de funcionários.
 Principais Implementações
 A aplicação utiliza uma interface administrativa unificada (/admin) onde o acesso a recursos e dados é controlado dinamicamente via funções e permissões geridas pelo Filament Shield. Esta abordagem simplifica a navegação e centraliza a gestão, garantindo o isolamento de dados através de Policies Eloquent.
@@ -282,7 +284,7 @@ Gestão de Funcionários: Employees, AttendanceLogs, ActivityLogs (HR/Admin)
 Gestão de Organização: Designations, Countries, States, Cities
 Gestão de Contratos: Contracts
 Gestão de Ausências: Vacations, LeaveAndAbsences
-Gestão de Banco de Horas: HourBanks, Absences
+Gestão de Banco de Horas: HourBanks, HourBankMovements (via Relation Manager), Absences
 Gestão de Salários: Payrolls
 
 Proteções de Segurança:
@@ -325,10 +327,10 @@ Exclusão automática de tempo de pausa nos cálculos.
 Validação de lógica de intervalos.
 
 Banco de Horas (HourBank):
-Atualização automática após cada registo validado.
-Rastreamento de horas acumuladas/deficitárias.
-Criação automática ao criar novo funcionário.
-Relatórios e extratos de saldo.
+Atualização automática e incremental após cada registo validado.
+Rastreamento cumulativo de horas através de Movimentos (HourBankMovement).
+Criação automática atómica via `EmployeeOnboardingService`.
+Relatórios, extratos de saldo e comando de sincronização (`app:sync-hour-bank`).
 Validação automática de licenças antes de descontar: O sistema verifica se existe uma licença ou férias aprovada antes de descontar horas por ausência.
 Suporte a períodos de ausência: Cálculo correto apenas para dias úteis (segunda a sexta).
 Configuração flexível: Tipos de licenças justificadas vs injustificadas são configuráveis.
@@ -504,9 +506,9 @@ Auditoria automática de alterações via Spatie Activity Log.
 
 ## Suíte de Testes Automatizados
 
-A aplicação implementa uma suíte abrangente de testes automatizados usando Pest v4 para validar funcionalidades críticas:
+A aplicação implementa uma suíte abrangente de testes automatizados usando Pest v4 para validar funcionalidades críticas e garantir a integridade da lógica de negócio:
 
-### Testes Implementados (10+)
+### Testes Implementados (23 total)
 
 **Testes de Feature:**
 
@@ -560,7 +562,29 @@ A aplicação implementa uma suíte abrangente de testes automatizados usando Pe
    - Títulos corretos (Utilizador criado, Contrato inicial, Banco de horas)
    - Armazenamento em base de dados para UI
 
-**Testes de Unit:** ExampleTest
+9. **DeductHourBankServiceTest** — Valida regras complexas de descontos:
+   - Aplicação de tolerâncias (15 min)
+   - Conversão de atraso em falta total (>1h)
+   - Regra de 3 atrasos consecutivos
+
+10. **EmployeeOnboardingServiceTest** — Garante atomicidade na criação:
+    - Sucesso cria Employee, User, Contract e HourBank numa transação
+    - Falha em qualquer passo reverte toda a operação
+
+11. **GeneratePayrollServiceTest** — Valida precisão financeira:
+    - Cálculo de taxas horárias com base em contratos
+    - Soma correta de movimentos de banco de horas por mês
+    - Prevenção de duplicados
+
+12. **AttendanceLogObserverTest** — Testa reatividade do sistema:
+    - Atualização de saldo ao criar/editar picagens
+    - Reversão de movimentos ao eliminar picagens
+
+13. **DashboardWidgetsTest** — Valida visibilidade de dados:
+    - Widgets mostram valores corretos para Admin vs Employee
+    - Respeito por permissões de visualização
+
+**Testes de Unit:** Validam componentes isolados como middlewares e utilitários de dashboard (ex: `EnsureUtf8EncodingTest`).
 
 Cada teste executa contra uma base de dados SQLite em memória (:memory:) garantindo isolamento completo e execução rápida. Os testes utilizamFactory Pattern para criar dados de teste consistentes e RefreshDatabase para limpeza entre testes.
 
@@ -582,6 +606,9 @@ ContractObserver: Quando um novo contrato é criado/atualizado, sincroniza autom
 AttendanceLogObserver: Automatiza cálculos de tempos e delega verificações de atrasos/faltas para o DeductHourBankService.
 AbsenceObserver: Monitoriza a criação, atualização e eliminação de ausências, despoletando o recálculo automático do saldo do Banco de Horas para o período correspondente.
 LeaveAndAbsenceObserver: Gere a remoção de ausências automáticas ou criação de deduções por licenças não pagas aquando da aprovação de um pedido.
+
+Figura 17: Interface do HourBank com Movements Relation Manager detalhando cada transação.
+(Instrução de print: Aceder a /admin/hour-banks/{id}/edit e mostrar a relação de movimentos)
 
 Activity Logging com Spatie
 Todos os modelos críticos utilizam a trait LogsActivity do Spatie para rastreamento automático:
@@ -625,7 +652,7 @@ Auditoria completa: Spatie Activity Log fornece rastreamento automático de toda
 
 RBAC dinâmico: Filament Shield permite gerir papéis e permissões de forma granular e flexível.
 
-Testes com cobertura robusta: Pest v4 com 10+ testes cobrindo funcionalidades críticas (HourBank, Policies, AttendanceProcessing, VacationAndLeave, PayrollProcessing, EmployeeCreation). Cada teste valida comportamentos essenciais: cálculo de horas extras, processamento de ausências, gestão de férias, geração de payroll, e policies de autorização. Os testes fornecem confiança elevada na qualidade técnica e reduzem riscos de regressões.
+Testes com cobertura robusta: Pest v4 com 20+ testes (23 no total) cobrindo funcionalidades críticas (HourBank, Policies, AttendanceProcessing, VacationAndLeave, PayrollProcessing, EmployeeCreation, DeductHourBankService). Cada teste valida comportamentos essenciais: cálculo de horas extras, processamento de ausências, gestão de férias, geração de payroll, e policies de autorização. Os testes fornecem confiança elevada na qualidade técnica e reduzem riscos de regressões.
 
 Pontos a Melhorar
 Integrações Externas: Falta de ligação com sistemas bancários externos para automatização real de pagamentos e exportação de ficheiros SEPA.

@@ -12,14 +12,14 @@ Armazena as picagens diárias dos funcionários.
   - Se a pausa efetuada for inferior à prevista no contrato, o sistema desconta o valor contratual (mínimo obrigatório).
 
 ## 2. Banco de Horas (`HourBank`)
-Gere o saldo acumulado de horas extras e défices mensalmente.
+Gere o saldo acumulado de horas extras e défices de forma cumulativa. Ao contrário de sistemas mensais tradicionais, o TeamCore utiliza um único registo de saldo por funcionário que evolui ao longo do tempo.
 
 - **Modelo:** `app/Models/HourBank.php`
 - **Atributos:**
-  - `balance`: Saldo final do mês (`previous_balance` + `extra_hours_added` - `extra_hours_used`).
-  - `extra_hours_added`: Horas trabalhadas além do horário contratual.
-  - `extra_hours_used`: Horas deduzidas por atrasos, faltas ou licenças não remuneradas.
-- **Propagação:** O saldo final de um mês é automaticamente propagado como `previous_balance` do mês seguinte via `HourBankService::propagate()`.
+  - `balance`: Saldo total acumulado em minutos.
+  - `extra_hours_added`: Total histórico de minutos ganhos.
+  - `extra_hours_used`: Total histórico de minutos utilizados ou descontados.
+- **Movimentos (`HourBankMovement`):** Cada alteração ao saldo é registada nesta tabela polimórfica (`source_type`, `source_id`), permitindo uma auditoria completa e o cálculo de deltas durante atualizações para evitar erros de saldo.
 
 ## 3. Ausências e Deduções (`Absence`)
 Entidade de auditoria que justifica por que razão foram deduzidas horas do banco.
@@ -40,9 +40,13 @@ Gere as regras punitivas e de tolerância:
 - **Regra dos 3 Atrasos:** Se um funcionário tiver 3 atrasos consecutivos (dias úteis), o sistema converte o 3.º atraso numa falta total e remove os 2 anteriores para efeitos de histórico.
 
 ### `HourBankService`
-Centraliza o recalculo do saldo. É despoletado por Observers (`AttendanceLogObserver`, `AbsenceObserver`) sempre que há alterações nos dados base.
+Centraliza a lógica de atualização do saldo. Utiliza um sistema de deltas para garantir que edições em registos passados de presença ou ausência atualizam o saldo de forma incremental e precisa, sem necessidade de recalcular todo o histórico.
 
-## 5. Interface de Check-in (`AttendanceCheckIn`)
+## 5. Comandos de Consola e Manutenção
+- `app:check-daily-attendance`: Comando agendado que verifica retrospectivamente (por defeito, o dia anterior) se os funcionários ativos realizaram picagens. Em caso de ausência sem licença aprovada, regista automaticamente uma falta injustificada.
+- `app:sync-hour-bank`: Comando de manutenção que remove movimentos órfãos e recalcula o saldo do banco de horas com base na soma real de todos os movimentos válidos, garantindo a integridade do sistema.
+
+## 6. Interface de Check-in (`AttendanceCheckIn`)
 Página Livewire otimizada para picagens rápidas.
 - Gere estados dinamicamente: Entrada -> Almoço (Início) -> Almoço (Fim) -> Saída.
 - Captura o timestamp do servidor para evitar fraudes de horário no cliente.
