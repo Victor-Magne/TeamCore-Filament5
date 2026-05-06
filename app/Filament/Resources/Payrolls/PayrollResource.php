@@ -25,10 +25,9 @@ class PayrollResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Recursos Humanos';
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Processamento Salarial');
-    }
+    protected static ?string $navigationLabel = 'Processamento Salarial';
+    protected static ?string $modelLabel = 'Processamento Salarial';
+    protected static ?string $pluralModelLabel = 'Processamentos Salariais';
 
     /** @noinspection PhpIncompatibleReturnTypeInspection */
     public static function form(Schema $schema): Schema

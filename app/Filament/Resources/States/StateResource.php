@@ -25,11 +25,8 @@ class StateResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Estados');
-    }
-
+    protected static ?string $modelLabel = 'Estado';
+    
     public static function form(Schema $schema): Schema
     {
         return StateForm::configure($schema);

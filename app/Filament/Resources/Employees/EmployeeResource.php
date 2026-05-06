@@ -50,11 +50,9 @@ class EmployeeResource extends Resource
     /**
      * Rótulo de navegação traduzido.
      */
-    public static function getNavigationLabel(): string
-    {
-        return __('Funcionários');
-    }
-
+        protected static ?string $navigationLabel = 'Funcionários';
+        protected static ?string $modelLabel = 'Funcionário';
+        protected static ?string $pluralModelLabel = 'Funcionários';
     /**
      * Define a estrutura do formulário de criação e edição.
      *
