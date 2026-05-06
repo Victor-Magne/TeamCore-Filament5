@@ -44,50 +44,41 @@ class TeamPendingRequestsWidget extends BaseWidget
                 'employees.last_name',
                 DB::raw("'Férias' as request_type"),
                 DB::raw("'App\\\\Models\\\\Vacation' as model_type"),
-                DB::raw("CONCAT('Vacation_', vacations.id) as row_key")
+                DB::raw("CONCAT('App\\\\Models\\\\Vacation', ':', vacations.id) as row_key"),
             ])
             ->whereIn('vacations.employee_id', $employeeIds)
             ->where('vacations.status', 'pending')
             ->whereNull('vacations.deleted_at');
 
-        $leaveQuery = LeaveAndAbsence::query()
+        // Subquery 2: Leaves and Absences
+        $leaveQuery = DB::table('leaves_and_absences')
+            ->join('employees', 'leaves_and_absences.employee_id', '=', 'employees.id')
             ->select([
-                'id',
-                'employee_id',
-                'start_date',
-                'end_date',
-                'status',
-                DB::raw('type as request_type'),
+                'leaves_and_absences.id',
+                'leaves_and_absences.employee_id',
+                'leaves_and_absences.start_date',
+                'leaves_and_absences.end_date',
+                'leaves_and_absences.status',
+                'employees.first_name',
+                'employees.last_name',
+                'leaves_and_absences.type as request_type',
                 DB::raw("'App\\\\Models\\\\LeaveAndAbsence' as model_type"),
-                DB::raw("CONCAT('App\\\\\\\\Models\\\\\\\\LeaveAndAbsence', ':', id) as row_key"),
+                DB::raw("CONCAT('App\\\\Models\\\\LeaveAndAbsence', ':', leaves_and_absences.id) as row_key"),
             ])
-            ->whereIn('employee_id', $employeeIds)
-            ->where('status', 'pending');
+            ->whereIn('leaves_and_absences.employee_id', $employeeIds)
+            ->where('leaves_and_absences.status', 'pending')
+            ->whereNull('leaves_and_absences.deleted_at');
 
-        // We use one of the models as the base for the query builder but override the whole query with a union
-        $vacationQuery = Vacation::query()
-            ->select([
-                'id',
-                'employee_id',
-                'start_date',
-                'end_date',
-                'status',
-                DB::raw("'Férias' as request_type"),
-                DB::raw("'App\\\\Models\\\\Vacation' as model_type"),
-                DB::raw("CONCAT('App\\\\\\\\Models\\\\\\\\Vacation', ':', id) as row_key"),
-            ])
-            ->whereIn('employee_id', $employeeIds)
-            ->where('status', 'pending');
-
-        // Wrap the union in a subquery to allow pagination and sorting
+        // We use the Vacation model as the base for the query builder
+        // but override the whole query with a union of both requests.
+        // We alias the subquery as 'vacations' so that Filament's default
+        // sorting (which prefixes columns with the table name) works correctly.
         $query = Vacation::query()
             ->withoutGlobalScopes()
-            ->select('*')
-            ->fromSub($vacationQuery->union($leaveQuery), 'combined_requests');
+            ->fromSub($vacationQuery->union($leaveQuery), 'vacations');
 
         return $table
             ->query($query)
-            ->recordIdentifier('row_key')
             ->columns([
                 Tables\Columns\TextColumn::make('full_name')
                     ->label('Colaborador')
