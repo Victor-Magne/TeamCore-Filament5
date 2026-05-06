@@ -13,12 +13,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
-use Illuminate\Support\Carbon;
 
 class Employee extends Model
 {
@@ -199,7 +201,7 @@ class Employee extends Model
     /**
      * Relacionamento: Unidades que este funcionário gere (via pivot).
      */
-    public function managedUnitsViaPivot(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function managedUnitsViaPivot(): BelongsToMany
     {
         return $this->belongsToMany(Unit::class, 'unit_manager', 'employee_id', 'unit_id');
     }
@@ -207,7 +209,7 @@ class Employee extends Model
     /**
      * Obtém todas as unidades geridas pelo funcionário (diretas e via pivot).
      */
-    public function getAllManagedUnits(): \Illuminate\Support\Collection
+    public function getAllManagedUnits(): Collection
     {
         return $this->managedUnits->merge($this->managedUnitsViaPivot)->unique('id');
     }
@@ -237,6 +239,14 @@ class Employee extends Model
     }
 
     /**
+     * Verifica se este gestor pode gerir um funcionário específico.
+     */
+    public function canManageEmployeeId(int $employeeId): bool
+    {
+        return in_array($employeeId, $this->getAllSubordinateEmployeeIds(), true);
+    }
+
+    /**
      * Obtém o saldo acumulado total do funcionário.
      *
      * @return int Saldo em minutos (pode ser negativo).
@@ -249,7 +259,7 @@ class Employee extends Model
     /**
      * Obtém os ganhos e perdas de um mês específico.
      *
-     * @param string $monthYear Formato 'Y-m'
+     * @param  string  $monthYear  Formato 'Y-m'
      */
     public function getMonthlyHourBankStats(string $monthYear): array
     {
