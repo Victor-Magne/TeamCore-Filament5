@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Filament\Tables\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class TeamPendingRequestsWidget extends BaseWidget
 {
@@ -30,33 +31,58 @@ class TeamPendingRequestsWidget extends BaseWidget
 
         $employeeIds = $meuEmployee->getAllSubordinateEmployeeIds();
 
-        // Using a polymorphic/combined approach for Vacations and Leaves
-        // Since they have similar structures, we can use a custom query or union.
-        // But for Filament Tables to work best with different models, separate widgets or a shared interface is better.
-        // However, let's try a Union or a custom list.
+        // Subquery 1: Vacations
+        $vacationQuery = DB::table('vacations')
+            ->join('employees', 'vacations.employee_id', '=', 'employees.id')
+            ->select([
+                'vacations.id',
+                'vacations.employee_id',
+                'vacations.start_date',
+                'vacations.end_date',
+                'vacations.status',
+                'employees.first_name',
+                'employees.last_name',
+                DB::raw("'Férias' as request_type"),
+                DB::raw("'App\\\\Models\\\\Vacation' as model_type"),
+                DB::raw("CONCAT('Vacation_', vacations.id) as row_key")
+            ])
+            ->whereIn('vacations.employee_id', $employeeIds)
+            ->where('vacations.status', 'pending')
+            ->whereNull('vacations.deleted_at');
 
-        $vacationQuery = Vacation::query()
-            ->select(['id', 'employee_id', 'start_date', 'end_date', 'status', \DB::raw("'Férias' as request_type"), \DB::raw("'App\\\\Models\\\\Vacation' as model_type")])
-            ->whereIn('employee_id', $employeeIds)
-            ->where('status', 'pending');
+        // Subquery 2: Leaves
+        $leaveQuery = DB::table('leaves_and_absences')
+            ->join('employees', 'leaves_and_absences.employee_id', '=', 'employees.id')
+            ->select([
+                'leaves_and_absences.id',
+                'leaves_and_absences.employee_id',
+                'leaves_and_absences.start_date',
+                'leaves_and_absences.end_date',
+                'leaves_and_absences.status',
+                'employees.first_name',
+                'employees.last_name',
+                DB::raw("leaves_and_absences.type as request_type"),
+                DB::raw("'App\\\\Models\\\\LeaveAndAbsence' as model_type"),
+                DB::raw("CONCAT('Leave_', leaves_and_absences.id) as row_key")
+            ])
+            ->whereIn('leaves_and_absences.employee_id', $employeeIds)
+            ->where('leaves_and_absences.status', 'pending')
+            ->whereNull('leaves_and_absences.deleted_at');
 
-        $leaveQuery = LeaveAndAbsence::query()
-            ->select(['id', 'employee_id', 'start_date', 'end_date', 'status', \DB::raw("type as request_type"), \DB::raw("'App\\\\Models\\\\LeaveAndAbsence' as model_type")])
-            ->whereIn('employee_id', $employeeIds)
-            ->where('status', 'pending');
+        $unionQuery = $vacationQuery->union($leaveQuery);
 
-        // We use one of the models as the base for the query builder but override the whole query with a union
-        $query = Vacation::query()
-            ->select(['id', 'employee_id', 'start_date', 'end_date', 'status', \DB::raw("'Férias' as request_type"), \DB::raw("'App\\\\Models\\\\Vacation' as model_type")])
-            ->whereIn('employee_id', $employeeIds)
-            ->where('status', 'pending')
-            ->union($leaveQuery);
+        // We use DB::table to avoid Eloquent global scopes (like SoftDeletes)
+        // that would incorrectly prefix columns in the outer query.
+        $query = DB::table(DB::raw("({$unionQuery->toSql()}) as combined_requests"))
+            ->mergeBindings($unionQuery);
 
         return $table
             ->query($query)
+            ->recordIdentifier('row_key')
             ->columns([
-                Tables\Columns\TextColumn::make('employee.full_name')
-                    ->label('Colaborador'),
+                Tables\Columns\TextColumn::make('full_name')
+                    ->label('Colaborador')
+                    ->getStateUsing(fn ($record) => "{$record->first_name} {$record->last_name}"),
                 Tables\Columns\TextColumn::make('request_type')
                     ->label('Tipo')
                     ->badge()
@@ -88,7 +114,7 @@ class TeamPendingRequestsWidget extends BaseWidget
                     ->color('success')
                     ->icon('heroicon-m-check')
                     ->requiresConfirmation()
-                    ->action(function (Model $record) {
+                    ->action(function ($record) {
                         $actualRecord = ($record->model_type)::find($record->id);
                         $actualRecord->update(['status' => 'approved']);
 
@@ -106,7 +132,7 @@ class TeamPendingRequestsWidget extends BaseWidget
                             ->label('Motivo da Rejeição')
                             ->required(),
                     ])
-                    ->action(function (Model $record, array $data) {
+                    ->action(function ($record, array $data) {
                         $actualRecord = ($record->model_type)::find($record->id);
                         $actualRecord->update([
                             'status' => 'rejected',
