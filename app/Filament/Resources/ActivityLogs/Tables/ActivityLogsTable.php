@@ -4,8 +4,11 @@ namespace App\Filament\Resources\ActivityLogs\Tables;
 
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter; // Adicionado aqui
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Carbon\Carbon;
 
 class ActivityLogsTable
 {
@@ -46,13 +49,64 @@ class ActivityLogsTable
             ])
             ->filters([
                 SelectFilter::make('event')
-                    ->label('Event Type')
+                    ->label('Tipo de Evento')
                     ->options([
-                        'created' => 'Created',
-                        'updated' => 'Updated',
-                        'deleted' => 'Deleted',
+                        'created' => 'Criado',
+                        'updated' => 'Atualizado',
+                        'deleted' => 'Eliminado',
                     ])
                     ->multiple(),
+                
+                SelectFilter::make('subject_type')
+                    ->label('Tipo de Assunto')
+                    ->multiple()
+                    ->options(function () {
+                        return \App\Models\ActivityLog::distinct()
+                            ->pluck('subject_type', 'subject_type')
+                            ->mapWithKeys(fn ($item) => [$item => class_basename($item)])
+                            ->toArray();
+                    }),
+                
+                SelectFilter::make('causer_type')
+                    ->label('Tipo de Actor')
+                    ->multiple()
+                    ->options(function () {
+                        return \App\Models\ActivityLog::whereNotNull('causer_type')
+                            ->distinct()
+                            ->pluck('causer_type', 'causer_type')
+                            ->mapWithKeys(fn ($item) => [$item => class_basename($item)])
+                            ->toArray();
+                    }),
+                
+                SelectFilter::make('log_name')
+                    ->label('Nome do Log')
+                    ->multiple()
+                    ->options(function () {
+                        return \App\Models\ActivityLog::distinct()
+                            ->pluck('log_name', 'log_name')
+                            ->toArray();
+                    }),
+                
+                Filter::make('created_at')
+                    ->label('Período')
+                    ->form([
+                        \Filament\Forms\Components\DatePicker::make('created_from')
+                            ->label('De'),
+                        \Filament\Forms\Components\DatePicker::make('created_until')
+                            ->label('Até'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['created_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['created_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                            );
+                    })
+                    ->columns(2),
             ])
             ->defaultSort('created_at', 'desc')
             ->recordActions([
