@@ -39,10 +39,10 @@ class ActivityLogExporter extends Exporter
 
     public static function getCompletedNotificationBody(Export $export): string
     {
-        $body = 'Your activity log export has completed and ' . Number::format($export->successful_rows) . ' ' . str('row')->plural($export->successful_rows) . ' exported.';
+        $body = 'A exportação do log de atividades foi concluída e '.Number::format($export->successful_rows).' '.($export->successful_rows === 1 ? 'linha foi exportada' : 'linhas foram exportadas').'.';
 
         if ($failedRowsCount = $export->getFailedRowsCount()) {
-            $body .= ' ' . Number::format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to export.';
+            $body .= ' '.Number::format($failedRowsCount).' '.($failedRowsCount === 1 ? 'linha falhou' : 'linhas falharam').' na exportação.';
         }
 
         return $body;

@@ -58,7 +58,9 @@ describe('Attendance and Absence Processing', function () {
             ->where('absence_date', $date->toDateString())
             ->first();
 
-        expect($absence)->toBeNull();
+        expect($absence)->not->toBeNull()
+            ->and($absence->deduction_type)->toBe('partial_absence')
+            ->and($absence->hours_deducted)->toBe(60);
     });
 
     it('does not penalize arrival within 15 minute tolerance', function () {
@@ -70,7 +72,7 @@ describe('Attendance and Absence Processing', function () {
             'time_in' => $date->copy()->setTime(9, 10),
             'lunch_break_start' => $date->copy()->setTime(12, 10),
             'lunch_break_end' => $date->copy()->setTime(13, 10),
-            'time_out' => $date->copy()->setTime(17, 10),
+            'time_out' => $date->copy()->setTime(18, 10),
         ]);
 
         $absence = Absence::where('employee_id', $this->employee->id)
@@ -96,7 +98,9 @@ describe('Attendance and Absence Processing', function () {
             ->where('absence_date', $date->toDateString())
             ->first();
 
-        expect($absence)->toBeNull();
+        expect($absence)->not->toBeNull()
+            ->and($absence->deduction_type)->toBe('unjustified_absence')
+            ->and($absence->hours_deducted)->toBe(480);
     });
 
     it('detects early departure as absence', function () {
@@ -115,7 +119,9 @@ describe('Attendance and Absence Processing', function () {
             ->where('absence_date', $date->toDateString())
             ->first();
 
-        expect($absence)->toBeNull();
+        expect($absence)->not->toBeNull()
+            ->and($absence->deduction_type)->toBe('unjustified_absence')
+            ->and($absence->hours_deducted)->toBe(480);
     });
 
     it('removes absence when employee attends within tolerance', function () {
@@ -136,7 +142,7 @@ describe('Attendance and Absence Processing', function () {
             'time_in' => Carbon::parse($date)->setTime(9, 10),
             'lunch_break_start' => Carbon::parse($date)->setTime(12, 10),
             'lunch_break_end' => Carbon::parse($date)->setTime(13, 10),
-            'time_out' => Carbon::parse($date)->setTime(17, 10),
+            'time_out' => Carbon::parse($date)->setTime(18, 10),
         ]);
 
         $absence = Absence::where('employee_id', $this->employee->id)

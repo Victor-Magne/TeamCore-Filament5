@@ -50,9 +50,17 @@ class EmployeeResource extends Resource
     /**
      * Rótulo de navegação traduzido.
      */
-        protected static ?string $navigationLabel = 'Funcionários';
-        protected static ?string $modelLabel = 'Funcionário';
-        protected static ?string $pluralModelLabel = 'Funcionários';
+    protected static ?string $navigationLabel = 'Funcionários';
+
+    protected static ?string $modelLabel = 'Funcionário';
+
+    protected static ?string $pluralModelLabel = 'Funcionários';
+
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) Employee::count();
+    }
+
     /**
      * Define a estrutura do formulário de criação e edição.
      *
