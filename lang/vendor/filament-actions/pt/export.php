@@ -14,6 +14,18 @@ return [
 
                 'label' => 'Colunas',
 
+                'actions' => [
+
+                    'select_all' => [
+                        'label' => 'Seleccionar todos',
+                    ],
+
+                    'deselect_all' => [
+                        'label' => 'Desmarcar todos',
+                    ],
+
+                ],
+
                 'form' => [
 
                     'is_enabled' => [
@@ -63,6 +75,11 @@ return [
         'max_rows' => [
             'title' => 'A exportação é demasiado grande',
             'body' => 'Não é possível exportar mais de um registo de uma só vez.|Não é possível exportar mais de :count registos de uma só vez.',
+        ],
+
+        'no_columns' => [
+            'title' => 'Nenhuma coluna seleccionada',
+            'body' => 'Por favor, seleccione pelo menos uma coluna para exportar.',
         ],
 
         'started' => [
