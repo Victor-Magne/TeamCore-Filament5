@@ -22,8 +22,6 @@ class DeductHourBankService
 {
     /**
      * Processa um registo de presença para verificar se houve incumprimento de horário.
-     *
-     * @param AttendanceLog $attendanceLog
      */
     public function processAttendance(AttendanceLog $attendanceLog): void
     {
@@ -35,21 +33,23 @@ class DeductHourBankService
             // Se o funcionário trabalhou num dia que deveria estar de folga,
             // removemos qualquer falta automática que tenha sido gerada por erro.
             $this->removeAbsenceForDate($employeeId, $date->toDateString());
+
             return;
         }
 
         // 2. Obter o contrato para saber o horário esperado
         $contract = $attendanceLog->employee->contracts()
             ->where('status', 'active')
+            ->whereNotNull('expected_start_time')
             ->where('start_date', '<=', $date)
             ->orderByDesc('start_date')
             ->first();
 
-        if (! $contract || ! $contract->expected_start_time) {
-            return;
-        }
+        $expectedStartTime = $contract?->expected_start_time ?? '09:00:00';
+        $dailyWorkMinutes = (int) ($contract?->daily_work_minutes ?? 480);
+        $lunchDurationMinutes = (int) ($contract?->lunch_duration_minutes ?? 60);
 
-        $expectedStart = Carbon::parse($date->toDateString().' '.$contract->expected_start_time);
+        $expectedStart = Carbon::parse($date->toDateString().' '.$expectedStartTime);
         $actualStart = Carbon::parse($attendanceLog->time_in);
 
         // Calcula a diferença em minutos (positivo se chegou atrasado)
@@ -73,7 +73,7 @@ class DeductHourBankService
                 $this->createOrUpdateAbsence(
                     $employeeId,
                     $date,
-                    $contract->daily_work_minutes,
+                    $dailyWorkMinutes,
                     'unjustified_absence',
                     sprintf('Falta por atraso superior a 1h (%d min)', $delayMinutes)
                 );
@@ -88,7 +88,7 @@ class DeductHourBankService
         // 3. Verificar Saída Antecipada (se a saída já tiver sido registada)
         if ($attendanceLog->time_out) {
             // Hora esperada de saída = Início esperado + Horas Trabalho + Almoço
-            $expectedEnd = $expectedStart->copy()->addMinutes($contract->daily_work_minutes + $contract->lunch_duration_minutes);
+            $expectedEnd = $expectedStart->copy()->addMinutes($dailyWorkMinutes + $lunchDurationMinutes);
             $actualEnd = Carbon::parse($attendanceLog->time_out);
 
             $earlyDepartureMinutes = $actualEnd->diffInMinutes($expectedEnd, false);
@@ -106,7 +106,7 @@ class DeductHourBankService
                     $this->createOrUpdateAbsence(
                         $employeeId,
                         $date,
-                        $contract->daily_work_minutes,
+                        $dailyWorkMinutes,
                         'unjustified_absence',
                         sprintf('Falta por saída antecipada/atraso acumulado > 1h (%d min)', $totalMinutesToDeduct)
                     );

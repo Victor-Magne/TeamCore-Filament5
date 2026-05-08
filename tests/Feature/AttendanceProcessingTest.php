@@ -5,6 +5,7 @@ use App\Models\AttendanceLog;
 use App\Models\Contract;
 use App\Models\Designation;
 use App\Models\Employee;
+use App\Services\Hour\DeductHourBankService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -12,8 +13,12 @@ uses(RefreshDatabase::class);
 
 describe('Attendance and Absence Processing', function () {
     beforeEach(function () {
+        Carbon::setTestNow(Carbon::create(2026, 4, 21, 10, 0, 0)); // terça-feira
+
         $this->designation = Designation::factory()->create(['base_salary' => 1000]);
-        $this->employee = Employee::factory()->create(['designation_id' => $this->designation->id]);
+        $this->employee = Employee::withoutEvents(function () {
+            return Employee::factory()->create(['designation_id' => $this->designation->id]);
+        });
 
         // Criar contrato com horário esperado
         $this->contract = Contract::factory()->create([
@@ -24,10 +29,16 @@ describe('Attendance and Absence Processing', function () {
             'lunch_duration_minutes' => 60,
             'expected_start_time' => '09:00',
         ]);
+
+        $this->deductService = app(DeductHourBankService::class);
+    });
+
+    afterEach(function () {
+        Carbon::setTestNow();
     });
 
     it('calculates total working minutes excluding lunch time', function () {
-        $date = Carbon::now();
+        $date = Carbon::create(2026, 4, 21, 10, 0, 0);
         $attendance = AttendanceLog::create([
             'employee_id' => $this->employee->id,
             'time_in' => $date->copy()->setTime(9, 0),
@@ -43,19 +54,21 @@ describe('Attendance and Absence Processing', function () {
     });
 
     it('detects late arrival as partial absence', function () {
-        $date = Carbon::now();
+        $date = Carbon::create(2026, 4, 21, 10, 0, 0);
 
         // Chegar 30 minutos atrasado (além da tolerância de 15 minutos)
-        AttendanceLog::create([
+        $attendance = AttendanceLog::create([
             'employee_id' => $this->employee->id,
             'time_in' => $date->copy()->setTime(9, 30),
             'lunch_break_start' => $date->copy()->setTime(12, 30),
             'lunch_break_end' => $date->copy()->setTime(13, 30),
             'time_out' => $date->copy()->setTime(17, 30),
         ]);
+        $this->deductService->processAttendance($attendance);
 
-        $absence = Absence::where('employee_id', $this->employee->id)
-            ->where('absence_date', $date->toDateString())
+        $absence = Absence::withTrashed()
+            ->where('employee_id', $this->employee->id)
+            ->whereDate('absence_date', $date->toDateString())
             ->first();
 
         expect($absence)->not->toBeNull()
@@ -64,38 +77,42 @@ describe('Attendance and Absence Processing', function () {
     });
 
     it('does not penalize arrival within 15 minute tolerance', function () {
-        $date = Carbon::now();
+        $date = Carbon::create(2026, 4, 21, 10, 0, 0);
 
         // Chegar 10 minutos atrasado (dentro da tolerância)
-        AttendanceLog::create([
+        $attendance = AttendanceLog::create([
             'employee_id' => $this->employee->id,
             'time_in' => $date->copy()->setTime(9, 10),
             'lunch_break_start' => $date->copy()->setTime(12, 10),
             'lunch_break_end' => $date->copy()->setTime(13, 10),
             'time_out' => $date->copy()->setTime(18, 10),
         ]);
+        $this->deductService->processAttendance($attendance);
 
-        $absence = Absence::where('employee_id', $this->employee->id)
-            ->where('absence_date', $date->toDateString())
+        $absence = Absence::withTrashed()
+            ->where('employee_id', $this->employee->id)
+            ->whereDate('absence_date', $date->toDateString())
             ->first();
 
         expect($absence)->toBeNull();
     });
 
     it('detects major delay (>1h) as full day absence', function () {
-        $date = Carbon::now();
+        $date = Carbon::create(2026, 4, 21, 10, 0, 0);
 
         // Chegar 90 minutos atrasado
-        AttendanceLog::create([
+        $attendance = AttendanceLog::create([
             'employee_id' => $this->employee->id,
             'time_in' => $date->copy()->setTime(10, 30),
             'lunch_break_start' => $date->copy()->setTime(13, 30),
             'lunch_break_end' => $date->copy()->setTime(14, 30),
             'time_out' => $date->copy()->setTime(18, 30),
         ]);
+        $this->deductService->processAttendance($attendance);
 
-        $absence = Absence::where('employee_id', $this->employee->id)
-            ->where('absence_date', $date->toDateString())
+        $absence = Absence::withTrashed()
+            ->where('employee_id', $this->employee->id)
+            ->whereDate('absence_date', $date->toDateString())
             ->first();
 
         expect($absence)->not->toBeNull()
@@ -104,19 +121,21 @@ describe('Attendance and Absence Processing', function () {
     });
 
     it('detects early departure as absence', function () {
-        $date = Carbon::now();
+        $date = Carbon::create(2026, 4, 21, 10, 0, 0);
 
         // Sair 30 minutos cedo (além da tolerância)
-        AttendanceLog::create([
+        $attendance = AttendanceLog::create([
             'employee_id' => $this->employee->id,
             'time_in' => $date->copy()->setTime(9, 0),
             'lunch_break_start' => $date->copy()->setTime(12, 0),
             'lunch_break_end' => $date->copy()->setTime(13, 0),
             'time_out' => $date->copy()->setTime(16, 30), // 30 min mais cedo
         ]);
+        $this->deductService->processAttendance($attendance);
 
-        $absence = Absence::where('employee_id', $this->employee->id)
-            ->where('absence_date', $date->toDateString())
+        $absence = Absence::withTrashed()
+            ->where('employee_id', $this->employee->id)
+            ->whereDate('absence_date', $date->toDateString())
             ->first();
 
         expect($absence)->not->toBeNull()
@@ -137,13 +156,14 @@ describe('Attendance and Absence Processing', function () {
         ]);
 
         // Depois registar presença dentro da tolerância
-        AttendanceLog::create([
+        $attendance = AttendanceLog::create([
             'employee_id' => $this->employee->id,
             'time_in' => Carbon::parse($date)->setTime(9, 10),
             'lunch_break_start' => Carbon::parse($date)->setTime(12, 10),
             'lunch_break_end' => Carbon::parse($date)->setTime(13, 10),
             'time_out' => Carbon::parse($date)->setTime(18, 10),
         ]);
+        $this->deductService->processAttendance($attendance);
 
         $absence = Absence::where('employee_id', $this->employee->id)
             ->where('absence_date', $date)

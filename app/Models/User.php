@@ -41,7 +41,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, LogsActivity, Notifiable, TwoFactorAuthenticatable, HasPushSubscriptions;
+    use HasFactory, HasPushSubscriptions, HasRoles, LogsActivity, Notifiable, TwoFactorAuthenticatable;
 
     /**
      * Define as tipagens (casts) dos atributos para garantir o comportamento correcto do PHP.

@@ -1,12 +1,3 @@
-@php
-    $manifestPath = public_path('build/manifest.json');
-    $manifest = [];
-    if (file_exists($manifestPath)) {
-        $manifest = json_decode(file_get_contents($manifestPath), true);
-    }
-    $swPath = asset('build/registerSW.js');
-@endphp
-
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="TeamCore">
@@ -14,5 +5,15 @@
 
 <link rel="manifest" href="{{ asset('build/manifest.webmanifest') }}">
 <link rel="apple-touch-icon" href="{{ asset('images/Document.svg') }}">
+<link rel="icon" href="{{ asset('images/pwa-192.png') }}" sizes="192x192" type="image/png">
+<link rel="icon" href="{{ asset('images/pwa-512.png') }}" sizes="512x512" type="image/png">
 
-<script src="{{ $swPath }}"></script>
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register('/sw.js').catch(function (error) {
+                console.error('Service worker registration failed:', error);
+            });
+        });
+    }
+</script>
