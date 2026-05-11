@@ -43,9 +43,9 @@ class ContractForm
                         ->label('Tipo de Contrato')
                         ->options([
                             'permanent' => 'Efetivo / Tempo Indeterminado',
-                            'fixed-term' => 'Prazo Certo',
+                            'fixed_term' => 'Prazo Certo',
                             'internship' => 'Estágio',
-                            'freelance' => 'Prestação de Serviços',
+                            'service_provision' => 'Prestação de Serviços',
                         ])
                         ->required()
                         ->native(false)
@@ -87,7 +87,7 @@ class ContractForm
                         ->label('Data de Fim')
                         ->helperText('Deixe vazio se o contrato for efetivo.')
                         ->native(false)
-                        ->hidden(fn(Get $get) => $get('type') === 'permanent')
+                        ->hidden(fn (Get $get) => $get('type') === 'permanent')
                         ->extraAttributes([
                             'class' => 'flex-1',
                         ]),

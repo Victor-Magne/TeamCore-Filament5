@@ -66,8 +66,10 @@ class ContractsTable
                     ->label('Tipo de Contrato')
                     ->options([
                         'permanent' => 'Efetivo',
-                        'fixed-term' => 'Prazo Certo',
+                        'fixed_term' => 'Prazo Certo',
+                        'unfixed_term' => 'Prazo Incerto',
                         'internship' => 'Estágio',
+                        'service_provision' => 'Prestação de Serviços',
                     ]),
             ])
             ->recordActions([

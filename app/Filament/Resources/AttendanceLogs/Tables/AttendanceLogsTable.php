@@ -54,6 +54,11 @@ class AttendanceLogsTable
                     ->label('Notas')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('created_at')
+                    ->label('Registrado em')
+                    ->date()
+                    ->sortable(),
             ])
             ->recordActions([
                 EditAction::make(),

@@ -35,7 +35,21 @@ class AttendanceCheckIn extends Page
     /**
      * Agrupamento no menu lateral.
      */
+
+    public function getTitle(): string
+    {
+        return __('Pontualização de Presença');
+    }
+
     protected static string|UnitEnum|null $navigationGroup = 'Gestão de Pessoal';
+
+    public static function getNavigationLabel(): string
+    {
+        return __('widgets.attendance.check_in');
+    }
+
+    
+
 
     /**
      * Propriedades para sincronização reactiva com o frontend.

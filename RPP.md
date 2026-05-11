@@ -74,7 +74,7 @@ Figura 1: Diagrama de Entidades e Relações (ER) - Estrutura da base de dados r
 Figura 2: Dashboard Admin com Widgets de Estatísticas (contratos, funcionários, presença)	12
 Figura 3: Gestão de Funcionários com tabela de dados e filtros de acesso	13
 Figura 4: Visualização de Dados Pessoais e Banco de Horas com acesso restrito	14
-Figura 5: Diagrama RBAC - Hierarquia de Papeis (Admin, HR, Employee) e Permissões por Funcionalidade	15
+Figura 5: Dashboard do Funcionário com widgets de resumo e ações rápidas	15
 Figura 6: Registo de Presença (Attendance) com Campos de Entrada/Saída e Pausas	16
 Figura 7: Visualização do Banco de Horas (Hourbank) com Saldo Acumulado e Histórico	17
 Figura 8: Notificações Toast ao Criar Funcionário - 4 Mensagens de Sucesso (Utilizador, Contrato, Banco de Horas)	18
@@ -85,7 +85,7 @@ Figura 12: Resource EmployeeResource - Lista com Tabela, Filtros e Ações	24
 Figura 13: Resource ContractResource com Ação de Download PDF de Contrato	25
 Figura 14: Resource ActivityLogResource - Visualização de Histórico de Auditoria com Filtros	26
 Figura 15: Página de Check-in Simplificado com botões de ação dinâmica e histórico diário	16
-Figura 16: Dashboard do Funcionário com widgets de resumo e ações rápidas	13
+Figura 16:	13
 Figura 17: Interface do HourBank com Movements Relation Manager detalhando cada transação	17
 
 
@@ -508,7 +508,7 @@ Auditoria automática de alterações via Spatie Activity Log.
 
 A aplicação implementa uma suíte abrangente de testes automatizados usando Pest v4 para validar funcionalidades críticas e garantir a integridade da lógica de negócio:
 
-### Testes Implementados (23 ficheiros / 100 testes / 222 assertions)
+### Testes Implementados (25 ficheiros / 105 testes / 238 assertions)
 
 **Testes de Feature:**
 
@@ -590,7 +590,7 @@ A aplicação implementa uma suíte abrangente de testes automatizados usando Pe
 
 Para garantir rastreabilidade documental e auditoria técnica, abaixo segue o inventário integral dos ficheiros de teste existentes no repositório na data desta revisão. Esta listagem permite cruzar, de forma objetiva, a documentação do projeto com os artefactos reais de validação automatizada presentes na pasta `tests/`.
 
-**Feature Tests (20 ficheiros):**
+**Feature Tests (22 ficheiros):**
 - `tests/Feature/AttendanceProcessingTest.php`
 - `tests/Feature/ContractPdfTest.php`
 - `tests/Feature/EmployeeCreationTest.php`
@@ -599,6 +599,8 @@ Para garantir rastreabilidade documental e auditoria técnica, abaixo segue o in
 - `tests/Feature/ExampleTest.php`
 - `tests/Feature/HourBankTest.php`
 - `tests/Feature/PayrollProcessingTest.php`
+- `tests/Feature/TeamManagementTest.php`
+- `tests/Feature/UserPushSubscriptionTest.php`
 - `tests/Feature/VacationAndLeaveTest.php`
 - `tests/Feature/VacationBalanceTest.php`
 - `tests/Feature/App/EmployeeWidgetsTest.php`
@@ -615,7 +617,7 @@ Para garantir rastreabilidade documental e auditoria técnica, abaixo segue o in
 **Unit Tests (3 ficheiros):**
 - `tests/Unit/ExampleTest.php`
 - `tests/Unit/Dashboard/DashboardWidgetsTest.php`
-- `tests/Unit/Http/Middleware/EnsureUtf8EncodingTest.php`
+- `tests/Unit/Http/Middleware/EnsureUtf8En5odingTest.php`
 
 Este inventário confirma a existência de 23 ficheiros de teste, distribuídos entre validação de comportamento ponta-a-ponta (Feature) e validação de componentes isolados (Unit). Em conjunto, estes testes exercitam fluxos críticos de negócio, proteção de acesso, geração documental, operações de processamento e consistência de dados.
 
@@ -650,8 +652,8 @@ Cada teste executa contra uma base de dados SQLite em memória (:memory:) garant
 No estado atual da aplicação, a validação automatizada deixou de ser apenas um suporte de desenvolvimento e passou a ser um pilar operativo de confiança para evolução contínua. A suíte foi executada de forma completa com `php artisan test` e também no modo compacto (`php artisan test --compact`), mantendo consistência nos resultados e confirmando estabilidade transversal entre testes de Unit e Feature.
 
 Métricas consolidadas na data desta atualização:
-- **100 testes passados**
-- **222 assertions**
+- **105 testes passados**
+- **238 assertions**
 - **0 falhas no estado final após correções de estabilidade**
 
 Para além da cobertura funcional direta, os testes garantem propriedades arquiteturais importantes:
