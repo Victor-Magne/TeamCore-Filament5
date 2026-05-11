@@ -10,14 +10,14 @@ use Illuminate\Support\Facades\Auth;
 
 class EmployeeStatsWidget extends StatsOverviewWidget
 {
-    protected static ?int $sort = 20;
+    protected static ?int $sort = 21;
 
     protected ?string $pollingInterval = '10s';
 
     protected int|string|array $columnSpan = [
-        'default' => 'full',
-        'md' => 1,
-        'xl' => 1,
+        'default' => 'flex',
+        'md' => 3,
+        'xl' => 2,
     ];
 
     public static function canView(): bool

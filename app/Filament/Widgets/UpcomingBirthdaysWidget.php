@@ -9,7 +9,25 @@ use Illuminate\Support\Carbon;
 
 class UpcomingBirthdaysWidget extends StatsOverviewWidget
 {
-    protected static ?int $sort = 25;
+    protected static ?int $sort = 20;
+
+    protected ?string $pollingInterval = '1h';
+    protected int|string|array $columnSpan = [
+        'default' => 'flex',
+        'md' => 3,
+        'xl' => 2,
+    ];
+
+        public function getHeading(): ?string
+        {
+            return 'Aniversariantes Próximos';
+        }
+
+        public function getDescription(): ?string
+        {
+            return __('widgets.upcoming_birthdays_description');
+        }
+
 
     public function getStats(): array
     {

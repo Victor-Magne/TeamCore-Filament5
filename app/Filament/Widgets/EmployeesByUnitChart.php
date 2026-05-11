@@ -9,16 +9,16 @@ use Illuminate\Support\Facades\Auth;
 
 class EmployeesByUnitChart extends ChartWidget
 {
-    protected static ?int $sort = 20;
+    protected static ?int $sort = 21;
 
     protected ?string $heading = 'Funcionários por Tipo de Unidade';
 
     protected ?string $pollingInterval = '30s';
 
     protected int|string|array $columnSpan = [
-        'default' => 'full',
-        'md' => 1,
-        'xl' => 1,
+    'default' => 'full',
+    'md' => 1,
+    'xl' => 1,
     ];
 
     public static function canView(): bool

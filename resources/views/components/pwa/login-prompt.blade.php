@@ -4,7 +4,7 @@
     }"
     x-show="show"
     x-transition
-    class="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-[9999] p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-primary-100 dark:border-primary-900"
+    class="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-9999 p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-primary-100 dark:border-primary-900"
     style="display: none;"
     >
         <div class="flex items-start gap-4">
@@ -17,7 +17,7 @@
                 <h4 class="text-sm font-bold text-gray-900 dark:text-white">Ativar Notificações?</h4>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Fique a par das aprovações de férias e alertas importantes em tempo real.</p>
                 <div class="flex gap-3 mt-4">
-                    <livewire:pwa-subscription-manager />
+                    <livewire:pwa-subscription-manager :minimal="true" />
                     <button @click="show = false; localStorage.setItem('pwa_prompt_dismissed', 'true')" class="px-4 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                         Agora não
                     </button>

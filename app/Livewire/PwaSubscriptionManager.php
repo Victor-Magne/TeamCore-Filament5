@@ -2,12 +2,14 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
 
 class PwaSubscriptionManager extends Component
 {
     public bool $isSubscribed = false;
+
+    public bool $minimal = false;
 
     public function mount()
     {
@@ -28,7 +30,7 @@ class PwaSubscriptionManager extends Component
 
         $this->dispatch('notify', [
             'type' => 'success',
-            'message' => 'Notificações activadas com sucesso!'
+            'message' => 'Notificações activadas com sucesso!',
         ]);
     }
 
@@ -39,7 +41,7 @@ class PwaSubscriptionManager extends Component
 
         $this->dispatch('notify', [
             'type' => 'info',
-            'message' => 'Notificações desactivadas.'
+            'message' => 'Notificações desactivadas.',
         ]);
     }
 
