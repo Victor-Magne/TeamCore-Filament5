@@ -12,11 +12,7 @@ class UpcomingBirthdaysWidget extends StatsOverviewWidget
     protected static ?int $sort = 20;
 
     protected ?string $pollingInterval = '1h';
-    protected int|string|array $columnSpan = [
-        'default' => 'flex',
-        'md' => 3,
-        'xl' => 2,
-    ];
+    protected int|string|array $columnSpan = 'full';
 
         public function getHeading(): ?string
         {

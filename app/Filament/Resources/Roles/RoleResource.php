@@ -41,15 +41,7 @@ class RoleResource extends Resource
     use Essentials\HasNavigation;
     use HasShieldFormComponents;
 
-    protected static ?string $recordTitleAttribute = 'name';
-
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-shield-check';
-
-    protected static string|UnitEnum|null $navigationGroup = 'Administração';
-
-    protected static ?string $navigationLabel = 'Funções';
-    protected static ?string $modelLabel = 'Função';
-    protected static ?string $pluralModelLabel = 'Funções';
+   
 
     #[Override]
     public static function getNavigationIcon(): string|BackedEnum|null
