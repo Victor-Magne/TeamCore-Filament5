@@ -132,7 +132,7 @@ A Aplicação TeamCore foi desenvolvida com o objetivo de alcançar uma gestão 
 
 A metodologia de trabalho incluiu o levantamento detalhado de requisitos, a modelação da base de dados relacional, e o desenvolvimento técnico utilizando a framework Laravel v13 com Filament v5 para o backend e frontend. O processo foi complementado por validação rigorosa de funcionalidades e testes automatizados.
 
-Nota sobre o Estado da Aplicação: No momento da redação deste relatório (15 de Maio de 2026), a Aplicação TeamCore encontra-se numa fase de maturidade production-ready com todas as funcionalidades core completamente implementadas, testadas e validadas. A aplicação inclui: 16 Models com isolamento de dados RBAC; 16 Filament Resources com políticas de autorização; 17 Policies para controlo granular; Sistema de banco de horas cumulativo com rastreio de movimentos e validação automática de licenças; Auditoria completa via Spatie Activity Log; 5 Observers e 1 Listener para automação de processos; Autenticação segura via Filament Breezy e Passkeys; e suíte de testes automatizados com Pest v4 com 20+ testes (23 no total) cobrindo funcionalidades críticas (HourBank, EmployeePolicies, EmployeeCreation, AttendanceProcessing, VacationAndLeave, PayrollProcessing, DeductHourBankService).A aplicação está pronta para utilização em ambiente de produção com confiança elevada na qualidade técnica e funcional.
+Nota sobre o Estado da Aplicação: No momento da redação deste relatório (15 de Maio de 2026), a Aplicação TeamCore encontra-se numa fase de maturidade production-ready com todas as funcionalidades core completamente implementadas, testadas e validadas. A aplicação inclui: 17 Modelos com isolamento de dados RBAC; 16 Recursos Filament com políticas de autorização; 17 Políticas para controlo granular; Sistema de banco de horas cumulativo com rastreio de movimentos e validação automática de licenças; Auditoria completa via Spatie Activity Log; 6 Observadores e 1 Listener para automação de processos; Autenticação segura via Filament Breezy; e suíte de testes automatizados com Pest v4 com 25 ficheiros de teste (97 testes automatizados no total) cobrindo funcionalidades críticas (HourBank, EmployeePolicies, EmployeeCreation, AttendanceProcessing, VacationAndLeave, PayrollProcessing, DeductHourBankService). A aplicação está pronta para utilização em ambiente de produção com confiança elevada na qualidade técnica e funcional.
 
 
 Introdução
@@ -167,7 +167,7 @@ Garantir a qualidade técnica: Assegurar a aplicação através de testes automa
 
 Abordagem e Metodologia
 O desenvolvimento foi realizado em ciclos iterativos, adotando:
-Tecnologias modernas: Laravel v13 como framework backend, Filament v5 como interface administrativa unificada, PHP v8.3 e MySQL como base de dados relacional.
+Tecnologias modernas: Laravel v13 como framework backend, Filament v5 como interface administrativa unificada, PHP v8.4 e MySQL como base de dados relacional.
 Testes automatizados: Desenvolvimento orientado a testes utilizando framework Pest/PHPUnit para validação contínua de funcionalidades.
 Validação com profissionais: Consulta com profissionais de RH durante o desenvolvimento para validar requisitos e funcionalidades essenciais.
 Boas práticas de engenharia: Isolamento de dados ao nível do modelo através de Policies Eloquent, arquitetura em camadas clara, padrões de código consistentes.
@@ -175,7 +175,7 @@ Boas práticas de engenharia: Isolamento de dados ao nível do modelo através d
 
 Desenvolvimento da Aplicação
 Metodologia e Ferramentas
-A Aplicação TeamCore foi desenvolvida com a framework Laravel v13, utilizando Filament v5 como interface administrativa unificada e PHP v8.3 como linguagem de desenvolvimento. A persistência de dados foi implementada em MySQL, com uma arquitetura relacional suportando entidades como Funcionários, Contratos, Departamentos, Designações, Bancos de Horas, Registos de Presença, Pedidos de Licença, Ausências e Logs de Auditoria.
+A Aplicação TeamCore foi desenvolvida com a framework Laravel v13, utilizando Filament v5 como interface administrativa unificada e PHP v8.4 como linguagem de desenvolvimento. A persistência de dados foi implementada em MySQL, com uma arquitetura relacional suportando entidades como Funcionários, Contratos, Departamentos, Designações, Bancos de Horas, Registos de Presença, Pedidos de Licença, Ausências e Logs de Auditoria.
 
 O processo de desenvolvimento adotou uma metodologia iterativa com ciclos bissemanais de análise, implementação, testes e validação. Foi feita a utilização Git para controlo de versão e manutenção de uma suíte de testes automatizados (Pest v4) que executam em cada novo commit, garantindo que regressões não ocorressem durante o desenvolvimento.
 
@@ -190,7 +190,7 @@ Construção da interface
 5.5+
 PHP
 Linguagem
-8.3
+8.4
 MySQL
 Base de Dados
 8.0
@@ -275,7 +275,7 @@ EMPLOYEE — Colaborador, acesso limitado a dados pessoais e pedidos próprios.
 
 Implementação em 3 Camadas:
 Middleware de Rotas — Bloqueio de acesso inicial (usando role checks via Shield).
-Filament Policies — 17 policies implementadas para controlo granular (UserPolicy, EmployeePolicy, ContractPolicy, etc.).
+Filament Policies — 17 Políticas implementadas para controlo granular (UserPolicy, EmployeePolicy, ContractPolicy, etc.).
 Eloquent Scopes — Isolamento de dados ao nível da query com visibilidade hierárquica recursiva e suporte a atribuição composta (ex: Colaboradores vêem apenas os seus dados, enquanto Gestores vêem os seus dados e os de todos os subordinados nas unidades que gerem e respetivas sub-unidades em cascata).
 
 Recursos Filament com Controlo de Acesso (16 total):
@@ -294,7 +294,7 @@ Soft deletes: Preservação de histórico em todos os modelos críticos
 Activity logging: Rastreio completo via Spatie Activity Log (automatic com LogsActivity trait).
 Services especializados: Implementação de lógica de negócio complexa em Services (GeneratePayrollService, CalculateExtraHoursService, DeductHourBankService).
 CSRF protection: Tokens em formulários
-Autenticação: Filament Breezy com suporte a Passkeys
+Autenticação: Filament Breezy
 Auditoria de Modelos: Registo automático de create, update e delete com user tracking
 
 Gestão de Horas e Banco de Horas
@@ -399,7 +399,7 @@ Obrigatoriedade de alteração no primeiro acesso.
 Reforço de políticas de segurança.
 
 Isolamento de Dados de Funcionário:
-Proteção de privacidade e conformidade LGPD.
+Proteção de privacidade e conformidade RGPD.
 Dados pessoais acessíveis apenas aos autorizados.
 Logs de acesso a dados sensíveis.
 
@@ -459,7 +459,7 @@ Figura 14: Resource ActivityLogResource - Visualização de Histórico de Audito
 (Instrução de print: Aceder a /admin/activity-logs)
 O ActivityLogResource registra todas as alterações importantes no sistema (criação de utilizadores, edição de salários, eliminação de registos). Esta informação é crítica para conformidade regulatória e para rastrear quem fez o quê e quando. Os filtros permitem procurar por tipo de ação, utilizador que realizou a ação, ou data, facilitando investigações e auditorias. Por exemplo, se surgir uma discrepância num banco de horas, é possível rapidamente ver todo o histórico de alterações nesse registo. Isto é particularmente importante em contexto empresarial onde são necessárias evidências documentadas de todas as operações para fins legais.
 
-A aplicação implementa 16 Resources Filament para gestão:
+A aplicação implementa 16 Recursos Filament para gestão:
 
 Resource
 Modelo
@@ -508,7 +508,7 @@ Auditoria automática de alterações via Spatie Activity Log.
 
 A aplicação implementa uma suíte abrangente de testes automatizados usando Pest v4 para validar funcionalidades críticas e garantir a integridade da lógica de negócio:
 
-### Testes Implementados (25 ficheiros / 105 testes / 238 assertions)
+### Testes Implementados (25 ficheiros / 97 testes / 146 assertions)
 
 **Testes de Feature:**
 
@@ -617,9 +617,9 @@ Para garantir rastreabilidade documental e auditoria técnica, abaixo segue o in
 **Unit Tests (3 ficheiros):**
 - `tests/Unit/ExampleTest.php`
 - `tests/Unit/Dashboard/DashboardWidgetsTest.php`
-- `tests/Unit/Http/Middleware/EnsureUtf8En5odingTest.php`
+- `tests/Unit/Http/Middleware/EnsureUtf8EncodingTest.php`
 
-Este inventário confirma a existência de 23 ficheiros de teste, distribuídos entre validação de comportamento ponta-a-ponta (Feature) e validação de componentes isolados (Unit). Em conjunto, estes testes exercitam fluxos críticos de negócio, proteção de acesso, geração documental, operações de processamento e consistência de dados.
+Este inventário confirma a existência de 25 ficheiros de teste, distribuídos entre validação de comportamento ponta-a-ponta (Feature) e validação de componentes isolados (Unit). Em conjunto, estes testes exercitam fluxos críticos de negócio, proteção de acesso, geração documental, operações de processamento e consistência de dados.
 
 ### Cobertura Funcional por Domínio
 
@@ -652,8 +652,8 @@ Cada teste executa contra uma base de dados SQLite em memória (:memory:) garant
 No estado atual da aplicação, a validação automatizada deixou de ser apenas um suporte de desenvolvimento e passou a ser um pilar operativo de confiança para evolução contínua. A suíte foi executada de forma completa com `php artisan test` e também no modo compacto (`php artisan test --compact`), mantendo consistência nos resultados e confirmando estabilidade transversal entre testes de Unit e Feature.
 
 Métricas consolidadas na data desta atualização:
-- **105 testes passados**
-- **238 assertions**
+- **97 testes passados**
+- **146 assertions**
 - **0 falhas no estado final após correções de estabilidade**
 
 Para além da cobertura funcional direta, os testes garantem propriedades arquiteturais importantes:
@@ -683,12 +683,13 @@ Listeners e Automação
 O sistema implementa 1 Listener principal:
 AuthenticationActivityLogger: Regista eventos de autenticação (login/logout) e atividades críticas de utilizadores.
 
-O sistema utiliza Observer Pattern para automatizar operações (5 Observers):
+O sistema utiliza Observer Pattern para automatizar operações (6 Observadores):
 EmployeeObserver: Cria automaticamente o utilizador, contrato inicial e banco de horas ao registar um novo funcionário.
 ContractObserver: Quando um novo contrato é criado/atualizado, sincroniza automaticamente a designation_id do Employee com base no contrato ativo.
 AttendanceLogObserver: Automatiza cálculos de tempos e delega verificações de atrasos/faltas para o DeductHourBankService.
 AbsenceObserver: Monitoriza a criação, atualização e eliminação de ausências, despoletando o recálculo automático do saldo do Banco de Horas para o período correspondente.
 LeaveAndAbsenceObserver: Gere a remoção de ausências automáticas ou criação de deduções por licenças não pagas aquando da aprovação de um pedido.
+VacationObserver: Gere as notificações e actualizações de saldo relacionadas com pedidos de férias.
 
 Figura 17: Interface do HourBank com Movements Relation Manager detalhando cada transação.
 (Instrução de print: Aceder a /admin/hour-banks/{id}/edit e mostrar a relação de movimentos)
@@ -727,7 +728,7 @@ Gestão Inteligente de Férias: Sistema de controlo de saldo que debita automati
 
 Arquitetura bem estruturada: Separação clara das responsabilidades, com isolamento de dados ao nível do modelo via Policies. As scopes Eloquent garantem segurança sem depender apenas de frontend.
 
-Autenticação robusta: Integração com Filament Breezy e Passkeys oferece camadas de segurança modernas.
+Autenticação robusta: Integração com Filament Breezy oferece camadas de segurança modernas.
 
 Automação inteligente: O Observer Pattern automatiza a sincronização de dados entre modelos, reduzindo erros manuais.
 
@@ -735,7 +736,7 @@ Auditoria completa: Spatie Activity Log fornece rastreamento automático de toda
 
 RBAC dinâmico: Filament Shield permite gerir papéis e permissões de forma granular e flexível.
 
-Testes com cobertura robusta: Pest v4 com 20+ testes (23 no total) cobrindo funcionalidades críticas (HourBank, Policies, AttendanceProcessing, VacationAndLeave, PayrollProcessing, EmployeeCreation, DeductHourBankService). Cada teste valida comportamentos essenciais: cálculo de horas extras, processamento de ausências, gestão de férias, geração de payroll, e policies de autorização. Os testes fornecem confiança elevada na qualidade técnica e reduzem riscos de regressões.
+Testes com cobertura robusta: Pest v4 com 25 ficheiros de teste (97 testes automatizados no total) cobrindo funcionalidades críticas (HourBank, Policies, AttendanceProcessing, VacationAndLeave, PayrollProcessing, EmployeeCreation, DeductHourBankService). Cada teste valida comportamentos essenciais: cálculo de horas extras, processamento de ausências, gestão de férias, geração de payroll, e policies de autorização. Os testes fornecem confiança elevada na qualidade técnica e reduzem riscos de regressões.
 
 Pontos a Melhorar
 Integrações Externas: Falta de ligação com sistemas bancários externos para automatização real de pagamentos e exportação de ficheiros SEPA.
@@ -794,7 +795,7 @@ Bibliografia
 Laravel LLC. (2025). Laravel – The PHP framework for web artisans. Versão 13.0. Acedido em 16 de abril de 2026, de https://laravel.com 
 Filament. (2025). Filament – Accelerated Laravel development. Versão 5.5+. Acedido em 16 de abril de 2026, de https://filamentphp.com 
 Spatie. (2025). Laravel Activity Log. Versão 5.0. Acedido em 16 de abril de 2026, de https://spatie.be/docs/laravel-activitylog/
-The PHP Group. (2025). PHP: Hypertext preprocessor. Versão 8.3. Acedido em 16 de abril de 2026, de https://www.php.net 
+The PHP Group. (2025). PHP: Hypertext preprocessor. Versão 8.4. Acedido em 16 de abril de 2026, de https://www.php.net
 Composer Authors. (2025). Composer – Dependency manager for PHP. Acedido em 16 de abril de 2026, de https://getcomposer.org 
 Oracle Corporation. (2025). MySQL 8.0 reference manual. Acedido em 16 de abril de 2026, de https://dev.mysql.com/doc 
 GitHub, Inc. (2025). GitHub – Where the world builds software. Acedido em 16 de abril de 2026, de https://github.com 
