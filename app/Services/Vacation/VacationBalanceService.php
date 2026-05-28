@@ -21,9 +21,15 @@ class VacationBalanceService
         DB::transaction(function () use ($vacation) {
             $employee = Employee::lockForUpdate()->find($vacation->employee_id);
 
-            if ($employee) {
-                $employee->decrement('vacation_balance', $vacation->days_taken);
+            if (! $employee) {
+                return;
             }
+
+            if ($employee->vacation_balance < $vacation->days_taken) {
+                throw new \RuntimeException("Saldo insuficiente: disponível {$employee->vacation_balance} dia(s), necessário {$vacation->days_taken}.");
+            }
+
+            $employee->decrement('vacation_balance', $vacation->days_taken);
         });
     }
 
@@ -66,6 +72,10 @@ class VacationBalanceService
             }
 
             if ($diff > 0) {
+                if ($employee->vacation_balance < $diff) {
+                    throw new \RuntimeException("Saldo insuficiente para esta alteração: disponível {$employee->vacation_balance} dia(s), necessário {$diff}.");
+                }
+
                 $employee->decrement('vacation_balance', $diff);
             } else {
                 $employee->increment('vacation_balance', abs($diff));

@@ -125,7 +125,7 @@ class TeamPendingRequestsWidget extends BaseWidget
                             return;
                         }
 
-                        $actualRecord->update(['status' => 'approved']);
+                        $actualRecord->update(['status' => 'approved', 'approved_by' => Auth::id()]);
 
                         Notification::make()
                             ->title('Pedido aprovado com sucesso')
@@ -155,6 +155,7 @@ class TeamPendingRequestsWidget extends BaseWidget
                         $actualRecord->update([
                             'status' => 'rejected',
                             'rejection_reason' => $data['rejection_reason'],
+                            'approved_by' => Auth::id(),
                         ]);
 
                         Notification::make()

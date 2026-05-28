@@ -79,48 +79,30 @@ class PayrollForm
                             ->dehydrated()
                             ->default(0)
                             ->dehydrateStateUsing(function (Get $get) {
-                                // Force recalculation before saving
                                 $employeeId = $get('employee_id');
                                 $monthYear = $get('month_year');
-                                
-                                if (!$employeeId || !$monthYear) {
+
+                                if (! $employeeId || ! $monthYear) {
                                     return 0;
                                 }
-                                
+
                                 $contract = Contract::where('employee_id', $employeeId)
                                     ->where('status', 'active')
                                     ->first();
-                                
-                                if (!$contract) {
+
+                                if (! $contract) {
                                     return 0;
                                 }
-                                
-                                $baseSalary = (float) $contract->salary;
-                                $dailyWorkMinutes = (int) ($contract->daily_work_minutes ?? config('hr.default_daily_work_minutes'));
-                                $hourlyRate = $baseSalary / (($dailyWorkMinutes / 60) * config('hr.working_days_per_month'));
-                                
-                                $month = Carbon::createFromFormat('Y-m', $monthYear);
-                                $startDate = $month->copy()->startOfMonth();
-                                $endDate = $month->copy()->endOfMonth();
 
-                                $extraHoursMinutes = (int) HourBankMovement::where('employee_id', $employeeId)
-                                    ->where('type', 'addition')
-                                    ->whereBetween('date', [$startDate, $endDate])
-                                    ->sum('amount');
+                                $hourlyRate = self::computeHourlyRate($contract);
+                                $balance = self::computeHourBankBalance($employeeId, $monthYear);
 
-                                $usedHoursMinutes = abs((int) HourBankMovement::where('employee_id', $employeeId)
-                                    ->where('type', 'deduction')
-                                    ->whereBetween('date', [$startDate, $endDate])
-                                    ->sum('amount'));
-
-                                $balance = $extraHoursMinutes - $usedHoursMinutes;
-                                
                                 if ($balance > 0) {
                                     $extraHoursAmount = ($hourlyRate * config('hr.extra_hours_multiplier')) * ($balance / 60);
                                 } else {
                                     $extraHoursAmount = $hourlyRate * ($balance / 60);
                                 }
-                                
+
                                 return round($extraHoursAmount, 2);
                             })
                             ->formatStateUsing(function (Get $get) {
@@ -182,32 +164,14 @@ class PayrollForm
         }
 
         $baseSalary = (float) $contract->salary;
-        $dailyWorkMinutes = (int) ($contract->daily_work_minutes ?? config('hr.default_daily_work_minutes'));
-        $hourlyRate = $baseSalary / (($dailyWorkMinutes / 60) * config('hr.working_days_per_month'));
+        $hourlyRate = self::computeHourlyRate($contract);
 
         $set('base_salary', round($baseSalary, 2));
         $set('hourly_rate', round($hourlyRate, 2));
 
-        $month = Carbon::createFromFormat('Y-m', $monthYear);
-        $startDate = $month->copy()->startOfMonth();
-        $endDate = $month->copy()->endOfMonth();
-
-        $extraHoursMinutes = (int) HourBankMovement::where('employee_id', $employeeId)
-            ->where('type', 'addition')
-            ->whereBetween('date', [$startDate, $endDate])
-            ->sum('amount');
-
-        $usedHoursMinutes = abs((int) HourBankMovement::where('employee_id', $employeeId)
-            ->where('type', 'deduction')
-            ->whereBetween('date', [$startDate, $endDate])
-            ->sum('amount'));
-
-        $balance = $extraHoursMinutes - $usedHoursMinutes;
+        $balance = self::computeHourBankBalance($employeeId, $monthYear);
         $set('extra_hours', $balance);
 
-        // Calcular impacto financeiro:
-        // - Saldo positivo (+) pago com bónus 1.5x (horas ganhas)
-        // - Saldo negativo (-) desconto com taxa 1.0x (horas devidas)
         if ($balance > 0) {
             $extraHoursAmount = ($hourlyRate * config('hr.extra_hours_multiplier')) * ($balance / 60);
         } else {
@@ -237,5 +201,30 @@ class PayrollForm
         $set('extra_hours', 0);
         $set('extra_hours_amount', 0);
         $set('total_net', 0);
+    }
+
+    private static function computeHourlyRate(Contract $contract): float
+    {
+        $baseSalary = (float) $contract->salary;
+        $dailyWorkMinutes = (int) ($contract->daily_work_minutes ?? config('hr.default_daily_work_minutes'));
+
+        return $baseSalary / (($dailyWorkMinutes / 60) * config('hr.working_days_per_month'));
+    }
+
+    private static function computeHourBankBalance(int $employeeId, string $monthYear): int
+    {
+        $month = Carbon::createFromFormat('Y-m', $monthYear);
+        $startDate = $month->copy()->startOfMonth();
+        $endDate = $month->copy()->endOfMonth();
+
+        $movements = HourBankMovement::where('employee_id', $employeeId)
+            ->whereBetween('date', [$startDate, $endDate])
+            ->selectRaw("SUM(CASE WHEN type = 'addition' THEN amount ELSE 0 END) as extra, SUM(CASE WHEN type = 'deduction' THEN amount ELSE 0 END) as deducted")
+            ->first();
+
+        $extra = (int) ($movements->extra ?? 0);
+        $deducted = abs((int) ($movements->deducted ?? 0));
+
+        return $extra - $deducted;
     }
 }

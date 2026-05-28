@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Employee;
-use App\Models\User;
 use App\Models\Vacation;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -37,7 +36,7 @@ class VacationFactory extends Factory
             'end_date' => $endDate,
             'days_taken' => $daysTaken,
             'status' => $this->faker->randomElement(['approved', 'pending', 'rejected']),
-            'approved_by' => User::factory(),
+            'approved_by' => null,
         ];
     }
 

@@ -18,11 +18,14 @@ class AttendanceCalculationService
 
         $totalMinutes = $log->time_in->diffInMinutes($log->time_out);
 
-        $contract = $log->employee->contracts()
-            ->where('status', 'active')
-            ->where('start_date', '<=', $log->time_in)
-            ->orderByDesc('start_date')
-            ->first();
+        $employee = $log->employee;
+        $contract = $employee
+            ? $employee->contracts()
+                ->where('status', 'active')
+                ->where('start_date', '<=', $log->time_in)
+                ->orderByDesc('start_date')
+                ->first()
+            : null;
 
         $expectedLunchMinutes = $contract?->lunch_duration_minutes ?? config('hr.default_lunch_minutes', 60);
 

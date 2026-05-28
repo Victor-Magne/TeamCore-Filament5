@@ -78,7 +78,7 @@ class DeductHourBankService
                     ->whereDate('absence_date', $date)
                     ->first();
 
-                $totalMinutesToDeduct = max(0, $earlyDepartureMinutes) + ($existingAbsence?->hours_deducted ?? 0);
+                $totalMinutesToDeduct = $earlyDepartureMinutes + ($existingAbsence?->hours_deducted ?? 0);
 
                 if ($totalMinutesToDeduct > $fullAbsenceThreshold) {
                     $this->createOrUpdateAbsence(
@@ -182,6 +182,7 @@ class DeductHourBankService
 
         $lastAbsences = Absence::where('employee_id', $employeeId)
             ->where('deduction_type', 'partial_absence')
+            ->whereNull('leave_and_absence_id')
             ->orderByDesc('absence_date')
             ->take($limit)
             ->get();

@@ -20,11 +20,11 @@ describe('VacationBalanceService', function () {
     });
 
     it('deducts balance on approval', function () {
-        $vacation = Vacation::factory()->create([
+        $vacation = Vacation::withoutEvents(fn () => Vacation::factory()->create([
             'employee_id' => $this->employee->id,
             'days_taken' => 5,
             'status' => 'pending',
-        ]);
+        ]));
 
         $this->service->deductOnApproval($vacation);
 
@@ -32,11 +32,11 @@ describe('VacationBalanceService', function () {
     });
 
     it('restores balance on revocation', function () {
-        $vacation = Vacation::factory()->create([
+        $vacation = Vacation::withoutEvents(fn () => Vacation::factory()->create([
             'employee_id' => $this->employee->id,
             'days_taken' => 5,
             'status' => 'approved',
-        ]);
+        ]));
 
         $this->employee->update(['vacation_balance' => 17]);
 
@@ -46,16 +46,17 @@ describe('VacationBalanceService', function () {
     });
 
     it('adjusts balance when approved vacation duration increases', function () {
-        $vacation = Vacation::factory()->create([
+        $vacation = Vacation::withoutEvents(fn () => Vacation::factory()->create([
             'employee_id' => $this->employee->id,
             'days_taken' => 5,
             'status' => 'approved',
-        ]);
+        ]));
 
         $this->employee->update(['vacation_balance' => 17]);
 
-        // Simula mudança de days_taken de 5 para 8
-        $vacation->forceFill(['days_taken' => 8])->save(['timestamps' => false]);
+        // Simula o estado durante o evento `updated`: days_taken mudou de 5 para 8
+        // setRawAttributes altera o valor atual sem atualizar o original (getOriginal)
+        $vacation->setRawAttributes(array_merge($vacation->getAttributes(), ['days_taken' => 8]));
 
         $this->service->adjustOnDaysChange($vacation);
 
@@ -63,11 +64,11 @@ describe('VacationBalanceService', function () {
     });
 
     it('restores balance when approved vacation is deleted', function () {
-        $vacation = Vacation::factory()->create([
+        $vacation = Vacation::withoutEvents(fn () => Vacation::factory()->create([
             'employee_id' => $this->employee->id,
             'days_taken' => 5,
             'status' => 'approved',
-        ]);
+        ]));
 
         $this->employee->update(['vacation_balance' => 17]);
 
@@ -77,11 +78,11 @@ describe('VacationBalanceService', function () {
     });
 
     it('does not restore balance when pending vacation is deleted', function () {
-        $vacation = Vacation::factory()->create([
+        $vacation = Vacation::withoutEvents(fn () => Vacation::factory()->create([
             'employee_id' => $this->employee->id,
             'days_taken' => 5,
             'status' => 'pending',
-        ]);
+        ]));
 
         $this->service->restoreOnDelete($vacation);
 
@@ -89,11 +90,11 @@ describe('VacationBalanceService', function () {
     });
 
     it('does not deduct zero days', function () {
-        $vacation = Vacation::factory()->create([
+        $vacation = Vacation::withoutEvents(fn () => Vacation::factory()->create([
             'employee_id' => $this->employee->id,
             'days_taken' => 0,
             'status' => 'pending',
-        ]);
+        ]));
 
         $this->service->deductOnApproval($vacation);
 

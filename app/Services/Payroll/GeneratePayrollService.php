@@ -41,15 +41,13 @@ class GeneratePayrollService
         $startDate = $month->copy()->startOfMonth();
         $endDate = $month->copy()->endOfMonth();
 
-        $extraHoursMinutes = HourBankMovement::where('employee_id', $employee->id)
-            ->where('type', 'addition')
+        $movements = HourBankMovement::where('employee_id', $employee->id)
             ->whereBetween('date', [$startDate, $endDate])
-            ->sum('amount');
+            ->selectRaw("SUM(CASE WHEN type = 'addition' THEN amount ELSE 0 END) as extra, SUM(CASE WHEN type = 'deduction' THEN amount ELSE 0 END) as deducted")
+            ->first();
 
-        $usedHoursMinutes = abs(HourBankMovement::where('employee_id', $employee->id)
-            ->where('type', 'deduction')
-            ->whereBetween('date', [$startDate, $endDate])
-            ->sum('amount'));
+        $extraHoursMinutes = (int) ($movements->extra ?? 0);
+        $usedHoursMinutes = abs((int) ($movements->deducted ?? 0));
 
         $extraHoursAmount = ($hourlyRate * $extraHoursMultiplier) * ($extraHoursMinutes / 60);
         $deductions = $hourlyRate * ($usedHoursMinutes / 60);

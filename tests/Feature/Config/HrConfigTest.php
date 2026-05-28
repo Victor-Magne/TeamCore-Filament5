@@ -25,6 +25,15 @@ describe('HR Config', function () {
         expect(round($hourlyRate, 4))->toBe(round(1000 / (8 * 22), 4));
     });
 
+    it('enforces that delay_tolerance_minutes is less than full_absence_threshold_minutes', function () {
+        expect(config('hr.delay_tolerance_minutes'))
+            ->toBeLessThan(config('hr.full_absence_threshold_minutes'));
+    });
+
+    it('enforces that consecutive_delays_limit is at least 2', function () {
+        expect(config('hr.consecutive_delays_limit'))->toBeGreaterThanOrEqual(2);
+    });
+
     it('generates correct extra hours amount with multiplier', function () {
         $hourlyRate = 5.0;
         $extraMinutes = 60; // 1 hora extra

@@ -132,10 +132,10 @@ class VacationForm
                                     ? max(1, Carbon::parse($startDate)->diffInDays(Carbon::parse($endDate)) + 1)
                                     : (int) $get('days_taken');
 
-                                // Se for uma edição que já estava aprovada, não revalida o saldo
+                                // Só ignora re-validação se já estava aprovada E os dias não aumentaram
                                 if ($recordId) {
                                     $existing = Vacation::find($recordId);
-                                    if ($existing && $existing->status === 'approved') {
+                                    if ($existing && $existing->status === 'approved' && $daysTaken <= $existing->days_taken) {
                                         return;
                                     }
                                 }
