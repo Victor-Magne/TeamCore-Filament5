@@ -16,6 +16,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class PayrollResource extends Resource
 {
@@ -38,6 +39,7 @@ class PayrollResource extends Resource
     public static function table(Table $table): Table
     {
         return PayrollsTable::configure($table)
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('employee'))
             ->headerActions([
                 Action::make('process_payroll')
                     ->label('Processar Salários')
@@ -48,7 +50,14 @@ class PayrollResource extends Resource
                             ->placeholder('YYYY-MM')
                             ->regex('/^\d{4}-(0[1-9]|1[0-2])$/')
                             ->default(now()->format('Y-m'))
-                            ->required(),
+                            ->required()
+                            ->rules([
+                                fn (): \Closure => function (string $attribute, $value, \Closure $fail) {
+                                    if ($value > now()->format('Y-m')) {
+                                        $fail('Não é possível processar salários para meses futuros.');
+                                    }
+                                },
+                            ]),
                     ])
                     ->action(function (array $data) {
                         $monthYear = $data['month_year'];

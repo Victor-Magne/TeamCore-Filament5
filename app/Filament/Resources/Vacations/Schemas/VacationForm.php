@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Vacations\Schemas;
 
+use App\Models\Employee;
 use App\Models\Vacation;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
@@ -45,6 +46,7 @@ class VacationForm
                         ->label('Data de Fim')
                         ->required()
                         ->native(false)
+                        ->afterOrEqual('start_date')
                         ->live()
                         ->rules([
                             fn (callable $get): \Closure => function (string $attribute, $value, \Closure $fail) use ($get) {
@@ -98,11 +100,59 @@ class VacationForm
                         ->default('pending')
                         ->required()
                         ->native(false)
+                        ->live()
+                        ->afterStateUpdated(function (callable $set, ?string $state) {
+                            if (in_array($state, ['approved', 'rejected'])) {
+                                $set('approved_by', auth()->id());
+                            } else {
+                                $set('approved_by', null);
+                            }
+                        })
+                        ->rules([
+                            fn (callable $get): \Closure => function (string $attribute, $value, \Closure $fail) use ($get) {
+                                if ($value !== 'approved') {
+                                    return;
+                                }
+
+                                $employeeId = $get('employee_id');
+                                $recordId = $get('id');
+
+                                if (! $employeeId) {
+                                    return;
+                                }
+
+                                $employee = Employee::find($employeeId);
+                                if (! $employee) {
+                                    return;
+                                }
+
+                                $startDate = $get('start_date');
+                                $endDate = $get('end_date');
+                                $daysTaken = ($startDate && $endDate)
+                                    ? max(1, Carbon::parse($startDate)->diffInDays(Carbon::parse($endDate)) + 1)
+                                    : (int) $get('days_taken');
+
+                                // Se for uma edição que já estava aprovada, não revalida o saldo
+                                if ($recordId) {
+                                    $existing = Vacation::find($recordId);
+                                    if ($existing && $existing->status === 'approved') {
+                                        return;
+                                    }
+                                }
+
+                                if ($employee->vacation_balance < $daysTaken) {
+                                    $fail("Saldo insuficiente. Disponível: {$employee->vacation_balance} dia(s), necessário: {$daysTaken}.");
+                                }
+                            },
+                        ])
                         ->disabled(fn (?Vacation $record, callable $get): bool =>
                             (($record && $record->employee_id === auth()->user()?->employee_id) ||
                              ((int) $get('employee_id') === auth()->user()?->employee_id)) &&
                             ! auth()->user()?->can('Approve:OwnVacation')
                         )
+                        ->dehydrated(),
+
+                    \Filament\Forms\Components\Hidden::make('approved_by')
                         ->dehydrated(),
 
                     Textarea::make('rejection_reason')
