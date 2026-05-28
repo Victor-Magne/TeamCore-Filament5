@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\Absences;
 
-use App\Filament\Resources\Absences\Pages\EditAbsence;
 use App\Filament\Resources\Absences\Pages\ListAbsences;
-use App\Filament\Resources\Absences\Schemas\AbsenceForm;
+use App\Filament\Resources\Absences\Pages\ViewAbsence;
+use App\Filament\Resources\Absences\Schemas\AbsenceInfolist;
 use App\Filament\Resources\Absences\Tables\AbsencesTable;
 use App\Models\Absence;
 use App\Traits\HasHierarchicalQuery;
@@ -33,9 +33,9 @@ class AbsenceResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Ausências/Faltas';
 
-    public static function form(Schema $schema): Schema
+    public static function infolist(Schema $schema): Schema
     {
-        return AbsenceForm::configure($schema);
+        return AbsenceInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table
@@ -45,16 +45,14 @@ class AbsenceResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
     {
         return [
             'index' => ListAbsences::route('/'),
-            'edit' => EditAbsence::route('/{record}/edit'),
+            'view' => ViewAbsence::route('/{record}'),
         ];
     }
 

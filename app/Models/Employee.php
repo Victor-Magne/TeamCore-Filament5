@@ -170,6 +170,11 @@ class Employee extends Model
         return $this->hasMany(HourBank::class);
     }
 
+    public function hourBankMovements(): HasMany
+    {
+        return $this->hasMany(HourBankMovement::class);
+    }
+
     /**
      * Relacionamento: Ausências (Auditadas).
      *
