@@ -16,9 +16,10 @@ class AbsencesTable
         return $table
             ->defaultSort('absence_date', 'desc')
             ->columns([
-                TextColumn::make('employee.full_name')
+                TextColumn::make('employee.first_name')
                     ->label('Funcionário')
-                    ->searchable()
+                    ->formatStateUsing(fn ($record) => "{$record->employee->first_name} {$record->employee->last_name}")
+                    ->searchable(['first_name', 'last_name'])
                     ->sortable(),
 
                 TextColumn::make('absence_date')
