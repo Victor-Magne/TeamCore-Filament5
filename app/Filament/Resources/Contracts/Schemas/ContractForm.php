@@ -16,11 +16,13 @@ class ContractForm
     {
         return $schema->components([
             Section::make('Funcionário')
-                ->description('Selecione o funcionário para este contrato.')
+                ->description('Selecione o funcionário e a designação para este contrato.')
+                ->columns(2)
                 ->schema([
                     Select::make('employee_id')
                         ->label('Funcionário')
                         ->relationship('employee', 'first_name')
+                        ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->first_name} {$record->last_name}")
                         ->searchable()
                         ->preload()
                         ->required()
@@ -33,11 +35,11 @@ class ContractForm
                         ->preload()
                         ->required()
                         ->columnSpanFull(),
-                ])
-                ->columns(1),
+                ]),
 
-            Section::make('Tipo de Contrato')
+            Section::make('Tipo e Estado')
                 ->description('Defina o tipo e estado do contrato.')
+                ->columns(2)
                 ->schema([
                     Select::make('type')
                         ->label('Tipo de Contrato')
@@ -49,10 +51,7 @@ class ContractForm
                         ])
                         ->required()
                         ->native(false)
-                        ->live()
-                        ->extraAttributes([
-                            'class' => 'flex-1',
-                        ]),
+                        ->live(),
 
                     Select::make('status')
                         ->label('Estado do Contrato')
@@ -63,52 +62,36 @@ class ContractForm
                         ])
                         ->default('active')
                         ->required()
-                        ->native(false)
-                        ->extraAttributes([
-                            'class' => 'flex-1',
-                        ]),
-                ])
-                ->extraAttributes([
-                    'class' => 'flex flex-wrap gap-4',
+                        ->native(false),
                 ]),
 
             Section::make('Vigência do Contrato')
                 ->description('Defina as datas de início e fim.')
+                ->columns(2)
                 ->schema([
                     DatePicker::make('start_date')
                         ->label('Data de Início')
                         ->required()
-                        ->native(false)
-                        ->extraAttributes([
-                            'class' => 'flex-1',
-                        ]),
+                        ->native(false),
 
                     DatePicker::make('end_date')
                         ->label('Data de Fim')
                         ->helperText('Deixe vazio se o contrato for efetivo.')
                         ->native(false)
                         ->hidden(fn (Get $get) => $get('type') === 'permanent')
-                        ->after('start_date')
-                        ->extraAttributes([
-                            'class' => 'flex-1',
-                        ]),
-                ])
-                ->extraAttributes([
-                    'class' => 'flex flex-wrap gap-4',
+                        ->after('start_date'),
                 ]),
 
             Section::make('Remuneração e Jornada')
                 ->description('Defina o salário bruto e a jornada diária.')
+                ->columns(2)
                 ->schema([
                     TextInput::make('salary')
                         ->label('Salário Bruto')
                         ->numeric()
                         ->prefix('€')
                         ->minValue(1)
-                        ->required()
-                        ->extraAttributes([
-                            'class' => 'flex-1',
-                        ]),
+                        ->required(),
 
                     TextInput::make('daily_work_minutes')
                         ->label('Jornada Diária (minutos)')
@@ -117,19 +100,13 @@ class ContractForm
                         ->minValue(60)
                         ->maxValue(600)
                         ->required()
-                        ->helperText('Padrão: 480 minutos (8 horas). Mín: 60, Máx: 600.')
-                        ->extraAttributes([
-                            'class' => 'flex-1',
-                        ]),
+                        ->helperText('Padrão: 480 min (8h). Mín: 60, Máx: 600.'),
 
                     TimePicker::make('expected_start_time')
                         ->label('Hora de Entrada Esperada')
                         ->default('09:00')
                         ->required()
-                        ->native(false)
-                        ->extraAttributes([
-                            'class' => 'flex-1',
-                        ]),
+                        ->native(false),
 
                     TextInput::make('lunch_duration_minutes')
                         ->label('Duração do Almoço (minutos)')
@@ -138,13 +115,7 @@ class ContractForm
                         ->minValue(0)
                         ->maxValue(240)
                         ->required()
-                        ->helperText('Mín: 0, Máx: 240 minutos.')
-                        ->extraAttributes([
-                            'class' => 'flex-1',
-                        ]),
-                ])
-                ->extraAttributes([
-                    'class' => 'flex flex-wrap gap-4',
+                        ->helperText('Mín: 0, Máx: 240 minutos.'),
                 ]),
         ]);
     }

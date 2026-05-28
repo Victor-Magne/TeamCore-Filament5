@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\LeavesAndAbsences\Schemas;
 
+use App\Models\LeaveAndAbsence;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -20,6 +21,7 @@ class LeaveAndAbsenceForm
                     Select::make('employee_id')
                         ->label('Funcionário')
                         ->relationship('employee', 'first_name')
+                        ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->first_name} {$record->last_name}")
                         ->searchable()
                         ->preload()
                         ->required()
@@ -44,12 +46,41 @@ class LeaveAndAbsenceForm
                     DatePicker::make('start_date')
                         ->label('Data de Início')
                         ->required()
-                        ->native(false),
+                        ->native(false)
+                        ->live(),
 
                     DatePicker::make('end_date')
                         ->label('Data de Fim')
                         ->required()
-                        ->native(false),
+                        ->native(false)
+                        ->afterOrEqual('start_date')
+                        ->rules([
+                            fn (callable $get): \Closure => function (string $attribute, $value, \Closure $fail) use ($get) {
+                                $startDate = $get('start_date');
+                                $employeeId = $get('employee_id');
+                                $recordId = $get('id');
+
+                                if (! $startDate || ! $employeeId) {
+                                    return;
+                                }
+
+                                $overlap = LeaveAndAbsence::where('employee_id', $employeeId)
+                                    ->when($recordId, fn ($q) => $q->where('id', '!=', $recordId))
+                                    ->where(function ($query) use ($startDate, $value) {
+                                        $query->whereBetween('start_date', [$startDate, $value])
+                                            ->orWhereBetween('end_date', [$startDate, $value])
+                                            ->orWhere(function ($q) use ($startDate, $value) {
+                                                $q->where('start_date', '<=', $startDate)
+                                                    ->where('end_date', '>=', $value);
+                                            });
+                                    })
+                                    ->exists();
+
+                                if ($overlap) {
+                                    $fail('O funcionário já possui uma licença/ausência registada para este período.');
+                                }
+                            },
+                        ]),
                 ])->columns(2),
 
             Section::make('Detalhes')

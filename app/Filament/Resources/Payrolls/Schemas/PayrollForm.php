@@ -23,6 +23,7 @@ class PayrollForm
                         Select::make('employee_id')
                             ->label('Funcionário')
                             ->relationship('employee', 'first_name')
+                            ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->first_name} {$record->last_name}")
                             ->required()
                             ->searchable()
                             ->live()
@@ -65,11 +66,18 @@ class PayrollForm
                             ->dehydrated(),
 
                         TextInput::make('extra_hours')
-                            ->label('Saldo de Horas (min)')
-                            ->numeric()
+                            ->label('Saldo de Horas')
                             ->readOnly()
                             ->dehydrated()
-                            ->hint('Positivo ou Negativo'),
+                            ->formatStateUsing(function ($state): string {
+                                $minutes = (int) $state;
+                                if ($minutes === 0) return '0h 00m';
+                                $sign = $minutes < 0 ? '-' : '+';
+                                $abs = abs($minutes);
+                                return $sign . intdiv($abs, 60) . 'h ' . str_pad($abs % 60, 2, '0', STR_PAD_LEFT) . 'm';
+                            })
+                            ->hint(fn ($state) => (int) $state >= 0 ? 'Crédito' : 'Débito')
+                            ->hintColor(fn ($state) => (int) $state >= 0 ? 'success' : 'danger'),
 
                         TextInput::make('extra_hours_amount')
                             ->label('Ajuste do Banco de Horas')

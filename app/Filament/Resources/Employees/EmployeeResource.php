@@ -13,6 +13,9 @@ namespace App\Filament\Resources\Employees;
 use App\Filament\Resources\Employees\Pages\CreateEmployee;
 use App\Filament\Resources\Employees\Pages\EditEmployee;
 use App\Filament\Resources\Employees\Pages\ListEmployees;
+use App\Filament\Resources\Employees\RelationManagers\ContractsRelationManager;
+use App\Filament\Resources\Employees\RelationManagers\HourBankMovementsRelationManager;
+use App\Filament\Resources\Employees\RelationManagers\VacationsRelationManager;
 use App\Filament\Resources\Employees\Schemas\EmployeeForm;
 use App\Filament\Resources\Employees\Tables\EmployeesTable;
 use App\Models\Employee;
@@ -84,13 +87,12 @@ class EmployeeResource extends Resource
             ->modifyQueryUsing(fn (Builder $query) => $query->with(['unit', 'designation']));
     }
 
-    /**
-     * Define gestores de relacionamentos (Relation Managers) para serem exibidos na página de edição.
-     */
     public static function getRelations(): array
     {
         return [
-            // Podem ser adicionados aqui relacionamentos como ContractsRelationManager, etc.
+            ContractsRelationManager::class,
+            VacationsRelationManager::class,
+            HourBankMovementsRelationManager::class,
         ];
     }
 

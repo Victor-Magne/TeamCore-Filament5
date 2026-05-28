@@ -10,6 +10,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Carbon;
 
@@ -23,6 +24,7 @@ class VacationForm
                     Select::make('employee_id')
                         ->label('Funcionário')
                         ->relationship('employee', 'first_name')
+                        ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->first_name} {$record->last_name}")
                         ->searchable()
                         ->preload()
                         ->required()
@@ -34,13 +36,20 @@ class VacationForm
                 ->description('Defina as datas. O ano e dias gozados serão preenchidos automaticamente.')
                 ->schema([
                     Hidden::make('year_reference')
-                        ->default(Carbon::now()->year),
+                        ->default(Carbon::now()->year)
+                        ->dehydrated(),
 
                     DatePicker::make('start_date')
                         ->label('Data de Início')
                         ->required()
                         ->native(false)
-                        ->live(),
+                        ->live()
+                        ->afterStateUpdated(function (Set $set, ?string $state, callable $get) {
+                            if ($state) {
+                                $set('year_reference', Carbon::parse($state)->year);
+                            }
+                            self::recalculateDays($set, $get);
+                        }),
 
                     DatePicker::make('end_date')
                         ->label('Data de Fim')
@@ -48,6 +57,7 @@ class VacationForm
                         ->native(false)
                         ->afterOrEqual('start_date')
                         ->live()
+                        ->afterStateUpdated(fn (Set $set, callable $get) => self::recalculateDays($set, $get))
                         ->rules([
                             fn (callable $get): \Closure => function (string $attribute, $value, \Closure $fail) use ($get) {
                                 $startDate = $get('start_date');
@@ -80,11 +90,6 @@ class VacationForm
                         ->label('Dias Gozados')
                         ->numeric()
                         ->readonly()
-                        ->afterStateHydrated(function (TextInput $component, ?string $state): void {
-                            $state ??= '0';
-                            $component->state($state);
-                        })
-                        ->live(debounce: 500)
                         ->dehydrated(),
                 ])->columns(2),
 
@@ -161,5 +166,18 @@ class VacationForm
                         ->columnSpanFull(),
                 ]),
         ]);
+    }
+
+    private static function recalculateDays(Set $set, callable $get): void
+    {
+        $start = $get('start_date');
+        $end = $get('end_date');
+
+        if ($start && $end) {
+            $days = max(1, Carbon::parse($start)->diffInDays(Carbon::parse($end)) + 1);
+            $set('days_taken', $days);
+        } else {
+            $set('days_taken', 0);
+        }
     }
 }
