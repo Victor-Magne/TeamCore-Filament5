@@ -88,6 +88,7 @@ class ContractForm
                         ->helperText('Deixe vazio se o contrato for efetivo.')
                         ->native(false)
                         ->hidden(fn (Get $get) => $get('type') === 'permanent')
+                        ->after('start_date')
                         ->extraAttributes([
                             'class' => 'flex-1',
                         ]),
@@ -103,6 +104,7 @@ class ContractForm
                         ->label('Salário Bruto')
                         ->numeric()
                         ->prefix('€')
+                        ->minValue(1)
                         ->required()
                         ->extraAttributes([
                             'class' => 'flex-1',
@@ -112,8 +114,10 @@ class ContractForm
                         ->label('Jornada Diária (minutos)')
                         ->numeric()
                         ->default(480)
+                        ->minValue(60)
+                        ->maxValue(600)
                         ->required()
-                        ->helperText('Padrão: 480 minutos (8 horas)')
+                        ->helperText('Padrão: 480 minutos (8 horas). Mín: 60, Máx: 600.')
                         ->extraAttributes([
                             'class' => 'flex-1',
                         ]),
@@ -131,7 +135,10 @@ class ContractForm
                         ->label('Duração do Almoço (minutos)')
                         ->numeric()
                         ->default(60)
+                        ->minValue(0)
+                        ->maxValue(240)
                         ->required()
+                        ->helperText('Mín: 0, Máx: 240 minutos.')
                         ->extraAttributes([
                             'class' => 'flex-1',
                         ]),

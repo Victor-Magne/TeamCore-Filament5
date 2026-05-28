@@ -96,8 +96,8 @@ class PayrollForm
                                 }
                                 
                                 $baseSalary = (float) $contract->salary;
-                                $dailyWorkMinutes = (int) ($contract->daily_work_minutes ?? (8 * 60));
-                                $hourlyRate = $baseSalary / (($dailyWorkMinutes / 60) * 22);
+                                $dailyWorkMinutes = (int) ($contract->daily_work_minutes ?? config('hr.default_daily_work_minutes'));
+                                $hourlyRate = $baseSalary / (($dailyWorkMinutes / 60) * config('hr.working_days_per_month'));
                                 
                                 $month = Carbon::createFromFormat('Y-m', $monthYear);
                                 $startDate = $month->copy()->startOfMonth();
@@ -116,9 +116,9 @@ class PayrollForm
                                 $balance = $extraHoursMinutes - $usedHoursMinutes;
                                 
                                 if ($balance > 0) {
-                                    $extraHoursAmount = ($hourlyRate * 1.5) * ($balance / 60);
+                                    $extraHoursAmount = ($hourlyRate * config('hr.extra_hours_multiplier')) * ($balance / 60);
                                 } else {
-                                    $extraHoursAmount = ($hourlyRate * 1.0) * ($balance / 60);
+                                    $extraHoursAmount = $hourlyRate * ($balance / 60);
                                 }
                                 
                                 return round($extraHoursAmount, 2);
@@ -181,10 +181,9 @@ class PayrollForm
             return;
         }
 
-        // Cálculo do valor da hora base
         $baseSalary = (float) $contract->salary;
-        $dailyWorkMinutes = (int) ($contract->daily_work_minutes ?? (8 * 60));
-        $hourlyRate = $baseSalary / (($dailyWorkMinutes / 60) * 22);
+        $dailyWorkMinutes = (int) ($contract->daily_work_minutes ?? config('hr.default_daily_work_minutes'));
+        $hourlyRate = $baseSalary / (($dailyWorkMinutes / 60) * config('hr.working_days_per_month'));
 
         $set('base_salary', round($baseSalary, 2));
         $set('hourly_rate', round($hourlyRate, 2));
@@ -210,11 +209,9 @@ class PayrollForm
         // - Saldo positivo (+) pago com bónus 1.5x (horas ganhas)
         // - Saldo negativo (-) desconto com taxa 1.0x (horas devidas)
         if ($balance > 0) {
-            $extraHoursAmount = ($hourlyRate * 1.5) * ($balance / 60);
+            $extraHoursAmount = ($hourlyRate * config('hr.extra_hours_multiplier')) * ($balance / 60);
         } else {
-            // Balance negativo: horas devidas, desconto simples
-            // Fórmula: balance é negativo, então (*1.0) dá negativo (desconto)
-            $extraHoursAmount = ($hourlyRate * 1.0) * ($balance / 60);
+            $extraHoursAmount = $hourlyRate * ($balance / 60);
         }
 
         $set('extra_hours_amount', round($extraHoursAmount, 2));

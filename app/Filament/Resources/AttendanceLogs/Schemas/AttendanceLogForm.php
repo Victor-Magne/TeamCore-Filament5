@@ -35,24 +35,31 @@ class AttendanceLogForm
                         ->label('Entrada')
                         ->required()
                         ->native(false)
+                        ->beforeOrEqual('now')
                         ->live()
                         ->afterStateUpdated(fn(Set $set, Get $get) => self::calculateTotal($set, $get)),
 
                     DateTimePicker::make('lunch_break_start')
                         ->label('Saída para Almoço')
                         ->native(false)
+                        ->after('time_in')
+                        ->beforeOrEqual('time_out')
                         ->live()
                         ->afterStateUpdated(fn(Set $set, Get $get) => self::calculateTotal($set, $get)),
 
                     DateTimePicker::make('lunch_break_end')
                         ->label('Volta do Almoço')
                         ->native(false)
+                        ->after('lunch_break_start')
+                        ->beforeOrEqual('time_out')
                         ->live()
                         ->afterStateUpdated(fn(Set $set, Get $get) => self::calculateTotal($set, $get)),
 
                     DateTimePicker::make('time_out')
                         ->label('Fim do Expediente')
                         ->native(false)
+                        ->after('time_in')
+                        ->beforeOrEqual('now')
                         ->live()
                         ->afterStateUpdated(fn(Set $set, Get $get) => self::calculateTotal($set, $get)),
                 ])->columns(2),

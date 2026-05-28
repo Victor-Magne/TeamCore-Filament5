@@ -29,8 +29,7 @@ class CalculateExtraHoursService
             ->orderByDesc('start_date')
             ->first();
 
-        // Valor por defeito: 8 horas (480 minutos)
-        $dailyWorkMinutes = $contract?->daily_work_minutes ?? 480;
+        $dailyWorkMinutes = $contract?->daily_work_minutes ?? config('hr.default_daily_work_minutes');
 
         // Se trabalhou menos ou o mesmo que a jornada, não há horas extras
         if (! $attendanceLog->total_minutes || $attendanceLog->total_minutes <= $dailyWorkMinutes) {
@@ -55,7 +54,7 @@ class CalculateExtraHoursService
             ->orderByDesc('start_date')
             ->first();
 
-        $dailyWorkMinutes = $contract?->daily_work_minutes ?? 480;
+        $dailyWorkMinutes = $contract?->daily_work_minutes ?? config('hr.default_daily_work_minutes');
 
         // Se trabalhou mais ou o mesmo que a jornada, não há défice
         if (! $attendanceLog->total_minutes || $attendanceLog->total_minutes >= $dailyWorkMinutes) {
