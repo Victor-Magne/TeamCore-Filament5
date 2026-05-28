@@ -3,14 +3,18 @@
 namespace App\Filament\Resources\Employees\Tables;
 
 use App\Models\Employee;
+use App\Models\Unit;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
@@ -22,13 +26,9 @@ class EmployeesTable
             ->columns([
                 TextColumn::make('first_name')
                     ->label('Nome')
-                    ->searchable()
+                    ->formatStateUsing(fn (Employee $record): string => "{$record->first_name} {$record->last_name}")
+                    ->searchable(['first_name', 'last_name'])
                     ->sortable(),
-                TextColumn::make('last_name')
-                    ->label('Apelido')
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('email')
                     ->label('Email')
                     ->searchable()
@@ -50,13 +50,18 @@ class EmployeesTable
                     ->color('info'),
                 TextColumn::make('date_hired')
                     ->label('Data Admissão')
-                    ->date()
+                    ->date('d/m/Y')
                     ->sortable()
                     ->description(fn (Employee $record): string => $record->date_dismissed ? 'Inactivo' : 'Activo')
                     ->color(fn (Employee $record): string => $record->date_dismissed ? 'danger' : 'success'),
+                TextColumn::make('vacation_balance')
+                    ->label('Saldo Férias')
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('date_of_birth')
                     ->label('Data Nascimento')
-                    ->date()
+                    ->date('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('nif')
@@ -77,12 +82,7 @@ class EmployeesTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('date_dismissed')
                     ->label('Data Demissão')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('vacation_balance')
-                    ->label('Saldo Férias')
-                    ->numeric()
+                    ->date('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
@@ -93,12 +93,27 @@ class EmployeesTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                SelectFilter::make('unit_id')
+                    ->label('Departamento')
+                    ->options(fn () => Unit::query()
+                        ->orderBy('name')
+                        ->pluck('name', 'id')
+                        ->toArray()
+                    )
+                    ->searchable(),
+
+                Filter::make('active')
+                    ->label('Activos')
+                    ->query(fn (Builder $query): Builder => $query->whereNull('date_dismissed'))
+                    ->toggle(),
+
+                Filter::make('inactive')
+                    ->label('Inactivos')
+                    ->query(fn (Builder $query): Builder => $query->whereNotNull('date_dismissed'))
+                    ->toggle(),
+
                 TrashedFilter::make(),
             ])
             ->headerActions([

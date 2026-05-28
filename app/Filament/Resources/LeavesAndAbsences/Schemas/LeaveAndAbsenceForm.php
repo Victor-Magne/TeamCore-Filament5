@@ -20,6 +20,7 @@ class LeaveAndAbsenceForm
                     Select::make('employee_id')
                         ->label('Funcionário')
                         ->relationship('employee', 'first_name')
+                        ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->first_name} {$record->last_name}")
                         ->searchable()
                         ->preload()
                         ->required()

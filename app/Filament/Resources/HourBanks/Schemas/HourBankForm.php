@@ -12,7 +12,7 @@ class HourBankForm
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Informações do Banco de Horas')
+            Section::make('Funcionário')
                 ->description('Visualização do saldo acumulado do colaborador.')
                 ->schema([
                     Select::make('employee_id')
@@ -24,29 +24,38 @@ class HourBankForm
                         ->required()
                         ->disabledOn('edit')
                         ->columnSpanFull(),
-                ])->columns(2),
+                ]),
 
             Section::make('Saldos Acumulados')
+                ->columns(3)
                 ->schema([
                     TextInput::make('balance')
-                        ->label('Saldo Actual (minutos)')
-                        ->numeric()
-                        ->default(0)
+                        ->label('Saldo Actual')
                         ->disabled()
+                        ->formatStateUsing(function (?int $state): string {
+                            if ($state === null) return '-';
+                            $sign = $state < 0 ? '-' : '';
+                            $abs = abs($state);
+                            return "{$sign}" . intdiv($abs, 60) . 'h ' . ($abs % 60) . 'm';
+                        })
                         ->helperText('Positivo = crédito | Negativo = débito'),
 
                     TextInput::make('extra_hours_added')
-                        ->label('Total Ganhos (min)')
-                        ->numeric()
-                        ->default(0)
-                        ->disabled(),
+                        ->label('Total Ganhos')
+                        ->disabled()
+                        ->formatStateUsing(function (?int $state): string {
+                            if ($state === null || $state === 0) return '0h 00m';
+                            return intdiv($state, 60) . 'h ' . str_pad($state % 60, 2, '0', STR_PAD_LEFT) . 'm';
+                        }),
 
                     TextInput::make('extra_hours_used')
-                        ->label('Total Descontos (min)')
-                        ->numeric()
-                        ->default(0)
-                        ->disabled(),
-        ])->columns(3),
+                        ->label('Total Descontos')
+                        ->disabled()
+                        ->formatStateUsing(function (?int $state): string {
+                            if ($state === null || $state === 0) return '0h 00m';
+                            return intdiv($state, 60) . 'h ' . str_pad($state % 60, 2, '0', STR_PAD_LEFT) . 'm';
+                        }),
+                ]),
         ]);
     }
 }

@@ -7,8 +7,12 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
@@ -18,6 +22,7 @@ class PayrollsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('month_year', 'desc')
             ->columns([
                 TextColumn::make('employee.full_name')
                     ->label('Funcionário')
@@ -40,7 +45,39 @@ class PayrollsTable
                         'pending' => 'warning',
                         'paid' => 'success',
                         'cancelled' => 'danger',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn(string $state): string => match ($state) {
+                        'pending' => 'Pendente',
+                        'paid' => 'Pago',
+                        'cancelled' => 'Cancelado',
+                        default => $state,
                     }),
+            ])
+            ->filters([
+                Filter::make('month_year')
+                    ->label('Mês de Referência')
+                    ->form([
+                        TextInput::make('month_year')
+                            ->label('Mês (AAAA-MM)')
+                            ->placeholder(now()->format('Y-m'))
+                            ->regex('/^\d{4}-(0[1-9]|1[0-2])$/'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when($data['month_year'], fn (Builder $q, $v) => $q->where('month_year', $v))
+                    )
+                    ->indicateUsing(fn (array $data): ?string => $data['month_year']
+                        ? 'Referência: ' . $data['month_year']
+                        : null
+                    ),
+
+                SelectFilter::make('status')
+                    ->label('Estado')
+                    ->options([
+                        'pending' => 'Pendente',
+                        'paid' => 'Pago',
+                        'cancelled' => 'Cancelado',
+                    ]),
             ])
             ->recordActions([
                 EditAction::make(),
@@ -57,7 +94,6 @@ class PayrollsTable
                             ]),
                     ]),
             ])
-            // 3. Alterado de toolbarActions para bulkActions
             ->bulkActions([
                 BulkActionGroup::make([
                     BulkAction::make('mark_as_paid_bulk')
