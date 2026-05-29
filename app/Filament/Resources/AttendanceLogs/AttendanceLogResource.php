@@ -10,8 +10,6 @@
 
 namespace App\Filament\Resources\AttendanceLogs;
 
-use App\Filament\Resources\AttendanceLogs\Pages\CreateAttendanceLog;
-use App\Filament\Resources\AttendanceLogs\Pages\EditAttendanceLog;
 use App\Filament\Resources\AttendanceLogs\Pages\ListAttendanceLogs;
 use App\Filament\Resources\AttendanceLogs\Schemas\AttendanceLogForm;
 use App\Filament\Resources\AttendanceLogs\Tables\AttendanceLogsTable;
@@ -56,7 +54,9 @@ class AttendanceLogResource extends Resource
      * Nome traduzido para o menu.
      */
     protected static ?string $navigationLabel = 'Registos de Assiduidade';
+
     protected static ?string $modelLabel = 'Registo de Assiduidade';
+
     protected static ?string $pluralModelLabel = 'Registos de Assiduidade';
 
     /**
@@ -73,7 +73,7 @@ class AttendanceLogResource extends Resource
     public static function table(Table $table): Table
     {
         return AttendanceLogsTable::configure($table)
-            ->modifyQueryUsing(fn(Builder $query) => $query->with(['employee']));
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['employee']));
     }
 
     /**
@@ -83,8 +83,6 @@ class AttendanceLogResource extends Resource
     {
         return [
             'index' => ListAttendanceLogs::route('/'),
-            'create' => CreateAttendanceLog::route('/create'),
-            'edit' => EditAttendanceLog::route('/{record}/edit'),
         ];
     }
 }

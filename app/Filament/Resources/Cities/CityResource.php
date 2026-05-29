@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\Cities;
 
-use App\Filament\Resources\Cities\Pages\CreateCity;
-use App\Filament\Resources\Cities\Pages\EditCity;
 use App\Filament\Resources\Cities\Pages\ListCities;
 use App\Filament\Resources\Cities\Schemas\CityForm;
 use App\Filament\Resources\Cities\Tables\CitiesTable;
@@ -28,7 +26,9 @@ class CityResource extends Resource
     protected static ?string $recordTitleAttribute = 'name';
 
     protected static ?string $navigationLabel = 'Cidades';
+
     protected static ?string $modelLabel = 'Cidade';
+
     protected static ?string $pluralModelLabel = 'Cidades';
 
     public static function form(Schema $schema): Schema
@@ -52,8 +52,6 @@ class CityResource extends Resource
     {
         return [
             'index' => ListCities::route('/'),
-            'create' => CreateCity::route('/create'),
-            'edit' => EditCity::route('/{record}/edit'),
         ];
     }
 

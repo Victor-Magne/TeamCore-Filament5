@@ -2,10 +2,7 @@
 
 namespace App\Filament\Resources\Units;
 
-use App\Filament\Resources\Units\Pages\CreateUnit;
-use App\Filament\Resources\Units\Pages\EditUnit;
 use App\Filament\Resources\Units\Pages\ListUnits;
-use App\Filament\Resources\Units\Pages\ViewUnit;
 use App\Filament\Resources\Units\Schemas\UnitForm;
 use App\Filament\Resources\Units\Schemas\UnitInfolist;
 use App\Filament\Resources\Units\Tables\UnitsTable;
@@ -30,7 +27,9 @@ class UnitResource extends Resource
     protected static ?string $recordTitleAttribute = 'name';
 
     protected static ?string $navigationLabel = 'Unidades';
+
     protected static ?string $modelLabel = 'Unidade';
+
     protected static ?string $pluralModelLabel = 'Unidades';
 
     public static function form(Schema $schema): Schema
@@ -59,9 +58,6 @@ class UnitResource extends Resource
     {
         return [
             'index' => ListUnits::route('/'),
-            'create' => CreateUnit::route('/create'),
-            'view' => ViewUnit::route('/{record}'),
-            'edit' => EditUnit::route('/{record}/edit'),
         ];
     }
 

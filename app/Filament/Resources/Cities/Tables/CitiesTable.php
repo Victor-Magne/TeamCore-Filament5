@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Cities\Tables;
 
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -28,6 +30,10 @@ class CitiesTable
                 SelectFilter::make('state_id')
                     ->label('Filtrar por Estado')
                     ->relationship('state', 'name'),
+            ])
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
             ]);
     }
 }

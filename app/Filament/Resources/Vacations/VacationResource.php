@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\Vacations;
 
-use App\Filament\Resources\Vacations\Pages\CreateVacation;
-use App\Filament\Resources\Vacations\Pages\EditVacation;
 use App\Filament\Resources\Vacations\Pages\ListVacations;
 use App\Filament\Resources\Vacations\Schemas\VacationForm;
 use App\Filament\Resources\Vacations\Tables\VacationsTable;
@@ -29,7 +27,9 @@ class VacationResource extends Resource
     protected static ?string $recordTitleAttribute = 'id';
 
     protected static ?string $navigationLabel = 'Férias';
+
     protected static ?string $modelLabel = 'Férias';
+
     protected static ?string $pluralModelLabel = 'Férias';
 
     public static function form(Schema $schema): Schema
@@ -46,8 +46,6 @@ class VacationResource extends Resource
     {
         return [
             'index' => ListVacations::route('/'),
-            'create' => CreateVacation::route('/create'),
-            'edit' => EditVacation::route('/{record}/edit'),
         ];
     }
 }

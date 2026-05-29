@@ -18,6 +18,12 @@ class UnitDensityChart extends ChartWidget
 
     protected static ?int $sort = 30;
 
+    protected int|string|array $columnSpan = [
+        'default' => 'full',
+        'md' => 'full',
+        'xl' => 3,
+    ];
+
     protected function getData(): array
     {
         $units = Unit::withCount('employees')->get();

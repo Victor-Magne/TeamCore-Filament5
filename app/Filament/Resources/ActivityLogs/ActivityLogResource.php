@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\ActivityLogs;
 
 use App\Filament\Resources\ActivityLogs\Pages\ListActivityLogs;
-use App\Filament\Resources\ActivityLogs\Pages\ViewActivityLog;
 use App\Filament\Resources\ActivityLogs\Schemas\ActivityLogInfolist;
 use App\Filament\Resources\ActivityLogs\Tables\ActivityLogsTable;
 use App\Models\ActivityLog;
@@ -25,7 +24,9 @@ class ActivityLogResource extends Resource
     protected static bool $shouldRegisterNavigation = true;
 
     protected static ?string $navigationLabel = 'Logs de Atividade';
+
     protected static ?string $modelLabel = 'Log de Atividade';
+
     protected static ?string $pluralModelLabel = 'Logs de Atividade';
 
     public static function infolist(Schema $schema): Schema
@@ -49,7 +50,6 @@ class ActivityLogResource extends Resource
     {
         return [
             'index' => ListActivityLogs::route('/'),
-            'view' => ViewActivityLog::route('/{record}'),
         ];
     }
 }

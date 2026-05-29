@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\Designations;
 
-use App\Filament\Resources\Designations\Pages\CreateDesignation;
-use App\Filament\Resources\Designations\Pages\EditDesignation;
 use App\Filament\Resources\Designations\Pages\ListDesignations;
 use App\Filament\Resources\Designations\Schemas\DesignationForm;
 use App\Filament\Resources\Designations\Tables\DesignationsTable;
@@ -25,9 +23,11 @@ class DesignationResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-  protected static ?string $navigationLabel = 'Cargos';
-  protected static ?string $modelLabel = 'Cargo';
-  protected static ?string $pluralModelLabel = 'Cargos';
+    protected static ?string $navigationLabel = 'Cargos';
+
+    protected static ?string $modelLabel = 'Cargo';
+
+    protected static ?string $pluralModelLabel = 'Cargos';
 
     public static function form(Schema $schema): Schema
     {
@@ -50,8 +50,6 @@ class DesignationResource extends Resource
     {
         return [
             'index' => ListDesignations::route('/'),
-            'create' => CreateDesignation::route('/create'),
-            'edit' => EditDesignation::route('/{record}/edit'),
         ];
     }
 }

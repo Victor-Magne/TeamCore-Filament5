@@ -14,8 +14,8 @@ class ContractTypeChart extends ChartWidget
 
     protected int|string|array $columnSpan = [
         'default' => 'full',
-        'md' => 1,
-        'xl' => 1,
+        'md' => 'full',
+        'xl' => 3,
     ];
 
     public static function canView(): bool

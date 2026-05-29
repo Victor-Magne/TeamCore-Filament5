@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Absences;
 
 use App\Filament\Resources\Absences\Pages\ListAbsences;
-use App\Filament\Resources\Absences\Pages\ViewAbsence;
 use App\Filament\Resources\Absences\Schemas\AbsenceInfolist;
 use App\Filament\Resources\Absences\Tables\AbsencesTable;
 use App\Models\Absence;
@@ -52,7 +51,6 @@ class AbsenceResource extends Resource
     {
         return [
             'index' => ListAbsences::route('/'),
-            'view' => ViewAbsence::route('/{record}'),
         ];
     }
 

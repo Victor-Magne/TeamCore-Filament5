@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\Countries;
 
-use App\Filament\Resources\Countries\Pages\CreateCountry;
-use App\Filament\Resources\Countries\Pages\EditCountry;
 use App\Filament\Resources\Countries\Pages\ListCountries;
 use App\Filament\Resources\Countries\Schemas\CountryForm;
 use App\Filament\Resources\Countries\Tables\CountriesTable;
@@ -26,7 +24,9 @@ class CountryResource extends Resource
     protected static ?string $recordTitleAttribute = 'name';
 
     protected static ?string $navigationLabel = 'Países';
+
     protected static ?string $modelLabel = 'País';
+
     protected static ?string $pluralModelLabel = 'Países';
 
     public static function form(Schema $schema): Schema
@@ -50,8 +50,6 @@ class CountryResource extends Resource
     {
         return [
             'index' => ListCountries::route('/'),
-            'create' => CreateCountry::route('/create'),
-            'edit' => EditCountry::route('/{record}/edit'),
         ];
     }
 }

@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\LeavesAndAbsences;
 
-use App\Filament\Resources\LeavesAndAbsences\Pages\CreateLeaveAndAbsence;
-use App\Filament\Resources\LeavesAndAbsences\Pages\EditLeaveAndAbsence;
 use App\Filament\Resources\LeavesAndAbsences\Pages\ListLeavesAndAbsences;
 use App\Filament\Resources\LeavesAndAbsences\Schemas\LeaveAndAbsenceForm;
 use App\Filament\Resources\LeavesAndAbsences\Tables\LeavesAndAbsencesTable;
@@ -48,8 +46,6 @@ class LeaveAndAbsenceResource extends Resource
     {
         return [
             'index' => ListLeavesAndAbsences::route('/'),
-            'create' => CreateLeaveAndAbsence::route('/create'),
-            'edit' => EditLeaveAndAbsence::route('/{record}/edit'),
         ];
     }
 }

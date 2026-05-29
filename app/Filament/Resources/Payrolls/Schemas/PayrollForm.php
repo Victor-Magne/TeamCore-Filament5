@@ -4,13 +4,13 @@ namespace App\Filament\Resources\Payrolls\Schemas;
 
 use App\Models\Contract;
 use App\Models\HourBankMovement;
-use Illuminate\Support\Carbon;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Carbon;
 
 class PayrollForm
 {
@@ -27,7 +27,8 @@ class PayrollForm
                             ->required()
                             ->searchable()
                             ->live()
-                            ->afterStateUpdated(fn(Set $set, Get $get) => self::loadData($set, $get)),
+                            ->columnSpan(2)
+                            ->afterStateUpdated(fn (Set $set, Get $get) => self::loadData($set, $get)),
 
                         TextInput::make('month_year')
                             ->label('Mês de Referência')
@@ -36,7 +37,7 @@ class PayrollForm
                             ->default(now()->format('Y-m'))
                             ->required()
                             ->live()
-                            ->afterStateUpdated(fn(Set $set, Get $get) => self::loadData($set, $get)),
+                            ->afterStateUpdated(fn (Set $set, Get $get) => self::loadData($set, $get)),
 
                         Select::make('status')
                             ->label('Status do Pagamento')
@@ -47,7 +48,7 @@ class PayrollForm
                             ])
                             ->required()
                             ->default('pending'),
-                    ])->columns(3),
+                    ])->columns(4),
 
                 Section::make('Resumo Financeiro')
                     ->schema([
@@ -71,16 +72,19 @@ class PayrollForm
                             ->dehydrated()
                             ->formatStateUsing(function ($state): string {
                                 $minutes = (int) $state;
-                                if ($minutes === 0) return '0h 00m';
+                                if ($minutes === 0) {
+                                    return '0h 00m';
+                                }
                                 $sign = $minutes < 0 ? '-' : '+';
                                 $abs = abs($minutes);
-                                return $sign . intdiv($abs, 60) . 'h ' . str_pad($abs % 60, 2, '0', STR_PAD_LEFT) . 'm';
+
+                                return $sign.intdiv($abs, 60).'h '.str_pad($abs % 60, 2, '0', STR_PAD_LEFT).'m';
                             })
                             ->hint(fn ($state) => (int) $state >= 0 ? 'Crédito' : 'Débito')
                             ->hintColor(fn ($state) => (int) $state >= 0 ? 'success' : 'danger'),
 
                         TextInput::make('extra_hours_amount')
-                            ->label('Ajuste do Banco de Horas')
+                            ->label('Ajuste de Horas')
                             ->numeric()
                             ->prefix('€')
                             ->readOnly()
@@ -115,19 +119,29 @@ class PayrollForm
                             })
                             ->formatStateUsing(function (Get $get) {
                                 $value = (float) ($get('extra_hours_amount') ?? 0);
+
                                 return round($value, 2);
                             })
-                            // Feedback visual dinâmico com base no sinal do valor
                             ->hint(function (Get $get) {
                                 $amount = (float) ($get('extra_hours_amount') ?? 0);
-                                if ($amount > 0) return '✅ Acréscimo (Horas Extras)';
-                                if ($amount < 0) return '❌ Desconto (Horas em Falta)';
+                                if ($amount > 0) {
+                                    return 'Acréscimo';
+                                }
+                                if ($amount < 0) {
+                                    return 'Desconto';
+                                }
+
                                 return 'Sem movimento';
                             })
                             ->hintColor(function (Get $get) {
                                 $amount = (float) ($get('extra_hours_amount') ?? 0);
-                                if ($amount > 0) return 'success';
-                                if ($amount < 0) return 'danger';
+                                if ($amount > 0) {
+                                    return 'success';
+                                }
+                                if ($amount < 0) {
+                                    return 'danger';
+                                }
+
                                 return 'gray';
                             }),
 
@@ -138,7 +152,7 @@ class PayrollForm
                             ->default(0)
                             ->required()
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn(Set $set, Get $get) => self::calculateTotal($set, $get)),
+                            ->afterStateUpdated(fn (Set $set, Get $get) => self::calculateTotal($set, $get)),
 
                         TextInput::make('total_net')
                             ->label('Salário Líquido')
@@ -146,8 +160,9 @@ class PayrollForm
                             ->prefix('€')
                             ->readOnly()
                             ->dehydrated()
-                            ->extraInputAttributes(['class' => 'font-bold text-primary-600']),
-                    ])->columns(3),
+                            ->columnSpanFull()
+                            ->extraInputAttributes(['class' => 'font-bold text-xl']),
+                    ])->columns(2),
             ]);
     }
 
@@ -158,6 +173,7 @@ class PayrollForm
 
         if (! $employeeId || ! $monthYear) {
             self::resetFinances($set);
+
             return;
         }
 
@@ -168,6 +184,7 @@ class PayrollForm
 
         if (! $contract) {
             self::resetFinances($set);
+
             return;
         }
 

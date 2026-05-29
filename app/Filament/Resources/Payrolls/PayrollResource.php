@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\Payrolls;
 
-use App\Filament\Resources\Payrolls\Pages\CreatePayroll;
-use App\Filament\Resources\Payrolls\Pages\EditPayroll;
 use App\Filament\Resources\Payrolls\Pages\ListPayrolls;
 use App\Filament\Resources\Payrolls\Schemas\PayrollForm;
 use App\Filament\Resources\Payrolls\Tables\PayrollsTable;
@@ -27,7 +25,9 @@ class PayrollResource extends Resource
     protected static string|\UnitEnum|null $navigationGroup = 'Recursos Humanos';
 
     protected static ?string $navigationLabel = 'Processamento Salarial';
+
     protected static ?string $modelLabel = 'Processamento Salarial';
+
     protected static ?string $pluralModelLabel = 'Processamentos Salariais';
 
     /** @noinspection PhpIncompatibleReturnTypeInspection */
@@ -82,8 +82,6 @@ class PayrollResource extends Resource
     {
         return [
             'index' => ListPayrolls::route('/'),
-            'create' => CreatePayroll::route('/create'),
-            'edit' => EditPayroll::route('/{record}/edit'),
         ];
     }
 }

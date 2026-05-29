@@ -14,6 +14,10 @@ use App\Filament\Widgets\SalaryByLevelStat;
 use App\Filament\Widgets\TotalPayrollStat;
 use App\Filament\Widgets\UnitDensityChart;
 use Filament\Pages\Dashboard as BaseDashboard;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Schema;
 
 class Dashboard extends BaseDashboard
 {
@@ -46,5 +50,57 @@ class Dashboard extends BaseDashboard
             'md' => 2,
             'xl' => 3,
         ];
+    }
+
+    public function content(Schema $schema): Schema
+    {
+        return $schema->components([
+            Tabs::make()
+                ->persistTabInQueryString()
+                ->schema([
+                    Tab::make('Colaboradores')
+                        ->icon('heroicon-o-users')
+                        ->schema([
+                            Grid::make(['md' => 2, 'xl' => 3])
+                                ->schema(fn (): array => $this->getWidgetsSchemaComponents([
+                                    EmployeeStatsWidget::class,
+                                    EmployeesByUnitChart::class,
+                                    UnitDensityChart::class,
+                                ])),
+                        ]),
+
+                    Tab::make('Contratos')
+                        ->icon('heroicon-o-document-text')
+                        ->schema([
+                            Grid::make(['md' => 2, 'xl' => 3])
+                                ->schema(fn (): array => $this->getWidgetsSchemaComponents([
+                                    ContractStatsWidget::class,
+                                    ContractExpirationsStat::class,
+                                    ContractTypeChart::class,
+                                ])),
+                        ]),
+
+                    Tab::make('Assiduidade')
+                        ->icon('heroicon-o-calendar-days')
+                        ->schema([
+                            Grid::make(['md' => 2, 'xl' => 3])
+                                ->schema(fn (): array => $this->getWidgetsSchemaComponents([
+                                    AttendanceOverviewChart::class,
+                                    DailyAbsenceStat::class,
+                                    AbsenceReasonChart::class,
+                                ])),
+                        ]),
+
+                    Tab::make('Remuneração')
+                        ->icon('heroicon-o-banknotes')
+                        ->schema([
+                            Grid::make(['md' => 2, 'xl' => 3])
+                                ->schema(fn (): array => $this->getWidgetsSchemaComponents([
+                                    TotalPayrollStat::class,
+                                    SalaryByLevelStat::class,
+                                ])),
+                        ]),
+                ]),
+        ]);
     }
 }

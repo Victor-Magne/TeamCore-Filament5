@@ -2,10 +2,7 @@
 
 namespace App\Filament\Resources\Contracts;
 
-use App\Filament\Resources\Contracts\Pages\CreateContract;
-use App\Filament\Resources\Contracts\Pages\EditContract;
 use App\Filament\Resources\Contracts\Pages\ListContracts;
-use App\Filament\Resources\Contracts\Pages\ViewContract;
 use App\Filament\Resources\Contracts\Schemas\ContractForm;
 use App\Filament\Resources\Contracts\Schemas\ContractInfolist;
 use App\Filament\Resources\Contracts\Tables\ContractsTable;
@@ -32,7 +29,9 @@ class ContractResource extends Resource
     protected static ?string $recordTitleAttribute = 'employee.first_name';
 
     protected static ?string $navigationLabel = 'Contratos';
+
     protected static ?string $modelLabel = 'Contrato';
+
     protected static ?string $pluralModelLabel = 'Contratos';
 
     public static function form(Schema $schema): Schema
@@ -55,9 +54,6 @@ class ContractResource extends Resource
     {
         return [
             'index' => ListContracts::route('/'),
-            'create' => CreateContract::route('/create'),
-            'view' => ViewContract::route('/{record}'),
-            'edit' => EditContract::route('/{record}/edit'),
         ];
     }
 }

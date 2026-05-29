@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\App\Pages\EmployeeDashboard;
 use App\Filament\Pages\AttendanceCheckIn;
+use App\Http\Middleware\CheckActiveUser;
 use App\Http\Middleware\CheckAppPanelAccess;
 use App\Http\Middleware\CheckMustChangePassword;
 use App\Http\Middleware\CheckTwoFactorEnforced;
@@ -17,12 +18,12 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
 
@@ -101,6 +102,7 @@ class AppPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                CheckActiveUser::class,
             ]);
     }
 }

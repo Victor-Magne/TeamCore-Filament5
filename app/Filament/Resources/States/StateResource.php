@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\States;
 
-use App\Filament\Resources\States\Pages\CreateState;
-use App\Filament\Resources\States\Pages\EditState;
 use App\Filament\Resources\States\Pages\ListStates;
 use App\Filament\Resources\States\Schemas\StateForm;
 use App\Filament\Resources\States\Tables\StatesTable;
@@ -26,7 +24,7 @@ class StateResource extends Resource
     protected static ?string $recordTitleAttribute = 'name';
 
     protected static ?string $modelLabel = 'Estado';
-    
+
     public static function form(Schema $schema): Schema
     {
         return StateForm::configure($schema);
@@ -48,8 +46,6 @@ class StateResource extends Resource
     {
         return [
             'index' => ListStates::route('/'),
-            'create' => CreateState::route('/create'),
-            'edit' => EditState::route('/{record}/edit'),
         ];
     }
 }

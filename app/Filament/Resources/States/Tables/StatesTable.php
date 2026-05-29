@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\States\Tables;
 
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -29,6 +31,10 @@ class StatesTable
                 SelectFilter::make('country_id')
                     ->label('Filtrar por País')
                     ->relationship('country', 'name'),
+            ])
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
             ]);
     }
 }
