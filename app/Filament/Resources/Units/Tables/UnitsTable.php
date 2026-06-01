@@ -2,15 +2,16 @@
 
 namespace App\Filament\Resources\Units\Tables;
 
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteBulkAction;
+use App\Models\Unit;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
-use Filament\Tables\Table;
 use Filament\Tables\Grouping\Group;
+use Filament\Tables\Table;
 
 class UnitsTable
 {
@@ -22,17 +23,21 @@ class UnitsTable
                     ->label('Unidade')
                     ->searchable()
                     ->weight('bold')
-                    ->description(fn($record) => $record->type ? ucfirst($record->type) : null),
+                    ->description(fn (Unit $record): ?string => match ($record->type) {
+                        'direction' => 'Direção',
+                        'department' => 'Departamento',
+                        'section' => 'Secção',
+                        default => ucfirst($record->type ?? ''),
+                    }),
 
-            TextColumn::make('managers.first_name')
-                ->label('Gestores')
-                ->badge() // Mostra cada gestor numa etiqueta
-                ->color('gray')
-                ->searchable()
-                ->wrap() // Se forem muitos, quebra a linha para não esticar a tabela
-                ->placeholder('Sem gestores atribuídos'),
+                TextColumn::make('managers.first_name')
+                    ->label('Gestores')
+                    ->badge()
+                    ->color('gray')
+                    ->searchable()
+                    ->wrap()
+                    ->placeholder('Sem gestores'),
 
-                // Número de funcionários na unidade
                 TextColumn::make('employees_count')
                     ->label('Staff')
                     ->counts('employees')
@@ -44,14 +49,14 @@ class UnitsTable
                     ->boolean()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            // LÓGICA DE LISTA RECOLHÍVEL (HAMBÚRGUER)
             ->groups([
                 Group::make('parent.name')
-                    ->label('Agrupado por Unidade Superior')
-                    ->collapsible(), // Permite expandir/recolher
+                    ->label('Unidade Superior')
+                    ->collapsible()
+                    ->getTitleFromRecordUsing(fn (Unit $record): string => $record->parent?->name ?? 'Sem unidade superior'),
             ])
             ->defaultGroup('parent.name')
-
+            ->groupingSettingsHidden()
             ->filters([
                 TrashedFilter::make(),
             ])
