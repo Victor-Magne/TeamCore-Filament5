@@ -28,12 +28,13 @@ class LeaveAndAbsenceFactory extends Factory
 
         return [
             'employee_id' => Employee::factory(),
-            'type' => $this->faker->randomElement(['sick_leave', 'vacation', 'unpaid', 'other', 'personal']),
+            'type' => $this->faker->randomElement(['sick_leave', 'parental', 'marriage', 'bereavement', 'justified_absence']),
             'start_date' => $startDate,
             'end_date' => $endDate,
             'reason' => $this->faker->sentence(),
             'is_paid' => $this->faker->boolean(70),
             'justification_doc' => null,
+            'status' => 'pending',
         ];
     }
 

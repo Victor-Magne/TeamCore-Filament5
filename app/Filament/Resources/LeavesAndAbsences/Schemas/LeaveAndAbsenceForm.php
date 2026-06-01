@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\LeavesAndAbsences\Schemas;
 
 use App\Models\LeaveAndAbsence;
+use App\Models\Vacation;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -64,20 +65,33 @@ class LeaveAndAbsenceForm
                                     return;
                                 }
 
-                                $overlap = LeaveAndAbsence::where('employee_id', $employeeId)
+                                $overlapQuery = fn ($query) => $query
+                                    ->whereBetween('start_date', [$startDate, $value])
+                                    ->orWhereBetween('end_date', [$startDate, $value])
+                                    ->orWhere(fn ($q) => $q
+                                        ->where('start_date', '<=', $startDate)
+                                        ->where('end_date', '>=', $value)
+                                    );
+
+                                $leaveOverlap = LeaveAndAbsence::where('employee_id', $employeeId)
                                     ->when($recordId, fn ($q) => $q->where('id', '!=', $recordId))
-                                    ->where(function ($query) use ($startDate, $value) {
-                                        $query->whereBetween('start_date', [$startDate, $value])
-                                            ->orWhereBetween('end_date', [$startDate, $value])
-                                            ->orWhere(function ($q) use ($startDate, $value) {
-                                                $q->where('start_date', '<=', $startDate)
-                                                    ->where('end_date', '>=', $value);
-                                            });
-                                    })
+                                    ->whereIn('status', ['pending', 'approved'])
+                                    ->where($overlapQuery)
                                     ->exists();
 
-                                if ($overlap) {
+                                if ($leaveOverlap) {
                                     $fail('O funcionário já possui uma licença/ausência registada para este período.');
+
+                                    return;
+                                }
+
+                                $vacationOverlap = Vacation::where('employee_id', $employeeId)
+                                    ->whereIn('status', ['pending', 'approved'])
+                                    ->where($overlapQuery)
+                                    ->exists();
+
+                                if ($vacationOverlap) {
+                                    $fail('O funcionário já possui férias marcadas para este período.');
                                 }
                             },
                         ]),
@@ -110,8 +124,7 @@ class LeaveAndAbsenceForm
                         ])
                         ->required()
                         ->native(false)
-                        ->disabled(fn ($record, callable $get): bool =>
-                            (($record && $record->employee_id === auth()->user()?->employee_id) ||
+                        ->disabled(fn ($record, callable $get): bool => (($record && $record->employee_id === auth()->user()?->employee_id) ||
                              ((int) $get('employee_id') === auth()->user()?->employee_id)) &&
                             ! auth()->user()?->can('Approve:OwnLeaveAndAbsence')
                         )

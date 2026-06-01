@@ -16,8 +16,8 @@ Orientador/a(es):
 	Zélia Capitão
 
 Data 
-15/05/2026
-Data de Versão Anterior: 28/04/2026
+29/05/2026
+Data de Versão Anterior: 15/05/2026
 Agradecimentos a:
 Jorge Lafuente — tutor de estágio ao longo do 11.º e do 12.º ano, e uma das pessoas que mais influenciou o rumo desta aplicação. Foi quem me apresentou o Laravel e o Filament, despertando em mim o interesse por estas tecnologias, e quem sugeriu funcionalidades concretas que acabaram por enriquecer significativamente a aplicação. O seu acompanhamento e partilha de experiência profissional foram determinantes para o resultado final.
 Zélia Capitão — orientadora da aplicação, pelo acompanhamento contínuo e disponibilidade ao longo de todo o processo, e pelas orientações que permitiram manter o trabalho no rumo certo.
@@ -132,7 +132,7 @@ A Aplicação TeamCore foi desenvolvida com o objetivo de alcançar uma gestão 
 
 A metodologia de trabalho incluiu o levantamento detalhado de requisitos, a modelação da base de dados relacional, e o desenvolvimento técnico utilizando a framework Laravel v13 com Filament v5 para o backend e frontend. O processo foi complementado por validação rigorosa de funcionalidades e testes automatizados.
 
-Nota sobre o Estado da Aplicação: No momento da redação deste relatório (15 de Maio de 2026), a Aplicação TeamCore encontra-se numa fase de maturidade production-ready com todas as funcionalidades core completamente implementadas, testadas e validadas. A aplicação inclui: 16 Models com isolamento de dados RBAC; 16 Filament Resources com políticas de autorização; 17 Policies para controlo granular; Sistema de banco de horas cumulativo com rastreio de movimentos e validação automática de licenças; Auditoria completa via Spatie Activity Log; 5 Observers e 1 Listener para automação de processos; Autenticação segura via Filament Breezy e Passkeys; e suíte de testes automatizados com Pest v4 com 20+ testes (23 no total) cobrindo funcionalidades críticas (HourBank, EmployeePolicies, EmployeeCreation, AttendanceProcessing, VacationAndLeave, PayrollProcessing, DeductHourBankService).A aplicação está pronta para utilização em ambiente de produção com confiança elevada na qualidade técnica e funcional.
+Nota sobre o Estado da Aplicação: No momento da redação deste relatório (29 de Maio de 2026), a Aplicação TeamCore encontra-se numa fase de maturidade production-ready com todas as funcionalidades core completamente implementadas, testadas e validadas. A aplicação inclui: 16 Models com isolamento de dados RBAC; 16 Filament Resources com políticas de autorização; 17 Policies para controlo granular; Sistema de banco de horas cumulativo com rastreio de movimentos e validação automática de licenças; Auditoria completa via Spatie Activity Log; 5 Observers e 1 Listener para automação de processos; Autenticação segura via Filament Breezy e Passkeys; middleware `CheckActiveUser` para gestão de activação de utilizadores; serviços especializados com proteção de concorrência (`VacationBalanceService` com `DB::transaction` + `lockForUpdate`); configuração centralizada de negócio em `config/hr.php`; e suíte de testes automatizados com Pest v4 com 29 ficheiros de teste cobrindo funcionalidades críticas (HourBank, EmployeePolicies, EmployeeCreation, AttendanceProcessing, VacationAndLeave, PayrollProcessing, DeductHourBankService, AttendanceCalculationService, VacationBalanceService, HrConfig, CheckActiveUser).A aplicação está pronta para utilização em ambiente de produção com confiança elevada na qualidade técnica e funcional.
 
 
 Introdução
@@ -167,7 +167,7 @@ Garantir a qualidade técnica: Assegurar a aplicação através de testes automa
 
 Abordagem e Metodologia
 O desenvolvimento foi realizado em ciclos iterativos, adotando:
-Tecnologias modernas: Laravel v13 como framework backend, Filament v5 como interface administrativa unificada, PHP v8.3 e MySQL como base de dados relacional.
+Tecnologias modernas: Laravel v13 como framework backend, Filament v5 como interface administrativa unificada, PHP v8.4 e MySQL como base de dados relacional.
 Testes automatizados: Desenvolvimento orientado a testes utilizando framework Pest/PHPUnit para validação contínua de funcionalidades.
 Validação com profissionais: Consulta com profissionais de RH durante o desenvolvimento para validar requisitos e funcionalidades essenciais.
 Boas práticas de engenharia: Isolamento de dados ao nível do modelo através de Policies Eloquent, arquitetura em camadas clara, padrões de código consistentes.
@@ -175,7 +175,7 @@ Boas práticas de engenharia: Isolamento de dados ao nível do modelo através d
 
 Desenvolvimento da Aplicação
 Metodologia e Ferramentas
-A Aplicação TeamCore foi desenvolvida com a framework Laravel v13, utilizando Filament v5 como interface administrativa unificada e PHP v8.3 como linguagem de desenvolvimento. A persistência de dados foi implementada em MySQL, com uma arquitetura relacional suportando entidades como Funcionários, Contratos, Departamentos, Designações, Bancos de Horas, Registos de Presença, Pedidos de Licença, Ausências e Logs de Auditoria.
+A Aplicação TeamCore foi desenvolvida com a framework Laravel v13, utilizando Filament v5 como interface administrativa unificada e PHP v8.4 como linguagem de desenvolvimento. A persistência de dados foi implementada em MySQL, com uma arquitetura relacional suportando entidades como Funcionários, Contratos, Departamentos, Designações, Bancos de Horas, Registos de Presença, Pedidos de Licença, Ausências e Logs de Auditoria.
 
 O processo de desenvolvimento adotou uma metodologia iterativa com ciclos bissemanais de análise, implementação, testes e validação. Foi feita a utilização Git para controlo de versão e manutenção de uma suíte de testes automatizados (Pest v4) que executam em cada novo commit, garantindo que regressões não ocorressem durante o desenvolvimento.
 
@@ -190,7 +190,7 @@ Construção da interface
 5.5+
 PHP
 Linguagem
-8.3
+8.4
 MySQL
 Base de Dados
 8.0
@@ -292,7 +292,10 @@ Isolamento de dados: Visibilidade hierárquica recursiva baseada na gestão de u
 Auto-aprovação bloqueada: Utilizador não pode aprovar seus próprios pedidos (via Policies)
 Soft deletes: Preservação de histórico em todos os modelos críticos
 Activity logging: Rastreio completo via Spatie Activity Log (automatic com LogsActivity trait).
-Services especializados: Implementação de lógica de negócio complexa em Services (GeneratePayrollService, CalculateExtraHoursService, DeductHourBankService).
+Services especializados: Implementação de lógica de negócio complexa em Services (GeneratePayrollService, CalculateExtraHoursService, DeductHourBankService, AttendanceCalculationService, VacationBalanceService).
+Middleware de activação: `CheckActiveUser` verifica o campo `is_active` em cada pedido — utilizadores desativados são imediatamente desautenticados e redirecionados, sem necessidade de expirar a sessão manualmente.
+Proteção de concorrência: `VacationBalanceService` usa `DB::transaction` + `lockForUpdate` para prevenir race conditions em aprovações simultâneas de férias.
+Configuração centralizada: `config/hr.php` define todos os limiares de negócio (tolerâncias, multiplicadores, limites de atrasos), eliminando constantes dispersas no código.
 CSRF protection: Tokens em formulários
 Autenticação: Filament Breezy com suporte a Passkeys
 Auditoria de Modelos: Registo automático de create, update e delete com user tracking
@@ -408,6 +411,27 @@ Botões e ações visíveis apenas para perfis autorizados.
 Desativação contextual de funcionalidades.
 Guia visual das permissões do utilizador.
 
+Gestão de Activação de Utilizadores:
+Campo `is_active` na tabela `users` para controlo de acesso por estado.
+Middleware `CheckActiveUser` desautentica automaticamente utilizadores desativados em cada pedido.
+Redirecionamento com notificação quando a conta está inativa.
+
+Otimização de Performance:
+Índices compostos adicionados nas tabelas `vacations`, `contracts`, `payrolls` e `leaves_and_absences` para colunas frequentemente filtradas.
+Resolução de problema N+1 no `PayrollResource` com eager loading da relação `employee`.
+
+Validações de Formulários Melhoradas:
+`ContractForm`: limites mínimos e máximos para campos de salário e horas.
+`AttendanceLogForm`: validação de ordem cronológica nos campos de data/hora.
+`VacationForm`: validação `afterOrEqual`, verificação de saldo disponível e prevenção de sobreposição de períodos.
+`PayrollResource`: proteção contra criação de payroll em meses futuros.
+`LeaveAndAbsenceForm`: validação de sobreposição de datas equivalente ao VacationForm.
+
+RelationManagers no EmployeeResource:
+`ContractsRelationManager`: lista todos os contratos do funcionário (tipo, designação, salário, estado, datas).
+`VacationsRelationManager`: lista férias por ano com filtro por estado.
+`HourBankMovementsRelationManager`: histórico completo do banco de horas com formato legível (Xh Ym).
+
 Boas Práticas de Engenharia:
 Código limpo e bem estruturado.
 Padrões consistentes em toda a codebase.
@@ -508,7 +532,7 @@ Auditoria automática de alterações via Spatie Activity Log.
 
 A aplicação implementa uma suíte abrangente de testes automatizados usando Pest v4 para validar funcionalidades críticas e garantir a integridade da lógica de negócio:
 
-### Testes Implementados (25 ficheiros / 105 testes / 238 assertions)
+### Testes Implementados (29 ficheiros)
 
 **Testes de Feature:**
 
@@ -584,13 +608,35 @@ A aplicação implementa uma suíte abrangente de testes automatizados usando Pe
     - Widgets mostram valores corretos para Admin vs Employee
     - Respeito por permissões de visualização
 
+14. **AttendanceCalculationServiceTest** — Valida o serviço de cálculo de presenças extraído do modelo:
+    - Cálculo correto de minutos trabalhados (excluindo pausa de almoço)
+    - Deteção de atrasos acima da tolerância configurável
+    - Deteção de saídas antecipadas
+    - Classificação de atraso grave como falta injustificada
+
+15. **VacationBalanceServiceTest** — Valida o serviço de gestão de saldo de férias com proteção de concorrência:
+    - Débito correto de dias ao aprovar férias
+    - Restauração do saldo ao rejeitar ou cancelar
+    - Proteção contra race conditions (DB transaction + lockForUpdate)
+    - Prevenção de saldo negativo
+
+16. **HrConfigTest** — Valida os valores de configuração centralizados em `config/hr.php`:
+    - `delay_tolerance_minutes` é menor que `full_absence_threshold_minutes`
+    - `consecutive_delays_limit` é pelo menos 2
+    - Valores retornam tipos corretos (inteiros/floats)
+
+17. **CheckActiveUserTest** — Valida o middleware de activação de utilizadores:
+    - Utilizadores activos passam normalmente
+    - Utilizadores inactivos (`is_active = false`) são desautenticados e redirecionados
+    - Utilizadores não autenticados não são afetados pelo middleware
+
 **Testes de Unit:** Validam componentes isolados como middlewares e utilitários de dashboard (ex: `EnsureUtf8EncodingTest`).
 
 ### Inventário Completo dos Ficheiros de Teste (Estado Atual)
 
 Para garantir rastreabilidade documental e auditoria técnica, abaixo segue o inventário integral dos ficheiros de teste existentes no repositório na data desta revisão. Esta listagem permite cruzar, de forma objetiva, a documentação do projeto com os artefactos reais de validação automatizada presentes na pasta `tests/`.
 
-**Feature Tests (22 ficheiros):**
+**Feature Tests (26 ficheiros):**
 - `tests/Feature/AttendanceProcessingTest.php`
 - `tests/Feature/ContractPdfTest.php`
 - `tests/Feature/EmployeeCreationTest.php`
@@ -603,23 +649,27 @@ Para garantir rastreabilidade documental e auditoria técnica, abaixo segue o in
 - `tests/Feature/UserPushSubscriptionTest.php`
 - `tests/Feature/VacationAndLeaveTest.php`
 - `tests/Feature/VacationBalanceTest.php`
+- `tests/Feature/CheckActiveUserTest.php`
 - `tests/Feature/App/EmployeeWidgetsTest.php`
 - `tests/Feature/Console/Commands/CheckDailyAttendanceTest.php`
+- `tests/Feature/Config/HrConfigTest.php`
 - `tests/Feature/Observers/AttendanceLogObserverTest.php`
 - `tests/Feature/Pages/AttendanceCheckInTest.php`
 - `tests/Feature/Resources/PayrollResourceTest.php`
 - `tests/Feature/Services/DeductHourBankServiceTest.php`
 - `tests/Feature/Services/EmployeeOnboardingServiceTest.php`
 - `tests/Feature/Services/LeaveApprovalRestoresBalanceTest.php`
+- `tests/Feature/Services/Attendance/AttendanceCalculationServiceTest.php`
 - `tests/Feature/Services/Payroll/GeneratePayrollServiceTest.php`
+- `tests/Feature/Services/Vacation/VacationBalanceServiceTest.php`
 - `tests/Feature/Widgets/DashboardWidgetsTest.php`
 
 **Unit Tests (3 ficheiros):**
 - `tests/Unit/ExampleTest.php`
 - `tests/Unit/Dashboard/DashboardWidgetsTest.php`
-- `tests/Unit/Http/Middleware/EnsureUtf8En5odingTest.php`
+- `tests/Unit/Http/Middleware/EnsureUtf8EncodingTest.php`
 
-Este inventário confirma a existência de 23 ficheiros de teste, distribuídos entre validação de comportamento ponta-a-ponta (Feature) e validação de componentes isolados (Unit). Em conjunto, estes testes exercitam fluxos críticos de negócio, proteção de acesso, geração documental, operações de processamento e consistência de dados.
+Este inventário confirma a existência de 29 ficheiros de teste, distribuídos entre validação de comportamento ponta-a-ponta (Feature) e validação de componentes isolados (Unit). Em conjunto, estes testes exercitam fluxos críticos de negócio, proteção de acesso, geração documental, operações de processamento e consistência de dados.
 
 ### Cobertura Funcional por Domínio
 
@@ -647,14 +697,14 @@ Foram também tratadas fontes de flutuação relacionadas com colisões de campo
 
 Cada teste executa contra uma base de dados SQLite em memória (:memory:) garantindo isolamento completo e execução rápida. Os testes utilizamFactory Pattern para criar dados de teste consistentes e RefreshDatabase para limpeza entre testes.
 
-### Estado Atual da Qualidade (Atualização de 06/05/2026)
+### Estado Atual da Qualidade (Atualização de 29/05/2026)
 
 No estado atual da aplicação, a validação automatizada deixou de ser apenas um suporte de desenvolvimento e passou a ser um pilar operativo de confiança para evolução contínua. A suíte foi executada de forma completa com `php artisan test` e também no modo compacto (`php artisan test --compact`), mantendo consistência nos resultados e confirmando estabilidade transversal entre testes de Unit e Feature.
 
 Métricas consolidadas na data desta atualização:
-- **105 testes passados**
-- **238 assertions**
-- **0 falhas no estado final após correções de estabilidade**
+- **29 ficheiros de teste**
+- **0 falhas no estado final**
+- Adicionados 4 ficheiros novos desde a última atualização: `AttendanceCalculationServiceTest`, `VacationBalanceServiceTest`, `HrConfigTest`, `CheckActiveUserTest`
 
 Para além da cobertura funcional direta, os testes garantem propriedades arquiteturais importantes:
 - **Integridade transacional** em fluxos de onboarding e processamento encadeado.
@@ -735,7 +785,7 @@ Auditoria completa: Spatie Activity Log fornece rastreamento automático de toda
 
 RBAC dinâmico: Filament Shield permite gerir papéis e permissões de forma granular e flexível.
 
-Testes com cobertura robusta: Pest v4 com 20+ testes (23 no total) cobrindo funcionalidades críticas (HourBank, Policies, AttendanceProcessing, VacationAndLeave, PayrollProcessing, EmployeeCreation, DeductHourBankService). Cada teste valida comportamentos essenciais: cálculo de horas extras, processamento de ausências, gestão de férias, geração de payroll, e policies de autorização. Os testes fornecem confiança elevada na qualidade técnica e reduzem riscos de regressões.
+Testes com cobertura robusta: Pest v4 com 29 ficheiros de teste cobrindo funcionalidades críticas (HourBank, Policies, AttendanceProcessing, VacationAndLeave, PayrollProcessing, EmployeeCreation, DeductHourBankService, AttendanceCalculationService, VacationBalanceService, HrConfig, CheckActiveUser). Cada teste valida comportamentos essenciais: cálculo de horas extras, processamento de ausências, gestão de férias, geração de payroll, policies de autorização e activação de utilizadores. Os testes fornecem confiança elevada na qualidade técnica e reduzem riscos de regressões.
 
 Pontos a Melhorar
 Integrações Externas: Falta de ligação com sistemas bancários externos para automatização real de pagamentos e exportação de ficheiros SEPA.

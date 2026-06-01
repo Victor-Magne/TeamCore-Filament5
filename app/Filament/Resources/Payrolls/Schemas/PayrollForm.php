@@ -19,6 +19,7 @@ class PayrollForm
         return $schema
             ->components([
                 Section::make('Detalhes do Processamento')
+                    ->icon('heroicon-o-document-text')
                     ->schema([
                         Select::make('employee_id')
                             ->label('Funcionário')
@@ -27,7 +28,7 @@ class PayrollForm
                             ->required()
                             ->searchable()
                             ->live()
-                            ->columnSpan(2)
+                            ->columnSpanFull()
                             ->afterStateUpdated(fn (Set $set, Get $get) => self::loadData($set, $get)),
 
                         TextInput::make('month_year')
@@ -48,9 +49,10 @@ class PayrollForm
                             ])
                             ->required()
                             ->default('pending'),
-                    ])->columns(4),
+                    ])->columns(2),
 
                 Section::make('Resumo Financeiro')
+                    ->icon('heroicon-o-banknotes')
                     ->schema([
                         TextInput::make('base_salary')
                             ->label('Salário Bruto')
@@ -152,7 +154,8 @@ class PayrollForm
                             ->default(0)
                             ->required()
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (Set $set, Get $get) => self::calculateTotal($set, $get)),
+                            ->afterStateUpdated(fn (Set $set, Get $get) => self::calculateTotal($set, $get))
+                            ->columnSpanFull(),
 
                         TextInput::make('total_net')
                             ->label('Salário Líquido')

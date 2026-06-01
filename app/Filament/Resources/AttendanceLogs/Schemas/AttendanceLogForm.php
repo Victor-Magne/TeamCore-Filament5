@@ -2,15 +2,15 @@
 
 namespace App\Filament\Resources\AttendanceLogs\Schemas;
 
+use Carbon\Carbon;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Section; // <-- Namespace corrigido
 use Filament\Schemas\Components\Utilities\Get; // <-- Namespace corrigido
-use Filament\Schemas\Components\Utilities\Set; // <-- Namespace corrigido
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Carbon\Carbon;
 
 class AttendanceLogForm
 {
@@ -18,6 +18,7 @@ class AttendanceLogForm
     {
         return $schema->components([
             Section::make('Funcionário')
+                ->icon('heroicon-o-user')
                 ->schema([
                     Select::make('employee_id')
                         ->label('Funcionário')
@@ -30,6 +31,7 @@ class AttendanceLogForm
                 ]),
 
             Section::make('Horários do Ponto')
+                ->icon('heroicon-o-clock')
                 ->description('Registar os 4 momentos do dia: entrada, saída para almoço, volta do almoço e fim do expediente.')
                 ->schema([
                     DateTimePicker::make('time_in')
@@ -38,7 +40,7 @@ class AttendanceLogForm
                         ->native(false)
                         ->beforeOrEqual('now')
                         ->live()
-                        ->afterStateUpdated(fn(Set $set, Get $get) => self::calculateTotal($set, $get)),
+                        ->afterStateUpdated(fn (Set $set, Get $get) => self::calculateTotal($set, $get)),
 
                     DateTimePicker::make('lunch_break_start')
                         ->label('Saída para Almoço')
@@ -46,7 +48,7 @@ class AttendanceLogForm
                         ->after('time_in')
                         ->beforeOrEqual('time_out')
                         ->live()
-                        ->afterStateUpdated(fn(Set $set, Get $get) => self::calculateTotal($set, $get)),
+                        ->afterStateUpdated(fn (Set $set, Get $get) => self::calculateTotal($set, $get)),
 
                     DateTimePicker::make('lunch_break_end')
                         ->label('Volta do Almoço')
@@ -54,7 +56,7 @@ class AttendanceLogForm
                         ->after('lunch_break_start')
                         ->beforeOrEqual('time_out')
                         ->live()
-                        ->afterStateUpdated(fn(Set $set, Get $get) => self::calculateTotal($set, $get)),
+                        ->afterStateUpdated(fn (Set $set, Get $get) => self::calculateTotal($set, $get)),
 
                     DateTimePicker::make('time_out')
                         ->label('Fim do Expediente')
@@ -62,10 +64,11 @@ class AttendanceLogForm
                         ->after('time_in')
                         ->beforeOrEqual('now')
                         ->live()
-                        ->afterStateUpdated(fn(Set $set, Get $get) => self::calculateTotal($set, $get)),
+                        ->afterStateUpdated(fn (Set $set, Get $get) => self::calculateTotal($set, $get)),
                 ])->columns(2),
 
             Section::make('Tempo Total')
+                ->icon('heroicon-o-calculator')
                 ->schema([
                     TextInput::make('total_minutes_display')
                         ->label('Tempo Total Calculado')
@@ -77,6 +80,7 @@ class AttendanceLogForm
                 ]),
 
             Section::make('Observações')
+                ->icon('heroicon-o-chat-bubble-left-ellipsis')
                 ->schema([
                     Textarea::make('notes')
                         ->label('Notas')
@@ -96,8 +100,9 @@ class AttendanceLogForm
         $lunchEnd = $get('lunch_break_end');
 
         // Se faltar algum dos campos principais, reseta o valor visual
-        if (!$timeIn || !$timeOut) {
+        if (! $timeIn || ! $timeOut) {
             $set('total_minutes_display', 'Preencha entrada e saída');
+
             return;
         }
 

@@ -32,6 +32,16 @@ class VacationResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Férias';
 
+    public static function getNavigationBadge(): ?string
+    {
+        return ($count = Vacation::where('status', 'pending')->count()) > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'warning';
+    }
+
     public static function form(Schema $schema): Schema
     {
         return VacationForm::configure($schema);

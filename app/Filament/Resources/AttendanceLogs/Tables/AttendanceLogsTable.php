@@ -4,11 +4,10 @@ namespace App\Filament\Resources\AttendanceLogs\Tables;
 
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
 
 class AttendanceLogsTable
@@ -17,6 +16,10 @@ class AttendanceLogsTable
     {
         return $table
             ->defaultSort('time_in', 'desc')
+            ->striped()
+            ->emptyStateIcon('heroicon-o-clock')
+            ->emptyStateHeading('Sem registos de ponto')
+            ->emptyStateDescription('Os registos de presença aparecerão aqui.')
             ->columns([
                 TextColumn::make('employee.first_name')
                     ->label('Funcionário')
@@ -80,11 +83,12 @@ class AttendanceLogsTable
                     ->indicateUsing(function (array $data): array {
                         $indicators = [];
                         if ($data['from'] ?? null) {
-                            $indicators[] = 'De: ' . $data['from'];
+                            $indicators[] = 'De: '.$data['from'];
                         }
                         if ($data['until'] ?? null) {
-                            $indicators[] = 'Até: ' . $data['until'];
+                            $indicators[] = 'Até: '.$data['until'];
                         }
+
                         return $indicators;
                     }),
             ])

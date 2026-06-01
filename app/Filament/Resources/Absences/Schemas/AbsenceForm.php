@@ -14,6 +14,7 @@ class AbsenceForm
     {
         return $schema->components([
             Section::make('Informações da Ausência')
+                ->icon('heroicon-o-user')
                 ->schema([
                     Select::make('employee_id')
                         ->label('Funcionário')
@@ -34,6 +35,7 @@ class AbsenceForm
                 ])->columns(2),
 
             Section::make('Dedução de Horas')
+                ->icon('heroicon-o-minus-circle')
                 ->schema([
                     Select::make('deduction_type')
                         ->label('Tipo de Dedução')
@@ -52,6 +54,7 @@ class AbsenceForm
                 ])->columns(2),
 
             Section::make('Observações')
+                ->icon('heroicon-o-chat-bubble-left-ellipsis')
                 ->schema([
                     Textarea::make('reason')
                         ->label('Motivo da Ausência')

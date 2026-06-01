@@ -18,17 +18,37 @@ class ContractsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->striped()
+            ->emptyStateIcon('heroicon-o-document-text')
+            ->emptyStateHeading('Sem contratos')
+            ->emptyStateDescription('Crie o primeiro contrato para começar.')
             ->columns([
                 TextColumn::make('employee.first_name')
                     ->label('Funcionário')
-                    ->searchable()
+                    ->formatStateUsing(fn ($record) => "{$record->employee->first_name} {$record->employee->last_name}")
+                    ->searchable(['employees.first_name', 'employees.last_name'])
                     ->sortable()
                     ->weight('bold'),
 
                 TextColumn::make('type')
                     ->label('Tipo')
                     ->badge()
-                    ->color('gray'),
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'permanent' => 'Efetivo',
+                        'fixed_term' => 'Prazo Certo',
+                        'unfixed_term' => 'Prazo Incerto',
+                        'internship' => 'Estágio',
+                        'service_provision' => 'Prestação de Serviços',
+                        default => $state,
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'permanent' => 'success',
+                        'fixed_term' => 'info',
+                        'unfixed_term' => 'warning',
+                        'internship' => 'primary',
+                        'service_provision' => 'gray',
+                        default => 'gray',
+                    }),
 
                 TextColumn::make('salary')
                     ->label('Salário')
@@ -38,6 +58,12 @@ class ContractsTable
                 TextColumn::make('status')
                     ->label('Estado')
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'active' => 'Ativo',
+                        'terminated' => 'Terminado',
+                        'on_hold' => 'Suspenso',
+                        default => $state,
+                    })
                     ->color(fn (string $state): string => match ($state) {
                         'active' => 'success',
                         'terminated' => 'danger',
@@ -47,12 +73,12 @@ class ContractsTable
 
                 TextColumn::make('start_date')
                     ->label('Início')
-                    ->date()
+                    ->date('d/m/Y')
                     ->sortable(),
 
                 TextColumn::make('end_date')
                     ->label('Fim')
-                    ->date()
+                    ->date('d/m/Y')
                     ->placeholder('Indeterminado'),
             ])
             ->filters([

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Services\Attendance\AttendanceCalculationService;
+use App\Services\Hour\HourBankService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -50,6 +51,10 @@ class AttendanceLog extends Model
     {
         static::saving(function (self $model) {
             $model->total_minutes = $model->calculateTotalMinutes();
+        });
+
+        static::deleted(function (self $model) {
+            app(HourBankService::class)->removeMovement(self::class, $model->id);
         });
     }
 

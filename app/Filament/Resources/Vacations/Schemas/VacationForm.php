@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Vacations\Schemas;
 
 use App\Models\Employee;
+use App\Models\LeaveAndAbsence;
 use App\Models\Vacation;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
@@ -20,6 +21,7 @@ class VacationForm
     {
         return $schema->components([
             Section::make('Funcionário')
+                ->icon('heroicon-o-user')
                 ->schema([
                     Select::make('employee_id')
                         ->label('Funcionário')
@@ -33,6 +35,7 @@ class VacationForm
                 ]),
 
             Section::make('Período de Férias')
+                ->icon('heroicon-o-sun')
                 ->description('Defina as datas. O ano e dias gozados serão preenchidos automaticamente.')
                 ->schema([
                     Hidden::make('year_reference')
@@ -68,20 +71,33 @@ class VacationForm
                                     return;
                                 }
 
-                                $overlap = Vacation::where('employee_id', $employeeId)
+                                $overlapQuery = fn ($query) => $query
+                                    ->whereBetween('start_date', [$startDate, $value])
+                                    ->orWhereBetween('end_date', [$startDate, $value])
+                                    ->orWhere(fn ($q) => $q
+                                        ->where('start_date', '<=', $startDate)
+                                        ->where('end_date', '>=', $value)
+                                    );
+
+                                $vacationOverlap = Vacation::where('employee_id', $employeeId)
                                     ->when($recordId, fn ($q) => $q->where('id', '!=', $recordId))
-                                    ->where(function ($query) use ($startDate, $value) {
-                                        $query->whereBetween('start_date', [$startDate, $value])
-                                            ->orWhereBetween('end_date', [$startDate, $value])
-                                            ->orWhere(function ($q) use ($startDate, $value) {
-                                                $q->where('start_date', '<=', $startDate)
-                                                    ->where('end_date', '>=', $value);
-                                            });
-                                    })
+                                    ->whereIn('status', ['pending', 'approved'])
+                                    ->where($overlapQuery)
                                     ->exists();
 
-                                if ($overlap) {
+                                if ($vacationOverlap) {
                                     $fail('O funcionário já possui férias marcadas para este período.');
+
+                                    return;
+                                }
+
+                                $leaveOverlap = LeaveAndAbsence::where('employee_id', $employeeId)
+                                    ->whereIn('status', ['pending', 'approved'])
+                                    ->where($overlapQuery)
+                                    ->exists();
+
+                                if ($leaveOverlap) {
+                                    $fail('O funcionário já possui uma licença/ausência registada para este período.');
                                 }
                             },
                         ]),
@@ -94,6 +110,7 @@ class VacationForm
                 ])->columns(2),
 
             Section::make('Aprovação')
+                ->icon('heroicon-o-check-badge')
                 ->schema([
                     Select::make('status')
                         ->label('Estado')
@@ -150,14 +167,13 @@ class VacationForm
                                 }
                             },
                         ])
-                        ->disabled(fn (?Vacation $record, callable $get): bool =>
-                            (($record && $record->employee_id === auth()->user()?->employee_id) ||
+                        ->disabled(fn (?Vacation $record, callable $get): bool => (($record && $record->employee_id === auth()->user()?->employee_id) ||
                              ((int) $get('employee_id') === auth()->user()?->employee_id)) &&
                             ! auth()->user()?->can('Approve:OwnVacation')
                         )
                         ->dehydrated(),
 
-                    \Filament\Forms\Components\Hidden::make('approved_by')
+                    Hidden::make('approved_by')
                         ->dehydrated(),
 
                     Textarea::make('rejection_reason')

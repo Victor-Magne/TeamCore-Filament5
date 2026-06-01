@@ -16,6 +16,7 @@ class ContractForm
     {
         return $schema->components([
             Section::make('Funcionário')
+                ->icon('heroicon-o-user')
                 ->description('Selecione o funcionário e a designação para este contrato.')
                 ->columns(2)
                 ->schema([
@@ -38,6 +39,7 @@ class ContractForm
                 ]),
 
             Section::make('Tipo e Estado')
+                ->icon('heroicon-o-tag')
                 ->description('Defina o tipo e estado do contrato.')
                 ->columns(2)
                 ->schema([
@@ -46,6 +48,7 @@ class ContractForm
                         ->options([
                             'permanent' => 'Efetivo / Tempo Indeterminado',
                             'fixed_term' => 'Prazo Certo',
+                            'unfixed_term' => 'Prazo Incerto',
                             'internship' => 'Estágio',
                             'service_provision' => 'Prestação de Serviços',
                         ])
@@ -66,6 +69,7 @@ class ContractForm
                 ]),
 
             Section::make('Vigência do Contrato')
+                ->icon('heroicon-o-calendar-days')
                 ->description('Defina as datas de início e fim.')
                 ->columns(2)
                 ->schema([
@@ -83,6 +87,7 @@ class ContractForm
                 ]),
 
             Section::make('Remuneração e Jornada')
+                ->icon('heroicon-o-banknotes')
                 ->description('Defina o salário bruto e a jornada diária.')
                 ->columns(2)
                 ->schema([

@@ -5,7 +5,6 @@ namespace App\Filament\Resources\Vacations\Tables;
 use App\Models\Employee;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -22,6 +21,10 @@ class VacationsTable
     {
         return $table
             ->defaultSort('start_date', 'desc')
+            ->striped()
+            ->emptyStateIcon('heroicon-o-sun')
+            ->emptyStateHeading('Sem férias registadas')
+            ->emptyStateDescription('Registe os pedidos de férias dos colaboradores.')
             ->columns([
                 TextColumn::make('employee.first_name')
                     ->label('Funcionário')
@@ -51,8 +54,7 @@ class VacationsTable
                         'rejected' => 'Rejeitado',
                     ])
                     ->native(false)
-                    ->disabled(fn ($record): bool =>
-                        $record->employee_id === auth()->user()?->employee_id &&
+                    ->disabled(fn ($record): bool => $record->employee_id === auth()->user()?->employee_id &&
                         ! auth()->user()?->can('Approve:OwnVacation')
                     ),
                 TextColumn::make('approver.name')
@@ -88,7 +90,7 @@ class VacationsTable
                         ->when($data['year'], fn (Builder $q, $v) => $q->where('year_reference', $v))
                     )
                     ->indicateUsing(fn (array $data): ?string => $data['year']
-                        ? 'Ano: ' . $data['year']
+                        ? 'Ano: '.$data['year']
                         : null
                     ),
 

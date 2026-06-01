@@ -13,16 +13,14 @@ namespace App\Filament\Resources\Employees\Schemas;
 
 use App\Models\City;
 use App\Rules\ValidEmailDomain;
+use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Carbon\Carbon;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 
 class EmployeeForm
@@ -30,8 +28,7 @@ class EmployeeForm
     /**
      * Configura os componentes do formulário de funcionário.
      *
-     * @param Schema $schema O objecto de schema a ser configurado.
-     * @return Schema
+     * @param  Schema  $schema  O objecto de schema a ser configurado.
      */
     public static function configure(Schema $schema): Schema
     {
@@ -44,7 +41,8 @@ class EmployeeForm
                         Tab::make('Dados Pessoais')
                             ->icon('heroicon-m-user')
                             ->schema([
-                                Section::make()
+                                Section::make('Informação Pessoal')
+                                    ->icon('heroicon-o-user-circle')
                                     ->schema([
                                         TextInput::make('first_name')
                                             ->label('Nome')
@@ -81,16 +79,18 @@ class EmployeeForm
                             ->icon('heroicon-m-identification')
                             ->schema([
                                 Section::make('Contacto Telefónico')
+                                    ->icon('heroicon-o-phone')
                                     ->schema([
                                         TextInput::make('phone_number')
                                             ->label('Telemóvel')
                                             ->tel()
                                             // Dinamicamente obtém o indicativo do país baseado na cidade seleccionada
-                                            ->prefix(fn(Get $get) => '+' . (City::find($get('city_id'))?->state?->country?->phonecode ?? ''))
+                                            ->prefix(fn (Get $get) => '+'.(City::find($get('city_id'))?->state?->country?->phonecode ?? ''))
                                             ->required(),
                                     ]),
 
                                 Section::make('Identificação Legal')
+                                    ->icon('heroicon-o-identification')
                                     ->schema([
                                         TextInput::make('nif')
                                             ->label('NIF')
@@ -102,6 +102,7 @@ class EmployeeForm
                                     ])->columns(2),
 
                                 Section::make('Endereço')
+                                    ->icon('heroicon-o-map-pin')
                                     ->schema([
                                         TextInput::make('address')
                                             ->label('Morada Completa')
@@ -126,7 +127,8 @@ class EmployeeForm
                         Tab::make('Contrato e Empresa')
                             ->icon('heroicon-m-briefcase')
                             ->schema([
-                                Section::make()
+                                Section::make('Vínculo Laboral')
+                                    ->icon('heroicon-o-briefcase')
                                     ->schema([
                                         Select::make('unit_id')
                                             ->label('Unidade/Departamento')
@@ -144,7 +146,7 @@ class EmployeeForm
                                             ->required(),
                                         DatePicker::make('date_dismissed')
                                             ->label('Data de Demissão')
-                                            ->minDate(fn(Get $get) => $get('date_hired')) // Não permite demissão antes da admissão
+                                            ->minDate(fn (Get $get) => $get('date_hired')) // Não permite demissão antes da admissão
                                             ->native(false)
                                             ->helperText('Deixe vazio se o funcionário estiver activo na empresa'),
                                         TextInput::make('vacation_balance')

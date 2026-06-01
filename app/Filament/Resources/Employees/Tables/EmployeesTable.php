@@ -9,6 +9,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -23,6 +24,10 @@ class EmployeesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->striped()
+            ->emptyStateIcon('heroicon-o-users')
+            ->emptyStateHeading('Sem funcionários')
+            ->emptyStateDescription('Adicione o primeiro funcionário para começar.')
             ->columns([
                 TextColumn::make('first_name')
                     ->label('Nome')
@@ -48,12 +53,19 @@ class EmployeesTable
                     ->sortable()
                     ->badge()
                     ->color('info'),
+                IconColumn::make('is_active')
+                    ->label('Estado')
+                    ->state(fn (Employee $record): bool => is_null($record->date_dismissed))
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger')
+                    ->tooltip(fn (Employee $record): string => $record->date_dismissed ? 'Inactivo' : 'Activo'),
                 TextColumn::make('date_hired')
                     ->label('Data Admissão')
                     ->date('d/m/Y')
-                    ->sortable()
-                    ->description(fn (Employee $record): string => $record->date_dismissed ? 'Inactivo' : 'Activo')
-                    ->color(fn (Employee $record): string => $record->date_dismissed ? 'danger' : 'success'),
+                    ->sortable(),
                 TextColumn::make('vacation_balance')
                     ->label('Saldo Férias')
                     ->numeric()

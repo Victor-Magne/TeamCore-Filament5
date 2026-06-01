@@ -19,12 +19,13 @@ class GeneratePayrollService
      */
     public function handle(Employee $employee, string $monthYear): Payroll
     {
-        $defaultDailyMinutes = config('hr.default_daily_work_minutes');
-        $workingDaysPerMonth = config('hr.working_days_per_month');
-        $extraHoursMultiplier = config('hr.extra_hours_multiplier');
+        $defaultDailyMinutes = config('hr.default_daily_work_minutes', 480);
+        $workingDaysPerMonth = config('hr.working_days_per_month', 22);
+        $extraHoursMultiplier = config('hr.extra_hours_multiplier', 1.5);
 
         $contract = $employee->contracts()
             ->where('status', 'active')
+            ->orderByDesc('start_date')
             ->first();
 
         if (! $contract) {

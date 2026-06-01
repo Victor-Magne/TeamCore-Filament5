@@ -15,6 +15,10 @@ class AbsencesTable
     {
         return $table
             ->defaultSort('absence_date', 'desc')
+            ->striped()
+            ->emptyStateIcon('heroicon-o-calendar-days')
+            ->emptyStateHeading('Sem ausências registadas')
+            ->emptyStateDescription('Não existem registos de ausências para o período seleccionado.')
             ->columns([
                 TextColumn::make('employee.first_name')
                     ->label('Funcionário')
@@ -46,8 +50,11 @@ class AbsencesTable
                 TextColumn::make('hours_deducted')
                     ->label('Horas Descontadas')
                     ->formatStateUsing(function (?int $state) {
-                        if ($state === null || $state === 0) return '-';
-                        return intdiv($state, 60) . 'h ' . str_pad($state % 60, 2, '0', STR_PAD_LEFT) . 'm';
+                        if ($state === null || $state === 0) {
+                            return '-';
+                        }
+
+                        return intdiv($state, 60).'h '.str_pad($state % 60, 2, '0', STR_PAD_LEFT).'m';
                     })
                     ->sortable(),
 

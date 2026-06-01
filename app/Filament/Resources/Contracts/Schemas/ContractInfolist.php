@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Contracts\Schemas;
 
 use App\Models\Contract;
-use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -15,6 +14,7 @@ class ContractInfolist
         return $schema
             ->components([
                 Section::make('Identificação')
+                    ->icon('heroicon-o-user')
                     ->columns(2)
                     ->schema([
                         TextEntry::make('employee.first_name')
@@ -29,9 +29,18 @@ class ContractInfolist
                             ->formatStateUsing(fn (string $state): string => match ($state) {
                                 'permanent' => 'Efetivo / Tempo Indeterminado',
                                 'fixed_term' => 'Prazo Certo',
+                                'unfixed_term' => 'Prazo Incerto',
                                 'internship' => 'Estágio',
                                 'service_provision' => 'Prestação de Serviços',
                                 default => $state,
+                            })
+                            ->color(fn (string $state): string => match ($state) {
+                                'permanent' => 'success',
+                                'fixed_term' => 'info',
+                                'unfixed_term' => 'warning',
+                                'internship' => 'primary',
+                                'service_provision' => 'gray',
+                                default => 'gray',
                             }),
                         TextEntry::make('status')
                             ->label('Estado')
@@ -51,6 +60,7 @@ class ContractInfolist
                     ]),
 
                 Section::make('Vigência')
+                    ->icon('heroicon-o-calendar-days')
                     ->columns(2)
                     ->schema([
                         TextEntry::make('start_date')
@@ -63,6 +73,7 @@ class ContractInfolist
                     ]),
 
                 Section::make('Remuneração e Jornada')
+                    ->icon('heroicon-o-banknotes')
                     ->columns(2)
                     ->schema([
                         TextEntry::make('salary')
@@ -71,7 +82,7 @@ class ContractInfolist
                         TextEntry::make('daily_work_minutes')
                             ->label('Jornada Diária')
                             ->formatStateUsing(fn (?int $state): string => $state
-                                ? intdiv($state, 60) . 'h ' . ($state % 60) . 'm'
+                                ? intdiv($state, 60).'h '.($state % 60).'m'
                                 : '-'),
                         TextEntry::make('expected_start_time')
                             ->label('Hora de Entrada')
@@ -79,11 +90,12 @@ class ContractInfolist
                         TextEntry::make('lunch_duration_minutes')
                             ->label('Duração do Almoço')
                             ->formatStateUsing(fn (?int $state): string => $state !== null
-                                ? intdiv($state, 60) . 'h ' . ($state % 60) . 'm'
+                                ? intdiv($state, 60).'h '.($state % 60).'m'
                                 : '-'),
                     ]),
 
                 Section::make('Metadados')
+                    ->icon('heroicon-o-information-circle')
                     ->columns(2)
                     ->collapsed()
                     ->schema([

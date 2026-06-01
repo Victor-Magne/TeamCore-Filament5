@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Payrolls\Tables;
 
+use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -23,6 +24,10 @@ class PayrollsTable
     {
         return $table
             ->defaultSort('month_year', 'desc')
+            ->striped()
+            ->emptyStateIcon('heroicon-o-banknotes')
+            ->emptyStateHeading('Sem processamentos')
+            ->emptyStateDescription('Use o botão "Processar Salários" para gerar os processamentos mensais.')
             ->columns([
                 TextColumn::make('employee.first_name')
                     ->label('Funcionário')
@@ -42,13 +47,13 @@ class PayrollsTable
                 TextColumn::make('status')
                     ->label('Estado')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'pending' => 'warning',
                         'paid' => 'success',
                         'cancelled' => 'danger',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn(string $state): string => match ($state) {
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
                         'pending' => 'Pendente',
                         'paid' => 'Pago',
                         'cancelled' => 'Cancelado',
@@ -68,7 +73,7 @@ class PayrollsTable
                         ->when($data['month_year'], fn (Builder $q, $v) => $q->where('month_year', $v))
                     )
                     ->indicateUsing(fn (array $data): ?string => $data['month_year']
-                        ? 'Referência: ' . $data['month_year']
+                        ? 'Referência: '.$data['month_year']
                         : null
                     ),
 
@@ -81,6 +86,13 @@ class PayrollsTable
                     ]),
             ])
             ->recordActions([
+                Action::make('mark_as_paid')
+                    ->label('Marcar como Pago')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->visible(fn ($record): bool => $record->status === 'pending')
+                    ->requiresConfirmation()
+                    ->action(fn ($record) => $record->update(['status' => 'paid'])),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
@@ -101,10 +113,8 @@ class PayrollsTable
                         ->label('Marcar como Pagos')
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
-                        ->action(fn(Collection $records) => $records->each->update([
-                            'status' => 'paid',
-                            'paid_at' => now(),
-                        ])),
+                        ->requiresConfirmation()
+                        ->action(fn (Collection $records) => $records->each->update(['status' => 'paid'])),
                     DeleteBulkAction::make(),
                 ]),
             ]);

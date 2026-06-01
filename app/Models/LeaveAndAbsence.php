@@ -43,7 +43,7 @@ class LeaveAndAbsence extends Model
         'justification_doc', // Caminho para o ficheiro de comprovativo/justificação
         'status',            // Estado do pedido (pending, approved, rejected)
         'approved_by',       // Utilizador que aprovou/rejeitou o pedido
-        'rejection_reason'   // Motivo em caso de rejeição
+        'rejection_reason',   // Motivo em caso de rejeição
     ];
 
     /**
@@ -83,11 +83,12 @@ class LeaveAndAbsence extends Model
     protected static function booted(): void
     {
         static::saving(function (self $model) {
-            // Se o estado foi alterado para 'approved' ou 'rejected',
-            // registamos automaticamente o ID do utilizador autenticado actual como o aprovador.
+            // Regista o aprovador quando o estado muda, mas apenas se não foi explicitamente
+            // definido pelo chamador e o utilizador está autenticado (contexto web).
             if ($model->isDirty('status') && in_array($model->status, ['approved', 'rejected'])) {
-                /** @noinspection PhpUndefinedMethodInspection - auth() helper returns Authenticatable **/
-                $model->approved_by = auth()->id();
+                if (blank($model->approved_by) && auth()->id()) {
+                    $model->approved_by = auth()->id();
+                }
             }
         });
     }

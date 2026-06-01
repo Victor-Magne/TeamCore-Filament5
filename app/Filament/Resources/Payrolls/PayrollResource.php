@@ -30,6 +30,16 @@ class PayrollResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Processamentos Salariais';
 
+    public static function getNavigationBadge(): ?string
+    {
+        return ($count = Payroll::where('status', 'pending')->count()) > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'warning';
+    }
+
     /** @noinspection PhpIncompatibleReturnTypeInspection */
     public static function form(Schema $schema): Schema
     {
