@@ -44,9 +44,14 @@ class EmployeesTable
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('unit.name')
-                    ->label('Departamento')
-                    ->searchable()
-                    ->sortable(),
+                    ->label('Unidade')
+                    ->state(fn (Employee $record): string => $record->unit
+                        ? collect($record->unit->ancestors)->add($record->unit)->pluck('name')->join(' › ')
+                        : '—'
+                    )
+                    ->searchable(['unit.name'])
+                    ->sortable()
+                    ->wrap(),
                 TextColumn::make('designation.name')
                     ->label('Cargo')
                     ->searchable()
@@ -108,12 +113,35 @@ class EmployeesTable
             ])
             ->filters([
                 SelectFilter::make('unit_id')
-                    ->label('Departamento')
-                    ->options(fn () => Unit::query()
-                        ->orderBy('name')
-                        ->pluck('name', 'id')
-                        ->toArray()
-                    )
+                    ->label('Unidade')
+                    ->options(function (): array {
+                        $user = auth()->user();
+                        $query = Unit::withDepth()->defaultOrder();
+
+                        if ($user && ! $user->hasRole('super_admin')) {
+                            $employee = $user->employee;
+                            if ($employee) {
+                                $managedUnits = $employee->getAllManagedUnits();
+                                $isGeneralManager = $managedUnits->contains(fn (Unit $u) => $u->isGeneralDirection());
+
+                                if (! $isGeneralManager && $managedUnits->isNotEmpty()) {
+                                    $accessibleIds = Unit::where(function (Builder $sub) use ($managedUnits) {
+                                        foreach ($managedUnits as $unit) {
+                                            $sub->orWhereBetween('_lft', [$unit->_lft, $unit->_rgt]);
+                                        }
+                                    })->pluck('id');
+
+                                    $query->whereIn('id', $accessibleIds);
+                                }
+                            }
+                        }
+
+                        return $query->get()
+                            ->mapWithKeys(fn (Unit $unit) => [
+                                $unit->id => str_repeat('— ', $unit->depth).$unit->name,
+                            ])
+                            ->toArray();
+                    })
                     ->searchable(),
 
                 Filter::make('active')

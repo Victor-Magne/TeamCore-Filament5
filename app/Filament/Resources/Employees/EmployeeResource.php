@@ -21,6 +21,7 @@ use App\Filament\Resources\Employees\RelationManagers\VacationsRelationManager;
 use App\Filament\Resources\Employees\Schemas\EmployeeForm;
 use App\Filament\Resources\Employees\Tables\EmployeesTable;
 use App\Models\Employee;
+use App\Traits\HasHierarchicalQuery;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -33,6 +34,8 @@ use UnitEnum;
 
 class EmployeeResource extends Resource
 {
+    use HasHierarchicalQuery;
+
     /**
      * Modelo associado ao recurso.
      */
@@ -97,7 +100,7 @@ class EmployeeResource extends Resource
     public static function table(Table $table): Table
     {
         return EmployeesTable::configure($table)
-            ->modifyQueryUsing(fn (Builder $query) => $query->with(['unit', 'designation']));
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['unit.ancestors', 'designation']));
     }
 
     public static function getRelations(): array

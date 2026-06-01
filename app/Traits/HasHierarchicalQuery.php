@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Models\Employee;
+use App\Models\Unit;
 use Illuminate\Database\Eloquent\Builder;
 
 trait HasHierarchicalQuery
@@ -56,14 +57,12 @@ trait HasHierarchicalQuery
 
             // 3. REGRA DE GESTÃO HIERÁRQUICA:
             if ($managedUnits->isNotEmpty()) {
-                $allAccessibleUnitIds = [];
-
-                foreach ($managedUnits as $unit) {
-                    $allAccessibleUnitIds[] = $unit->id;
-                    $allAccessibleUnitIds = array_merge($allAccessibleUnitIds, $unit->getAllDescendantIds());
-                }
-
-                $allAccessibleUnitIds = array_unique($allAccessibleUnitIds);
+                // Single query using nested set _lft/_rgt ranges for all managed units at once
+                $allAccessibleUnitIds = Unit::where(function (Builder $sub) use ($managedUnits) {
+                    foreach ($managedUnits as $unit) {
+                        $sub->orWhereBetween('_lft', [$unit->_lft, $unit->_rgt]);
+                    }
+                })->pluck('id')->all();
 
                 if ($q->getModel() instanceof Employee) {
                     $q->orWhereIn('unit_id', $allAccessibleUnitIds);

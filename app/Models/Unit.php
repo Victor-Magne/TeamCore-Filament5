@@ -16,58 +16,27 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Kalnoy\Nestedset\NodeTrait;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
 class Unit extends Model
 {
-    use HasFactory, LogsActivity, SoftDeletes;
+    use HasFactory, LogsActivity, NodeTrait, SoftDeletes;
 
-    /**
-     * Nome da tabela associada.
-     *
-     * @var string
-     */
     protected $table = 'organizational_units';
 
-    /**
-     * Campos preenchíveis em massa.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
-        'name',              // Nome da unidade (ex: Departamento Financeiro)
-        'type',              // Tipo de unidade (direction, department, section)
-        'description',       // Descrição das responsabilidades da unidade
-        'parent_id',         // ID da unidade pai (para hierarquia)
-        'manager_id',        // ID do funcionário que é o gestor directo
-        'is_main_direction', // Flag para indicar se é a direcção principal da empresa
+        'name',
+        'type',
+        'description',
+        'parent_id',
+        'manager_id',
+        'is_main_direction',
     ];
 
     /**
-     * Relacionamento: Unidade Pai.
-     *
-     * Permite subir na hierarquia organizacional.
-     */
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(Unit::class, 'parent_id');
-    }
-
-    /**
-     * Relacionamento: Unidades Filhas (Sub-unidades).
-     *
-     * Permite obter todas as divisões que pertencem a esta unidade.
-     */
-    public function children(): HasMany
-    {
-        return $this->hasMany(Unit::class, 'parent_id');
-    }
-
-    /**
      * Relacionamento: Gestor Principal.
-     *
-     * Liga ao funcionário que detém a responsabilidade máxima sobre a unidade.
      */
     public function manager(): BelongsTo
     {
@@ -76,8 +45,6 @@ class Unit extends Model
 
     /**
      * Relacionamento: Funcionários da Unidade.
-     *
-     * Obtém todos os funcionários alocados a esta unidade específica.
      */
     public function employees(): HasMany
     {
@@ -86,9 +53,6 @@ class Unit extends Model
 
     /**
      * Relacionamento: Gestores (BelongsToMany).
-     *
-     * Caso a unidade tenha múltiplos gestores ou para manter histórico
-     * de gestão via tabela pivot 'unit_manager'.
      */
     public function managers(): BelongsToMany
     {
@@ -96,22 +60,13 @@ class Unit extends Model
     }
 
     /**
-     * Obtém todos os IDs das unidades descendentes de forma recursiva.
-     *
-     * Útil para filtros de visibilidade hierárquica.
+     * Obtém todos os IDs das unidades descendentes via nested set (query única).
      *
      * @return array<int>
      */
     public function getAllDescendantIds(): array
     {
-        $ids = [];
-
-        foreach ($this->children as $child) {
-            $ids[] = $child->id;
-            $ids = array_merge($ids, $child->getAllDescendantIds());
-        }
-
-        return $ids;
+        return $this->descendants()->pluck('id')->all();
     }
 
     /**

@@ -8,6 +8,7 @@ use App\Filament\Resources\Payrolls\Tables\PayrollsTable;
 use App\Models\Employee;
 use App\Models\Payroll;
 use App\Services\Payroll\GeneratePayrollService;
+use App\Traits\HasHierarchicalQuery;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput as FormTextInput;
 use Filament\Notifications\Notification;
@@ -18,6 +19,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class PayrollResource extends Resource
 {
+    use HasHierarchicalQuery;
+
     protected static ?string $model = Payroll::class;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-banknotes';

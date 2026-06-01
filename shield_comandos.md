@@ -10,6 +10,8 @@ php artisan permission:cache-reset
 
 php artisan shield:super-admin
 
+php artisan optimize:clear
+
 npm run build
 
 php artisan serve

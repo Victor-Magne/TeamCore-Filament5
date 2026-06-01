@@ -16,9 +16,9 @@ class EmployeesByUnitChart extends ChartWidget
     protected ?string $pollingInterval = '30s';
 
     protected int|string|array $columnSpan = [
-    'default' => 'full',
-    'md' => 1,
-    'xl' => 1,
+        'default' => 'full',
+        'md' => 1,
+        'xl' => 1,
     ];
 
     public static function canView(): bool
@@ -28,8 +28,7 @@ class EmployeesByUnitChart extends ChartWidget
             return false;
         }
 
-        // Permitir Super Admin ou permissão específica
-        return $user->hasRole('super_admin') || $user->can('view_employees_by_unit_chart');
+        return $user->can('View:EmployeesByUnitChart');
     }
 
     protected function getData(): array

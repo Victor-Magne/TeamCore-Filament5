@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Units\Pages;
 
+use App\Filament\Pages\UnitsTree;
 use App\Filament\Resources\Units\UnitResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
@@ -17,9 +18,24 @@ class EditUnit extends EditRecord
     {
         return [
             ViewAction::make(),
-            DeleteAction::make(),
-            ForceDeleteAction::make(),
+            DeleteAction::make()
+                ->successRedirectUrl(UnitsTree::getUrl()),
+            ForceDeleteAction::make()
+                ->successRedirectUrl(UnitsTree::getUrl()),
             RestoreAction::make(),
+        ];
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        return UnitsTree::getUrl();
+    }
+
+    public function getBreadcrumbs(): array
+    {
+        return [
+            UnitsTree::getUrl() => 'Unidades',
+            $this->record->name,
         ];
     }
 }
