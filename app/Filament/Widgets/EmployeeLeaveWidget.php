@@ -5,7 +5,12 @@ namespace App\Filament\Widgets;
 use App\Models\LeaveAndAbsence;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -25,9 +30,8 @@ class EmployeeLeaveWidget extends BaseWidget
             ->query(
                 LeaveAndAbsence::where('employee_id', $employee?->id)
                     ->latest()
-                    
-                    ->limit(5)
             )
+            ->paginated([5, 10, 25])
             ->columns([
                 Tables\Columns\TextColumn::make('type')
                     ->label('Tipo')
@@ -45,8 +49,7 @@ class EmployeeLeaveWidget extends BaseWidget
                     ->iconColor('primary'),
                 Tables\Columns\TextColumn::make('start_date')
                     ->label('Período')
-                    ->formatStateUsing(fn (LeaveAndAbsence $record): string =>
-                        $record->start_date->format('d/m/Y') . ' - ' . $record->end_date->format('d/m/Y')
+                    ->formatStateUsing(fn (LeaveAndAbsence $record): string => $record->start_date->format('d/m/Y').' - '.$record->end_date->format('d/m/Y')
                     )
                     ->icon('heroicon-m-calendar')
                     ->iconColor('gray'),
@@ -89,9 +92,9 @@ class EmployeeLeaveWidget extends BaseWidget
                     }),
                 ViewAction::make()
                     ->form([
-                        \Filament\Schemas\Components\Grid::make(2)
+                        Grid::make(2)
                             ->schema([
-                                \Filament\Forms\Components\TextInput::make('type')
+                                TextInput::make('type')
                                     ->label('Tipo')
                                     ->formatStateUsing(fn (string $state): string => match ($state) {
                                         'sick_leave' => 'Baixa Médica',
@@ -102,7 +105,7 @@ class EmployeeLeaveWidget extends BaseWidget
                                         'unjustified' => 'Falta Injustificada',
                                         default => $state,
                                     }),
-                                \Filament\Forms\Components\TextInput::make('status')
+                                TextInput::make('status')
                                     ->label('Estado')
                                     ->formatStateUsing(fn (string $state): string => match ($state) {
                                         'pending' => 'Pendente',
@@ -110,14 +113,19 @@ class EmployeeLeaveWidget extends BaseWidget
                                         'rejected' => 'Rejeitado',
                                         default => $state,
                                     }),
-                                \Filament\Forms\Components\DatePicker::make('start_date')
+                                DatePicker::make('start_date')
                                     ->label('Início'),
-                                \Filament\Forms\Components\DatePicker::make('end_date')
+                                DatePicker::make('end_date')
                                     ->label('Fim'),
-                                \Filament\Forms\Components\Textarea::make('reason')
+                                Textarea::make('reason')
                                     ->label('Motivo')
                                     ->columnSpanFull(),
-                            ])
+                                Textarea::make('rejection_reason')
+                                    ->label('Motivo de Rejeição')
+                                    ->disabled()
+                                    ->columnSpanFull()
+                                    ->visible(fn (Get $get): bool => $get('status') === 'rejected'),
+                            ]),
                     ])
                     ->modalHeading('Detalhes da Ausência')
                     ->icon('heroicon-m-eye')

@@ -5,7 +5,12 @@ namespace App\Filament\Widgets;
 use App\Models\Vacation;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -25,21 +30,24 @@ class EmployeeVacationWidget extends BaseWidget
             ->query(
                 Vacation::where('employee_id', $employee?->id)
                     ->latest()
-                    ->limit(5)
             )
+            ->paginated([5, 10, 25])
             ->columns([
+                Tables\Columns\TextColumn::make('year_reference')
+                    ->label('Ano')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('start_date')
                     ->label('Início')
                     ->date('d/m/Y')
                     ->icon('heroicon-m-calendar-days')
                     ->iconColor('gray'),
-                    
+
                 Tables\Columns\TextColumn::make('end_date')
                     ->label('Fim')
                     ->date('d/m/Y')
                     ->icon('heroicon-m-calendar-days')
                     ->iconColor('gray'),
-                    
+
                 Tables\Columns\TextColumn::make('days_taken')
                     ->label('Dias')
                     ->badge()
@@ -92,15 +100,15 @@ class EmployeeVacationWidget extends BaseWidget
                     }),
                 ViewAction::make()
                     ->form([
-                        \Filament\Schemas\Components\Grid::make(2)
+                        Grid::make(2)
                             ->schema([
-                                \Filament\Forms\Components\DatePicker::make('start_date')
+                                DatePicker::make('start_date')
                                     ->label('Início'),
-                                \Filament\Forms\Components\DatePicker::make('end_date')
+                                DatePicker::make('end_date')
                                     ->label('Fim'),
-                                \Filament\Forms\Components\TextInput::make('days_taken')
+                                TextInput::make('days_taken')
                                     ->label('Dias'),
-                                \Filament\Forms\Components\TextInput::make('status')
+                                TextInput::make('status')
                                     ->label('Estado')
                                     ->formatStateUsing(fn (string $state): string => match ($state) {
                                         'pending' => 'Pendente',
@@ -108,7 +116,12 @@ class EmployeeVacationWidget extends BaseWidget
                                         'rejected' => 'Rejeitado',
                                         default => $state,
                                     }),
-                            ])
+                                Textarea::make('rejection_reason')
+                                    ->label('Motivo de Rejeição')
+                                    ->disabled()
+                                    ->columnSpanFull()
+                                    ->visible(fn (Get $get): bool => $get('status') === 'rejected'),
+                            ]),
                     ])
                     ->modalHeading('Detalhes das Férias')
                     ->icon('heroicon-m-eye')

@@ -13,8 +13,10 @@ namespace App\Filament\Resources\Employees;
 use App\Filament\Resources\Employees\Pages\CreateEmployee;
 use App\Filament\Resources\Employees\Pages\EditEmployee;
 use App\Filament\Resources\Employees\Pages\ListEmployees;
+use App\Filament\Resources\Employees\RelationManagers\AbsencesRelationManager;
 use App\Filament\Resources\Employees\RelationManagers\ContractsRelationManager;
 use App\Filament\Resources\Employees\RelationManagers\HourBankMovementsRelationManager;
+use App\Filament\Resources\Employees\RelationManagers\LeavesRelationManager;
 use App\Filament\Resources\Employees\RelationManagers\VacationsRelationManager;
 use App\Filament\Resources\Employees\Schemas\EmployeeForm;
 use App\Filament\Resources\Employees\Tables\EmployeesTable;
@@ -25,6 +27,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use UnitEnum;
 
@@ -61,7 +64,17 @@ class EmployeeResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return (string) Employee::count();
+        return (string) Employee::whereNull('date_dismissed')->count();
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['first_name', 'last_name'];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return $record->full_name;
     }
 
     /**
@@ -93,6 +106,8 @@ class EmployeeResource extends Resource
             ContractsRelationManager::class,
             VacationsRelationManager::class,
             HourBankMovementsRelationManager::class,
+            AbsencesRelationManager::class,
+            LeavesRelationManager::class,
         ];
     }
 

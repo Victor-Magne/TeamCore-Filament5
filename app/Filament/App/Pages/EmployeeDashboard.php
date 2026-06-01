@@ -2,12 +2,14 @@
 
 namespace App\Filament\App\Pages;
 
+use App\Filament\Widgets\EmployeeAbsencesWidget;
 use App\Filament\Widgets\EmployeeActionsWidget;
 use App\Filament\Widgets\EmployeeContractWidget;
 use App\Filament\Widgets\EmployeeInfoWidget;
 use App\Filament\Widgets\EmployeeLeaveWidget;
 use App\Filament\Widgets\EmployeeVacationWidget;
 use App\Filament\Widgets\HourBankStatsWidget;
+use App\Filament\Widgets\TodayAttendanceWidget;
 use Filament\Pages\Dashboard as BaseDashboard;
 
 class EmployeeDashboard extends BaseDashboard
@@ -19,8 +21,10 @@ class EmployeeDashboard extends BaseDashboard
             EmployeeContractWidget::class,
             EmployeeActionsWidget::class,
             HourBankStatsWidget::class,
+            TodayAttendanceWidget::class,
             EmployeeVacationWidget::class,
             EmployeeLeaveWidget::class,
+            EmployeeAbsencesWidget::class,
         ];
     }
 

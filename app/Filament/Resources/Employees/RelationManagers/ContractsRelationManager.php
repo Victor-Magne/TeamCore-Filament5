@@ -18,7 +18,7 @@ class ContractsRelationManager extends RelationManager
 
     public function form(Schema $schema): Schema
     {
-        return $schema->components([]);
+        return $schema;
     }
 
     public function table(Table $table): Table

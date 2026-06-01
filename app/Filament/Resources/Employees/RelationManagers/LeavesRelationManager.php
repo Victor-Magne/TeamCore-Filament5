@@ -4,17 +4,18 @@ namespace App\Filament\Resources\Employees\RelationManagers;
 
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
-class VacationsRelationManager extends RelationManager
+class LeavesRelationManager extends RelationManager
 {
-    protected static string $relationship = 'vacations';
+    protected static string $relationship = 'leaves';
 
-    protected static ?string $title = 'Férias';
+    protected static ?string $title = 'Licenças e Afastamentos';
 
-    protected static ?string $modelLabel = 'Férias';
+    protected static ?string $modelLabel = 'Licença';
 
     public function form(Schema $schema): Schema
     {
@@ -25,11 +26,29 @@ class VacationsRelationManager extends RelationManager
     {
         return $table
             ->defaultSort('start_date', 'desc')
-            ->recordTitleAttribute('year_reference')
+            ->recordTitleAttribute('type')
             ->columns([
-                TextColumn::make('year_reference')
-                    ->label('Ano')
-                    ->sortable(),
+                TextColumn::make('type')
+                    ->label('Tipo')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'sick_leave' => 'Baixa Médica',
+                        'parental' => 'Lic. Parental',
+                        'marriage' => 'Casamento',
+                        'bereavement' => 'Nojo',
+                        'justified_absence' => 'Falta Justif.',
+                        'unjustified' => 'Falta Injustif.',
+                        default => $state,
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'sick_leave' => 'danger',
+                        'parental' => 'info',
+                        'marriage' => 'primary',
+                        'bereavement' => 'warning',
+                        'justified_absence' => 'success',
+                        'unjustified' => 'secondary',
+                        default => 'gray',
+                    }),
 
                 TextColumn::make('start_date')
                     ->label('Início')
@@ -40,9 +59,9 @@ class VacationsRelationManager extends RelationManager
                     ->label('Fim')
                     ->date('d/m/Y'),
 
-                TextColumn::make('days_taken')
-                    ->label('Dias Gozados')
-                    ->numeric(),
+                IconColumn::make('is_paid')
+                    ->label('Remunerada')
+                    ->boolean(),
 
                 TextColumn::make('status')
                     ->label('Estado')
