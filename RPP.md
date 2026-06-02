@@ -55,6 +55,7 @@ Ciclo de Formação 2023/2026 | Ano letivo 2025/2026
    - [Validação de E-mail e Automação de Criação](#validação-de-e-mail-e-automação-de-criação)
    - [Recursos Filament Implementados](#recursos-filament-implementados)
    - [Automatização com *Observers* e *Listeners*](#automatização-com-observers-e-listeners)
+   - [Organograma de Unidades e Sincronização de Utilizadores](#organograma-de-unidades-e-sincronização-de-utilizadores)
 5. [Suíte de Testes Automatizados](#suíte-de-testes-automatizados)
 6. [Conclusão](#conclusão)
    - [Dificuldades Encontradas e Soluções Adotadas](#dificuldades-encontradas-e-soluções-adotadas)
@@ -87,7 +88,8 @@ Ciclo de Formação 2023/2026 | Ano letivo 2025/2026
 | Figura 13 | *EmployeeResource* — lista com tabela, filtros e ações |
 | Figura 14 | *ContractResource* com ação de *download* de PDF de contrato |
 | Figura 15 | *ActivityLogResource* — visualização de histórico de auditoria com filtros |
-| Figura 16 | Interface do Banco de Horas com *Relation Manager* de movimentos |
+| Figura 16 | *UnitsTree* — Organograma hierárquico de unidades organizacionais com NestedSet |
+| Figura 17 | Interface do Banco de Horas com *Relation Manager* de movimentos |
 
 ---
 
@@ -122,7 +124,7 @@ A metodologia de trabalho incluiu o levantamento detalhado de requisitos, a mode
 
 > **Estado da Aplicação — 01 de Junho de 2026**
 >
-> A Aplicação TeamCore encontra-se numa fase de maturidade *production-ready* com todas as funcionalidades核心 completamente implementadas, testadas e validadas. A aplicação inclui: 16 modelos com isolamento de dados RBAC; 16 *resources* Filament com políticas de autorização; 17 *policies* para controlo granular; sistema de banco de horas cumulativo com rastreio de movimentos e validação automática de licenças; auditoria completa via Spatie Activity Log; 5 *observers* e 1 *listener* para automatização de processos; autenticação segura via Filament Breezy e *Passkeys*; *middleware* `CheckActiveUser` para gestão de ativação de utilizadores; serviços especializados com proteção de concorrência (`VacationBalanceService` com `DB::transaction` + `lockForUpdate`); configuração centralizada de negócio em `config/hr.php`; suíte de testes automatizados com Pest v4 com 29 ficheiros de teste; página de calendário pessoal (*EmployeeCalendar*) com vista mensal/semanal/lista e codificação por cores; *widget* de ponto do dia (*TodayAttendanceWidget*) com estatísticas de entrada, almoço, saída e tempo trabalhado; *widget* de faltas (*EmployeeAbsencesWidget*); e validação de sobreposição de períodos em pedidos de férias e licenças para impedir conflitos de datas.
+> A Aplicação TeamCore encontra-se numa fase de maturidade *production-ready* com todas as funcionalidades completamente implementadas, testadas e validadas. A aplicação inclui: 16 modelos com isolamento de dados RBAC; 16 *resources* Filament com políticas de autorização; 17 *policies* para controlo granular; sistema de banco de horas cumulativo com rastreio de movimentos e validação automática de licenças; auditoria completa via Spatie Activity Log; 5 *observers* e 1 *listener* para automatização de processos; autenticação segura via Filament Breezy e *Passkeys*; *middleware* `CheckActiveUser` para gestão de ativação de utilizadores; serviços especializados com proteção de concorrência (`VacationBalanceService` com `DB::transaction` + `lockForUpdate`); configuração centralizada de negócio em `config/hr.php`; suíte de testes automatizados com Pest v4 com 29 ficheiros de teste; página de calendário pessoal (*EmployeeCalendar*) com vista mensal/semanal/lista e codificação por cores; *widget* de ponto do dia (*TodayAttendanceWidget*) com estatísticas de entrada, almoço, saída e tempo trabalhado; *widget* de faltas (*EmployeeAbsencesWidget*); validação de sobreposição de períodos em pedidos de férias e licenças para impedir conflitos de datas; organograma hierárquico de unidades (*UnitsTree*) com drag-and-drop via NestedSet; e ações de sincronização de utilizadores na listagem de funcionários.
 
 ---
 
@@ -192,6 +194,7 @@ O processo de desenvolvimento adotou uma metodologia iterativa com ciclos bissem
 | Pest | *Framework* de testes | 4.5 |
 | Vite | *Bundler Frontend* | 6.2.4+ |
 | Spatie Activity Log | Auditoria de operações | 5.0 |
+| wsmallnews/filament-nestedset | Gestão hierárquica de unidades | 2.2 |
 
 ---
 
@@ -206,14 +209,14 @@ A aplicação suporta as seguintes entidades principais:
 | **Funcionários** (`Employee`) | Dados pessoais, contactos, informações profissionais e saldo de férias. |
 | **Utilizadores** (`User`) | Credenciais de acesso, papéis e permissões (autenticação via Filament Breezy). |
 | **Contratos** (`Contract`) | Vínculo laboral (*permanent*, *fixed_term*, *unfixed_term*, *service_provision*, *internship*), remuneração e estado (*active*, *terminated*, *on_hold*). |
-| **Unidades Organizacionais** (`Unit`) | Estrutura hierárquica da empresa (*direction*, *department*, *section*) com gestor responsável. |
+| **Unidades Organizacionais** (`Unit`) | Estrutura hierárquica da empresa (*direction*, *management*, *department*, *section*) com gestor responsável e suporte a NestedSet para organograma. |
 | **Cargos** (`Designation`) | Funções profissionais com níveis (*junior*, *pleno*, *senior*, *specialist*, *lead*) e salários base. |
 | **Banco de Horas** (`HourBank`) | Controlo cumulativo de horas com suporte a movimentos históricos. |
 | **Movimentos do Banco de Horas** (`HourBankMovement`) | Registo polimórfico de cada alteração ao saldo (ganhos e descontos). |
 | **Registos de Presença** (`AttendanceLog`) | Registos diários de entrada/saída/pausas com cálculo automático de minutos totais. |
 | **Ausências** (`Absence`) | Auditoria de descontos de horas com tipos (*unjustified_absence*, *partial_absence*, *other*). |
 | **Férias** (`Vacation`) | Gestão de férias anuais com saldo por ano, estado de aprovação e dias tomados. |
-| **Licenças e Afastamentos** (`LeaveAndAbsence`) | Licenças justificadas (*sick_leave*, *parental*, *marriage*, *bereavement*, *justified_absence*, *unjustified*) com fluxo de aprovação. |
+| **Licenças e Afastamentos** (`LeaveAndAbsence`) | Licenças formais (*sick_leave*, *parental*, *marriage*, *bereavement*, *justified_absence*) e ausências injustificadas (*unjustified*) com fluxo de aprovação. |
 | **Processamento Salarial** (`Payroll`) | Geração automática de recibos de vencimento com base em contratos e movimentos do banco de horas. |
 | **Localização** | País, Estado e Cidade para preenchimento de dados de funcionários. |
 
@@ -520,6 +523,27 @@ Cada contrato pode ser visualizado em lista e descarregado como PDF com toda a i
 
 O `ActivityLogResource` regista todas as alterações importantes no sistema (criação de utilizadores, edição de salários, eliminação de registos). Os filtros permitem procurar por tipo de ação, utilizador ou data, facilitando investigações e auditorias internas.
 
+> **Figura 16:** *UnitsTree* — Organograma hierárquico de unidades organizacionais com NestedSet.
+> *(Print: aceder a `/admin/units-tree`.)*
+
+#### Organograma de Unidades (*UnitsTree*)
+
+A página `UnitsTree` disponibiliza uma vista em árvore da estrutura organizacional da empresa, implementada com o *package* `wsmallnews/filament-nestedset` (NestedSet v2.2). A interface permite:
+
+- Visualizar o organograma completo com todos os níveis hierárquicos (*direction*, *management*, *department*, *section*).
+- Criar, editar e eliminar unidades diretamente na árvore, sem sair da página.
+- Reordenar unidades por *drag-and-drop*, com atualização automática dos nós `_lft`/`_rgt` do NestedSet na base de dados.
+- Visualizar os detalhes de cada unidade (nome, tipo, gestor responsável, estado ativo) num painel lateral.
+
+A migração correspondente adiciona as colunas `_lft`, `_rgt` e `parent_id` à tabela `units`, garantindo compatibilidade total com o modelo NestedSet e preservando a hierarquia existente.
+
+#### Ações de Sincronização de Utilizadores
+
+A página de listagem de funcionários (`ListEmployees`) inclui duas ações administrativas de sincronização acessíveis no cabeçalho:
+
+- **Employees → Users:** cria contas de utilizador para todos os funcionários que ainda não possuem uma, atribuindo senha definida no .env e obrigando a troca no primeiro acesso.
+- **Users → Employees:** liga utilizadores existentes a registos de funcionário por correspondência de endereço de e-mail, resolvendo inconsistências de migração de dados.
+
 #### Lista Completa de *Resources* (16)
 
 | *Resource* | Modelo |
@@ -567,7 +591,7 @@ Cada *resource* inclui:
 | `AbsenceObserver` | Monitoriza a criação, atualização e eliminação de ausências, despoletando o recálculo automático do saldo do Banco de Horas para o período correspondente. |
 | `LeaveAndAbsenceObserver` | Gere a remoção de ausências automáticas ou criação de deduções por licenças não remuneradas aquando da aprovação de um pedido. |
 
-> **Figura 16:** Interface do Banco de Horas com *Relation Manager* de movimentos detalhando cada transação.
+> **Figura 17:** Interface do Banco de Horas com *Relation Manager* de movimentos detalhando cada transação.
 > *(Print: aceder a `/admin/hour-banks/{id}/edit` e mostrar a relação de movimentos.)*
 
 #### *Activity Logging* com Spatie
@@ -803,14 +827,31 @@ Para as próximas oportunidades profissionais, levarei a compreensão de que qua
 
 ## Bibliografia
 
+### *Frameworks* e Linguagens
+
 - Laravel LLC. (2025). *Laravel – The PHP framework for web artisans*. Versão 13.0. Acedido em 16 de abril de 2026, em https://laravel.com
 - Filament. (2025). *Filament – Accelerated Laravel development*. Versão 5.5+. Acedido em 16 de abril de 2026, em https://filamentphp.com
-- Spatie. (2025). *Laravel Activity Log*. Versão 5.0. Acedido em 16 de abril de 2026, em https://spatie.be/docs/laravel-activitylog/
 - The PHP Group. (2025). *PHP: Hypertext preprocessor*. Versão 8.4. Acedido em 16 de abril de 2026, em https://www.php.net
-- Composer Authors. (2025). *Composer – Dependency manager for PHP*. Acedido em 16 de abril de 2026, em https://getcomposer.org
 - Oracle Corporation. (2025). *MySQL 8.0 Reference Manual*. Acedido em 16 de abril de 2026, em https://dev.mysql.com/doc
-- GitHub, Inc. (2025). *GitHub – Where the world builds software*. Acedido em 16 de abril de 2026, em https://github.com
+
+### Pacotes e Plugins
+
+- Salleh, B. (2025). *Filament Shield – Role & Permission Manager for Filament*. Acedido em 16 de abril de 2026, em https://github.com/bezhanSalleh/filament-shield
+- Greco, J. (2025). *Filament Breezy – Authentication & Passkeys for Filament*. Versão 3.2+. Acedido em 16 de abril de 2026, em https://github.com/jeffgreco13/filament-breezy
+- Spatie. (2025). *Laravel Activity Log*. Versão 5.0. Acedido em 16 de abril de 2026, em https://spatie.be/docs/laravel-activitylog/
+- Van Dyck, B. (2025). *Laravel DomPDF – PDF generation for Laravel*. Versão 3.1+. Acedido em 16 de abril de 2026, em https://github.com/barryvdh/laravel-dompdf
+- Rotter, P. (2025). *Filament Excel – Excel export for Filament*. Versão 3.6+. Acedido em 16 de abril de 2026, em https://github.com/pxlrbt/filament-excel
+- Wsmallnews. (2025). *Filament Nestedset – Hierarchical tree management for Filament*. Versão 2.2. Acedido em 16 de abril de 2026, em https://github.com/wsmallnews/filament-nestedset
+- Azgasim. (2025). *Filament Unsaved Changes Modal – Unsaved data alert for Filament*. Versão 1.0+. Acedido em 16 de abril de 2026, em https://github.com/azgasim/filament-unsaved-changes-modal
+- Laravel Notification Channels. (2025). *WebPush – Web Push notifications for Laravel*. Versão 10.5+. Acedido em 16 de abril de 2026, em https://github.com/laravel-notification-channels/webpush
+- Predis Authors. (2025). *Predis – Redis client for PHP*. Versão 3.4+. Acedido em 16 de abril de 2026, em https://github.com/predis/predis
+
+### Ferramentas de Desenvolvimento
+
 - Pest. (2025). *Pest – PHP Testing Framework*. Versão 4.5. Acedido em 16 de abril de 2026, em https://pestphp.com
+- Laravel Pint Authors. (2025). *Laravel Pint – PHP code style fixer*. Versão 1.27+. Acedido em 16 de abril de 2026, em https://laravel.com/docs/pint
+- Composer Authors. (2025). *Composer – Dependency manager for PHP*. Acedido em 16 de abril de 2026, em https://getcomposer.org
+- GitHub, Inc. (2025). *GitHub – Where the world builds software*. Acedido em 16 de abril de 2026, em https://github.com
 
 ---
 
