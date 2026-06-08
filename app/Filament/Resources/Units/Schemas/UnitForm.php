@@ -33,7 +33,6 @@ class UnitForm
                             ->label('Tipo')
                             ->options([
                                 'direction' => 'Direção',
-                                'management' => 'Gestão',
                                 'department' => 'Departamento',
                                 'section' => 'Secção',
                             ])
@@ -49,6 +48,7 @@ class UnitForm
                                 if (! $record) {
                                     return $exists;
                                 }
+
                                 return $exists && ! $record->is_main_direction;
                             })
                             ->live()
@@ -81,7 +81,6 @@ class UnitForm
                                 fn (Builder $query, Get $get) => match ($get('type')) {
                                     'section' => $query->where('type', 'department'),
                                     'department' => $query->where('type', 'direction'),
-                                    'management' => $query->where('type', 'direction'),
                                     default => $query,
                                 }
                             )

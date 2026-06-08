@@ -181,8 +181,12 @@ class EmployeeActionsWidget extends Widget implements HasActions, HasSchemas
                     ->label('Motivo')
                     ->required(),
                 FileUpload::make('justification_doc')
-                    ->label('Documento de Justificação')
-                    ->directory('leaves'),
+                    ->label('Documento de Justificação (opcional)')
+                    ->disk('public')
+                    ->visibility('public')
+                    ->directory('leaves/justifications')
+                    ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'])
+                    ->maxSize(5120),
             ])
             ->action(function (array $data, Action $action): void {
                 $employee = Auth::user()->employee;

@@ -19,6 +19,7 @@ use App\Filament\Resources\Employees\RelationManagers\HourBankMovementsRelationM
 use App\Filament\Resources\Employees\RelationManagers\LeavesRelationManager;
 use App\Filament\Resources\Employees\RelationManagers\VacationsRelationManager;
 use App\Filament\Resources\Employees\Schemas\EmployeeForm;
+use App\Filament\Resources\Employees\Schemas\EmployeeInfolist;
 use App\Filament\Resources\Employees\Tables\EmployeesTable;
 use App\Models\Employee;
 use App\Traits\HasHierarchicalQuery;
@@ -89,6 +90,11 @@ class EmployeeResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return EmployeeForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return EmployeeInfolist::configure($schema);
     }
 
     /**

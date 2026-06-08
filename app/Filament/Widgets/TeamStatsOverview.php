@@ -3,20 +3,27 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Employee;
+use App\Models\LeaveAndAbsence;
+use App\Models\Vacation;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Vacation;
-use App\Models\LeaveAndAbsence;
 
 class TeamStatsOverview extends BaseWidget
 {
+    public static function canView(): bool
+    {
+        $user = Auth::user();
+
+        return (bool) $user?->employee?->getAllManagedUnits()->isNotEmpty();
+    }
+
     protected function getStats(): array
     {
         $user = Auth::user();
         $meuEmployee = $user?->employee;
 
-        if (!$meuEmployee) {
+        if (! $meuEmployee) {
             return [];
         }
 
@@ -33,11 +40,11 @@ class TeamStatsOverview extends BaseWidget
         $teamBalance = Employee::whereIn('id', $employeeIds)
             ->with('hourBank')
             ->get()
-            ->sum(fn($emp) => $emp->hourBank?->balance ?? 0);
+            ->sum(fn ($emp) => $emp->hourBank?->balance ?? 0);
 
         $hours = floor(abs($teamBalance) / 60);
         $minutes = abs($teamBalance) % 60;
-        $balanceFormatted = ($teamBalance < 0 ? '-' : '') . "{$hours}h {$minutes}m";
+        $balanceFormatted = ($teamBalance < 0 ? '-' : '')."{$hours}h {$minutes}m";
 
         return [
             Stat::make('Tamanho da Equipa', $teamSize)

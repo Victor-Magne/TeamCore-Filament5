@@ -33,6 +33,7 @@ class Absence extends Model
         'hours_deducted',         // Quantidade de minutos descontados
         'deduction_type',         // Tipo de dedução (ex: falta injustificada, atraso)
         'reason',                 // Descrição ou motivo detalhado da ausência
+        'justification_doc',      // Documento de justificação anexado pelo colaborador
     ];
 
     /**

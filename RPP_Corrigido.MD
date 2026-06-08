@@ -15,8 +15,8 @@ Ciclo de Formação 2023/2026 | Ano letivo 2025/2026
 |---|---|
 | **Autor** | Victor Gabriel Cristino Gomes — N.º 21 |
 | **Orientadora** | Zélia Capitão |
-| **Data** | 01/06/2026 |
-| **Versão anterior** | 29/05/2026 |
+| **Data** | 08/06/2026 |
+| **Versão anterior** | 01/06/2026 |
 
 ---
 
@@ -125,7 +125,7 @@ A metodologia de trabalho incluiu o levantamento detalhado de requisitos, a mode
 
 > **Estado da Aplicação — 01 de Junho de 2026**
 >
-> A Aplicação TeamCore encontra-se numa fase de maturidade *production-ready* com todas as funcionalidades completamente implementadas, testadas e validadas. A aplicação inclui: 18 modelos com isolamento de dados RBAC; 16 *resources* Filament com políticas de autorização; 17 *policies* para controlo granular; sistema de banco de horas cumulativo com rastreio de movimentos e validação automática de licenças; auditoria completa via Spatie Activity Log; 6 *observers* e 1 *listener* para automatização de processos; autenticação segura via Filament Breezy e *Passkeys*; *middleware* `CheckActiveUser` para gestão de ativação de utilizadores; serviços especializados com proteção de concorrência (`VacationBalanceService` com `DB::transaction` + `lockForUpdate`); configuração centralizada de negócio em `config/hr.php`; suíte de testes automatizados com Pest v4 com 29 ficheiros de teste; página de calendário pessoal (*EmployeeCalendar*) com vista mensal/semanal/lista e codificação por cores; *widget* de ponto do dia (*TodayAttendanceWidget*) com estatísticas de entrada, almoço, saída e tempo trabalhado; *widget* de faltas (*EmployeeAbsencesWidget*); validação de sobreposição de períodos em pedidos de férias e licenças para impedir conflitos de datas; organograma hierárquico de unidades (*UnitsTree*) com drag-and-drop via NestedSet; ações de sincronização de utilizadores na listagem de funcionários; e página de gestão de equipa (*ManageTeam*) para responsáveis de unidade com *widgets* de presença e pedidos pendentes.
+> A Aplicação TeamCore encontra-se numa fase de maturidade *production-ready* com todas as funcionalidades completamente implementadas, testadas e validadas. A aplicação inclui: 18 modelos com isolamento de dados RBAC; 16 *resources* Filament com políticas de autorização; 17 *policies* para controlo granular; sistema de banco de horas cumulativo com rastreio de movimentos e validação automática de licenças; auditoria completa via Spatie Activity Log; 6 *observers* e 1 *listener* para automatização de processos; autenticação segura via Filament Breezy e *Passkeys*; *middleware* `CheckActiveUser` para gestão de ativação de utilizadores; serviços especializados com proteção de concorrência (`VacationBalanceService` com `DB::transaction` + `lockForUpdate`); configuração centralizada de negócio em `config/hr.php`; suíte de testes automatizados com Pest v4 com 30 ficheiros de teste; página de calendário pessoal (*EmployeeCalendar*) com vista mensal/semanal/lista e codificação por cores; *widget* de ponto do dia (*TodayAttendanceWidget*) com estatísticas de entrada, almoço, saída e tempo trabalhado; *widget* de faltas (*EmployeeAbsencesWidget*); validação de sobreposição de períodos em pedidos de férias e licenças para impedir conflitos de datas; organograma hierárquico de unidades (*UnitsTree*) com drag-and-drop via NestedSet; ações de sincronização de utilizadores na listagem de funcionários; e página de gestão de equipa (*ManageTeam*) para responsáveis de unidade com *widgets* de presença e pedidos pendentes.
 
 ---
 
@@ -306,7 +306,7 @@ O sistema implementa um modelo RBAC (*Role-Based Access Control*) com papéis e 
 - **Auto-aprovação bloqueada:** o utilizador não pode aprovar os seus próprios pedidos (via *Policies*).
 - ***Soft deletes*:** preservação de histórico em todos os modelos críticos.
 - ***Activity logging*:** rastreio completo via Spatie Activity Log (automático com a *trait* `LogsActivity`).
-- **Serviços especializados:** lógica de negócio complexa encapsulada em *Services* (`GeneratePayrollService`, `CalculateExtraHoursService`, `DeductHourBankService`, `HourBankService`, `AttendanceCalculationService`, `VacationBalanceService`, `ContractPdfService`).
+- **Serviços especializados:** lógica de negócio complexa encapsulada em *Services* (`GeneratePayrollService`, `CalculateExtraHoursService`, `DeductHourBankService`, `HourBankService`, `AttendanceCalculationService`, `VacationBalanceService`, `ContractPdfService`, `EmployeeOnboardingService`).
 - ***Middleware* de ativação:** `CheckActiveUser` verifica o campo `is_active` em cada pedido — utilizadores desativados são imediatamente desautenticados e redirecionados, sem necessidade de expirar a sessão manualmente.
 - **Proteção de concorrência:** `VacationBalanceService` usa `DB::transaction` + `lockForUpdate` para prevenir *race conditions* em aprovações simultâneas de férias.
 - **Configuração centralizada:** `config/hr.php` define todos os limiares de negócio (tolerâncias, multiplicadores, limites de atrasos), eliminando constantes dispersas no código.
@@ -474,6 +474,24 @@ As *badges* (pequenos rótulos coloridos) permitem identificar rapidamente o pap
 - **`AbsencesRelationManager`:** lista faltas registadas com data, tipo de dedução (injustificada, parcial) e horas descontadas.
 - **`HourBankMovementsRelationManager`:** histórico completo do banco de horas com formato legível (Xh Ym).
 
+#### Foto de Perfil do Funcionário
+
+- Campo `photo` adicionado à tabela `employees` com migração dedicada.
+- *Upload* de avatar via `FileUpload` no formulário de edição, armazenado em `employees/photos` com visibilidade pública.
+- Coluna de imagem (`ImageColumn`) visível na listagem do `EmployeeResource`.
+
+#### Documento de Justificação em Faltas
+
+- Campo `justification_doc` adicionado à tabela `absences` com migração dedicada.
+- Os funcionários podem anexar um documento de justificação ao submeter um pedido de licença/falta via `EmployeeActionsWidget` e `EmployeeCalendar`.
+- O `AbsenceResource` apresenta um ícone indicador na tabela (verde com documento, vermelho sem) e permite ao RH anexar ou substituir o documento diretamente por uma ação inline.
+- `AbsenceInfolist` exibe o documento anexado na vista de detalhe da falta.
+
+#### Atribuição de Papéis em Lote (*Bulk Action*)
+
+- `AssignRoleBulkAction` adicionado ao `UserResource`, permitindo selecionar múltiplos utilizadores e atribuir papéis em bloco com um único formulário modal.
+- Suporta seleção múltipla de papéis e sincroniza via `syncRoles`, substituindo papéis existentes.
+
 #### Boas Práticas de Engenharia
 
 - Código limpo e bem estruturado.
@@ -625,7 +643,7 @@ Cada alteração (*create*, *update*, *delete*) é automaticamente registada na 
 
 A aplicação implementa uma suíte abrangente de testes automatizados usando Pest v4 para validar funcionalidades críticas e garantir a integridade da lógica de negócio.
 
-### Testes Implementados (29 ficheiros)
+### Testes Implementados (30 ficheiros)
 
 #### Testes de *Feature*
 
@@ -679,6 +697,8 @@ A aplicação implementa uma suíte abrangente de testes automatizados usando Pe
 
 25. **`CheckDailyAttendanceTest`** — testa o comando `CheckDailyAttendance` que verifica automaticamente as presenças diárias e regista ausências não justificadas para funcionários sem registo de presença no dia.
 
+26. **`HierarchicalVisibilityTest`** — valida o isolamento de dados hierárquico com uma árvore organizacional completa (Direção Geral → Direção → Departamento → Secção): o diretor-geral vê toda a organização; o diretor vê apenas a sua direção e unidades descendentes mas não ramos irmãos nem níveis superiores; o chefe de departamento vê o seu departamento e secções mas não os outros departamentos; o chefe de secção vê apenas os colaboradores da sua secção; o colaborador vê apenas os seus próprios dados.
+
 #### Testes de *Unit*
 
 - **`DashboardWidgetsTest`** (Unit) — valida componentes isolados dos *widgets* do painel administrativo.
@@ -689,7 +709,7 @@ A aplicação implementa uma suíte abrangente de testes automatizados usando Pe
 
 ### Inventário Completo dos Ficheiros de Teste
 
-**Testes de *Feature* (26 ficheiros):**
+**Testes de *Feature* (27 ficheiros):**
 
 - `tests/Feature/AttendanceProcessingTest.php`
 - `tests/Feature/ContractPdfTest.php`
@@ -697,6 +717,7 @@ A aplicação implementa uma suíte abrangente de testes automatizados usando Pe
 - `tests/Feature/EmployeeNotificationTest.php`
 - `tests/Feature/EmployeePolicyTest.php`
 - `tests/Feature/ExampleTest.php`
+- `tests/Feature/HierarchicalVisibilityTest.php`
 - `tests/Feature/HourBankTest.php`
 - `tests/Feature/PayrollProcessingTest.php`
 - `tests/Feature/TeamManagementTest.php`
@@ -724,7 +745,7 @@ A aplicação implementa uma suíte abrangente de testes automatizados usando Pe
 - `tests/Unit/Dashboard/DashboardWidgetsTest.php`
 - `tests/Unit/Http/Middleware/EnsureUtf8EncodingTest.php`
 
-Este inventário confirma a existência de 29 ficheiros de teste, distribuídos entre validação de comportamento ponta a ponta (*Feature*) e validação de componentes isolados (*Unit*).
+Este inventário confirma a existência de 30 ficheiros de teste, distribuídos entre validação de comportamento ponta a ponta (*Feature*) e validação de componentes isolados (*Unit*).
 
 ---
 
@@ -756,15 +777,15 @@ Foram também tratadas fontes de flutuação relacionadas com colisões de campo
 
 ---
 
-### Estado Atual da Qualidade — 01/06/2026
+### Estado Atual da Qualidade — 08/06/2026
 
 A suíte foi executada de forma completa com `php artisan test` e também no modo compacto (`php artisan test --compact`), mantendo consistência nos resultados e confirmando estabilidade entre testes de *Unit* e *Feature*.
 
 | Métrica | Valor |
 |---|---|
-| Ficheiros de teste | 29 |
+| Ficheiros de teste | 30 |
 | Falhas no estado final | 0 |
-| Novos ficheiros desde 15/05 | 4 (`AttendanceCalculationServiceTest`, `VacationBalanceServiceTest`, `HrConfigTest`, `CheckActiveUserTest`) |
+| Novos ficheiros desde 15/05 | 5 (`AttendanceCalculationServiceTest`, `VacationBalanceServiceTest`, `HrConfigTest`, `CheckActiveUserTest`, `HierarchicalVisibilityTest`) |
 
 Para além da cobertura funcional direta, os testes garantem propriedades arquiteturais importantes:
 
@@ -804,7 +825,7 @@ Do ponto de vista prático, esta maturidade de testes traduz-se em três ganhos 
 - **Automatização inteligente:** o padrão *Observer* (6 *observers*) automatiza a sincronização de dados entre modelos, incluindo notificações automáticas ao funcionário quando o estado dos seus pedidos é atualizado.
 - **Auditoria completa:** Spatie Activity Log fornece rastreio automático de todas as operações sensíveis.
 - **RBAC dinâmico:** Filament Shield permite gerir papéis e permissões de forma granular e flexível.
-- **Testes com cobertura robusta:** Pest v4 com 29 ficheiros de teste cobrindo funcionalidades críticas. Cada teste valida comportamentos essenciais: cálculo de horas extras, processamento de ausências, gestão de férias, geração de *payroll*, *policies* de autorização e ativação de utilizadores.
+- **Testes com cobertura robusta:** Pest v4 com 30 ficheiros de teste cobrindo funcionalidades críticas. Cada teste valida comportamentos essenciais: cálculo de horas extras, processamento de ausências, gestão de férias, geração de *payroll*, *policies* de autorização, ativação de utilizadores e visibilidade hierárquica por unidade organizacional.
 - **Notificações em tempo real:** integração com *Web Push* via `PushSubscription` e `RequestStatusNotification`, alertando os colaboradores de alterações de estado sem necessidade de recarregar a página.
 
 ---

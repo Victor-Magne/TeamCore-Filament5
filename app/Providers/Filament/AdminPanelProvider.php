@@ -80,7 +80,7 @@ class AdminPanelProvider extends PanelProvider
                         hasAvatars: true,
                         slug: 'my-profile'
                     )
-                    ->enableTwoFactorAuthentication(),
+                    ->withoutMyProfileComponents(['update_password', 'two_factor_authentication']),
                 FilamentShieldPlugin::make(),
                 FilamentUnsavedChangesModalPlugin::make(),
             ])

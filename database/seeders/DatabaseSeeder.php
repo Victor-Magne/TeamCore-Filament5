@@ -35,8 +35,14 @@ class DatabaseSeeder extends Seeder
             // 2. Estrutura da Empresa (Unidades e Cargos)
             OrganizationSeeder::class,
 
-            // 3. Dados de Demonstração (Funcionários, Contratos, etc.)
+            // 3. Roles e Permissões (necessárias antes de atribuir roles a funcionários)
+            ShieldSeeder::class,
+
+            // 4. Dados de Demonstração (Funcionários, Contratos, etc.)
             EmployeeSeeder::class,
+
+            // 5. Dados históricos de 2025 (contratos, presenças, férias, folhas de vencimento, etc.)
+            WorkYear2025Seeder::class,
         ]);
     }
 }

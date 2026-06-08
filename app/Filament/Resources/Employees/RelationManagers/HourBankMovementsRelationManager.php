@@ -47,12 +47,13 @@ class HourBankMovementsRelationManager extends RelationManager
 
                 TextColumn::make('amount')
                     ->label('Quantidade')
-                    ->formatStateUsing(function (int $state): string {
+                    ->formatStateUsing(function (int $state, $record): string {
                         $abs = abs($state);
-                        $sign = $state < 0 ? '-' : '+';
-                        return $sign . intdiv($abs, 60) . 'h ' . str_pad($abs % 60, 2, '0', STR_PAD_LEFT) . 'm';
+                        $sign = $record->type === 'deduction' ? '-' : '+';
+
+                        return $sign.intdiv($abs, 60).'h '.str_pad($abs % 60, 2, '0', STR_PAD_LEFT).'m';
                     })
-                    ->color(fn (int $state) => $state >= 0 ? 'success' : 'danger')
+                    ->color(fn (int $state, $record) => $record->type === 'deduction' ? 'danger' : 'success')
                     ->weight('bold'),
 
                 TextColumn::make('description')

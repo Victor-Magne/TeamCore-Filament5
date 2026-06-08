@@ -48,6 +48,7 @@ class Employee extends Model
         'date_hired',       // Data de contratação
         'date_dismissed',   // Data de demissão/saída
         'vacation_balance', // Saldo actual de dias de férias disponíveis
+        'photo',            // Foto de perfil (caminho no disco public)
     ];
 
     /**

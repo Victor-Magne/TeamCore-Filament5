@@ -2,7 +2,10 @@
 
 namespace App\Filament\Resources\Users\Tables;
 
+use App\Filament\Actions\AssignRoleBulkAction;
+use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -39,11 +42,17 @@ class UsersTable
                 IconColumn::make('must_change_password')
                     ->label('Alterar Password')
                     ->boolean()
-                    ->color(fn(bool $state): string => $state ? 'success' : 'danger'),
+                    ->color(fn (bool $state): string => $state ? 'success' : 'danger'),
             ])
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    AssignRoleBulkAction::make(),
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 }

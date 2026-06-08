@@ -11,7 +11,10 @@ class Cities extends Seeder
     public function run()
     {
         //
+DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 DB::table('cities')->delete();
+DB::statement('ALTER TABLE cities AUTO_INCREMENT = 1;');
+DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 $cities = array(
 array('name' => "Bombuflat",'state_id' => 1),
 array('name' => "Garacharma",'state_id' => 1),

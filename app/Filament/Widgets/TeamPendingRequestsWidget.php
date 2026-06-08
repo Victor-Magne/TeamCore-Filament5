@@ -18,6 +18,13 @@ class TeamPendingRequestsWidget extends BaseWidget
 {
     protected static ?string $heading = 'Pedidos Pendentes da Equipa';
 
+    public static function canView(): bool
+    {
+        $user = Auth::user();
+
+        return (bool) $user?->employee?->getAllManagedUnits()->isNotEmpty();
+    }
+
     protected int|string|array $columnSpan = 'full';
 
     public function table(Table $table): Table

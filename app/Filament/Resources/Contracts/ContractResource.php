@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Contracts;
 
+use App\Filament\Resources\Contracts\Pages\EditContract;
 use App\Filament\Resources\Contracts\Pages\ListContracts;
 use App\Filament\Resources\Contracts\Schemas\ContractForm;
 use App\Filament\Resources\Contracts\Schemas\ContractInfolist;
@@ -54,6 +55,7 @@ class ContractResource extends Resource
     {
         return [
             'index' => ListContracts::route('/'),
+            'edit' => EditContract::route('/{record}/edit'),
         ];
     }
 }

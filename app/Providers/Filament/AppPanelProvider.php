@@ -4,6 +4,9 @@ namespace App\Providers\Filament;
 
 use App\Filament\App\Pages\EmployeeDashboard;
 use App\Filament\Pages\AttendanceCheckIn;
+use App\Filament\Widgets\TeamAttendanceWidget;
+use App\Filament\Widgets\TeamPendingRequestsWidget;
+use App\Filament\Widgets\TeamStatsOverview;
 use App\Http\Middleware\CheckActiveUser;
 use App\Http\Middleware\CheckAppPanelAccess;
 use App\Http\Middleware\CheckMustChangePassword;
@@ -73,7 +76,12 @@ class AppPanelProvider extends PanelProvider
                         hasAvatars: true,
                         slug: 'my-profile'
                     )
-                    ->withoutMyProfileComponents(['update_password', 'two_factor_authentication']),
+                    ->withoutMyProfileComponents(['update_password', 'two_factor_authentication'])
+                    ->avatarUploadComponent(fn ($fileUpload) => $fileUpload
+                        ->disk('public')
+                        ->directory('employees/photos')
+                        ->visibility('public')
+                    ),
                 FilamentShieldPlugin::make(),
                 FilamentUnsavedChangesModalPlugin::make(),
             ])
@@ -84,7 +92,9 @@ class AppPanelProvider extends PanelProvider
                 AttendanceCheckIn::class,
             ])
             ->widgets([
-                // Widgets are registered in the Dashboard class
+                TeamStatsOverview::class,
+                TeamPendingRequestsWidget::class,
+                TeamAttendanceWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

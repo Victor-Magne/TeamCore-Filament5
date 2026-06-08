@@ -4,10 +4,9 @@ namespace App\Filament\Resources\HourBanks\RelationManagers;
 
 use Filament\Forms;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class MovementsRelationManager extends RelationManager
 {
@@ -57,13 +56,14 @@ class MovementsRelationManager extends RelationManager
 
                 TextColumn::make('amount')
                     ->label('Quantidade')
-                    ->formatStateUsing(function (int $state) {
+                    ->formatStateUsing(function (int $state, $record): string {
                         $hours = intdiv(abs($state), 60);
                         $minutes = abs($state) % 60;
-                        $sign = $state < 0 ? '-' : '+';
+                        $sign = $record->type === 'deduction' ? '-' : '+';
+
                         return "{$sign}{$hours}h {$minutes}m";
                     })
-                    ->color(fn (int $state) => $state >= 0 ? 'success' : 'danger')
+                    ->color(fn (int $state, $record) => $record->type === 'deduction' ? 'danger' : 'success')
                     ->weight('bold'),
             ])
             ->filters([

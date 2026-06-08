@@ -15,6 +15,7 @@ use App\Models\City;
 use App\Rules\ValidEmailDomain;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
@@ -44,6 +45,16 @@ class EmployeeForm
                                 Section::make('Informação Pessoal')
                                     ->icon('heroicon-o-user-circle')
                                     ->schema([
+                                        FileUpload::make('photo')
+                                            ->label('Foto de Perfil')
+                                            ->image()
+                                            ->imageEditor()
+                                            ->disk('public')
+                                            ->visibility('public')
+                                            ->directory('employees/photos')
+                                            ->avatar()
+                                            ->columnSpanFull(),
+
                                         TextInput::make('first_name')
                                             ->label('Nome')
                                             ->required()

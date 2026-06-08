@@ -9,7 +9,9 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -29,6 +31,12 @@ class EmployeesTable
             ->emptyStateHeading('Sem funcionários')
             ->emptyStateDescription('Adicione o primeiro funcionário para começar.')
             ->columns([
+                ImageColumn::make('photo')
+                    ->label('Foto')
+                    ->disk('public')
+                    ->circular()
+                    ->defaultImageUrl(fn (Employee $record): string => 'https://ui-avatars.com/api/?name='.urlencode($record->first_name.' '.$record->last_name).'&color=7F9CF5&background=EBF4FF'),
+
                 TextColumn::make('first_name')
                     ->label('Nome')
                     ->formatStateUsing(fn (Employee $record): string => "{$record->first_name} {$record->last_name}")
@@ -168,7 +176,9 @@ class EmployeesTable
                             ]),
                     ]),
             ])
+            ->recordAction('view')
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make(),
             ])
             ->toolbarActions([

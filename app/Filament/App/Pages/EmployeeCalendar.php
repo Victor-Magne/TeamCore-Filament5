@@ -184,7 +184,11 @@ class EmployeeCalendar extends Page
                         ->required(),
                     FileUpload::make('justification_doc')
                         ->label('Documento de Justificação (opcional)')
-                        ->directory('leaves'),
+                        ->disk('public')
+                        ->visibility('public')
+                        ->directory('leaves/justifications')
+                        ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'])
+                        ->maxSize(5120),
                 ])
                 ->action(function (array $data, Action $action): void {
                     $employee = Auth::user()->employee;

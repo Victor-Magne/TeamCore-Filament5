@@ -109,7 +109,12 @@ class LeaveAndAbsenceForm
 
                     FileUpload::make('justification_doc')
                         ->label('Documento de Justificação')
-                        ->directory('leaves')
+                        ->disk('public')
+                        ->visibility('public')
+                        ->directory('leaves/justifications')
+                        ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'])
+                        ->maxSize(5120)
+                        ->helperText('Formatos aceites: PDF, JPG, PNG. Tamanho máximo: 5MB.')
                         ->columnSpanFull(),
                 ]),
 

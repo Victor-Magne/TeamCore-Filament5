@@ -12,7 +12,9 @@ class Countries extends Seeder
      */
     public function run()
     {
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('countries')->delete();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
         $countries = [
             ['id' => 1, 'code' => 'AF', 'name' => 'Afghanistan', 'phonecode' => 93],
             ['id' => 2, 'code' => 'AL', 'name' => 'Albania', 'phonecode' => 355],

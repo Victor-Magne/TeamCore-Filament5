@@ -43,13 +43,34 @@ class AbsenceInfolist
                     TextEntry::make('hours_deducted')
                         ->label('Horas Descontadas')
                         ->formatStateUsing(function (?int $state): string {
-                            if ($state === null || $state === 0) return '-';
-                            return intdiv($state, 60) . 'h ' . str_pad($state % 60, 2, '0', STR_PAD_LEFT) . 'm';
+                            if ($state === null || $state === 0) {
+                                return '-';
+                            }
+
+                            return intdiv($state, 60).'h '.str_pad($state % 60, 2, '0', STR_PAD_LEFT).'m';
                         }),
 
                     TextEntry::make('reason')
                         ->label('Motivo')
                         ->placeholder('-')
+                        ->columnSpanFull(),
+                ]),
+
+            Section::make('Justificação')
+                ->icon('heroicon-o-paper-clip')
+                ->schema([
+                    TextEntry::make('justification_doc')
+                        ->label('Documento Anexado')
+                        ->placeholder('Sem documento de justificação')
+                        ->formatStateUsing(fn (?string $state): string => $state
+                            ? basename($state)
+                            : 'Sem documento'
+                        )
+                        ->url(fn (?string $state): ?string => $state
+                            ? asset('storage/'.$state)
+                            : null
+                        )
+                        ->openUrlInNewTab()
                         ->columnSpanFull(),
                 ]),
 
